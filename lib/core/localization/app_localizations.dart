@@ -134,6 +134,13 @@ class AppLocalizations {
     'top_interactions': 'En Çok Etkileşim',
     'activity_history': 'Aktivite Geçmişi',
     'monthly_stats': 'Aylık İstatistikler',
+    'top_fans': 'En Sadık Takipçiler',
+    'view_all': 'Tümünü Gör',
+    'active_hour': 'AKTİF SAAT',
+    'new_unfollowers': 'Yeni Takipten Çıkanlar',
+    'since_yesterday': 'Dünden beri',
+    'this_week': 'bu hafta',
+    'urgent': 'ACİL',
 
     // Ayarlar
     'delete_data': 'Verileri Sil',
@@ -265,6 +272,13 @@ class AppLocalizations {
     'top_interactions': 'Top Interactions',
     'activity_history': 'Activity History',
     'monthly_stats': 'Monthly Statistics',
+    'top_fans': 'Top 3 Fans',
+    'view_all': 'View All',
+    'active_hour': 'ACTIVE HOUR',
+    'new_unfollowers': 'New Unfollowers',
+    'since_yesterday': 'Since yesterday',
+    'this_week': 'this week',
+    'urgent': 'URGENT',
 
     // Settings
     'delete_data': 'Delete Data',

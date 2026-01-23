@@ -86,8 +86,53 @@ class TutorialStepCard extends StatelessWidget {
     );
   }
 
-  /// Resim alanı - Placeholder
-  /// NOT: Bu alan sonra gerçek resimlerle doldurulacak
+  // ============================================================
+  // TODO: RESİM EKLEME TALİMATLARI
+  // ============================================================
+  //
+  // 1. ADIM: Assets klasörü oluştur
+  //    Proje kök dizininde: assets/images/tutorial/ klasörü oluştur
+  //
+  // 2. ADIM: Resimleri ekle
+  //    - assets/images/tutorial/step1_settings.png  (Instagram ayarları)
+  //    - assets/images/tutorial/step2_json.png      (JSON seçimi)
+  //    - assets/images/tutorial/step3_daterange.png (Tarih aralığı)
+  //    - assets/images/tutorial/step4_download.png  (İndirme)
+  //
+  // 3. ADIM: pubspec.yaml'a ekle
+  //    flutter:
+  //      assets:
+  //        - assets/images/tutorial/
+  //
+  // 4. ADIM: Aşağıdaki _buildImageSection metodundaki placeholder'ı
+  //    Image.asset() ile değiştir. Örnek:
+  //
+  //    Image.asset(
+  //      _getStepImagePath(),
+  //      fit: BoxFit.contain,
+  //    )
+  //
+  // ============================================================
+
+  /// Adıma göre resim yolu döndür
+  /// TODO: Resimler eklendikten sonra bu metodu kullan
+  String _getStepImagePath() {
+    switch (stepNumber) {
+      case 1:
+        return 'assets/images/tutorial/step1_settings.png';
+      case 2:
+        return 'assets/images/tutorial/step2_json.png';
+      case 3:
+        return 'assets/images/tutorial/step3_daterange.png';
+      case 4:
+        return 'assets/images/tutorial/step4_download.png';
+      default:
+        return 'assets/images/tutorial/step1_settings.png';
+    }
+  }
+
+  /// Resim alanı
+  /// TODO: Resimler hazır olduğunda placeholder'ı kaldır ve Image.asset kullan
   Widget _buildImageSection(bool isDark) {
     return Container(
       width: double.infinity,
@@ -113,7 +158,16 @@ class TutorialStepCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: Stack(
           children: [
-            // Placeholder içerik
+            // ============================================================
+            // TODO: Resimler hazır olduğunda bu placeholder'ı şununla değiştir:
+            //
+            // Image.asset(
+            //   _getStepImagePath(),
+            //   fit: BoxFit.contain,
+            //   width: double.infinity,
+            //   height: double.infinity,
+            // ),
+            // ============================================================
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -133,6 +187,16 @@ class TutorialStepCard extends StatelessWidget {
                           ? AppColors.darkTextHint
                           : AppColors.lightTextHint,
                       fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _getStepImagePath(),
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.darkTextHint.withValues(alpha: 0.5)
+                          : AppColors.lightTextHint.withValues(alpha: 0.5),
+                      fontSize: 10,
                     ),
                   ),
                 ],

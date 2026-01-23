@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
+import 'package:socialsense/presentation/screens/dashboard/dashboard_screen.dart';
 
 /// ZIP Yükleme Ekranı
 /// Kullanıcının Instagram verisini yüklediği sayfa
@@ -288,8 +289,12 @@ class UploadScreen extends StatelessWidget {
   }
 
   void _selectFile(BuildContext context) {
-    // TODO: Dosya seçme işlemi - file_picker paketi ile
-    // Bu kısım ZIP yükleme işlevselliği eklendiğinde tamamlanacak
+    // TODO: Gerçek ZIP yükleme işlemi sonra eklenecek
+    // Şimdilik Dashboard'a yönlendir (test için)
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const DashboardScreen()),
+    );
   }
 }
 
