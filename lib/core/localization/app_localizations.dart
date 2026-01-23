@@ -142,6 +142,30 @@ class AppLocalizations {
     'this_week': 'bu hafta',
     'urgent': 'ACİL',
 
+    // Aktivite saati lakapları
+    'early_bird': '🌅 Erken Kalkan Kuş',
+    'morning_person': 'Sabah İnsanı',
+    'lunch_break_scroller': 'Öğle Arası Gezgini',
+    'afternoon_explorer': 'Öğleden Sonra Kaşifi',
+    'evening_browser': 'Akşam Gezgini',
+    'night_owl': '🦉 Gece Kuşu',
+    'midnight_explorer': 'Gece Yarısı Kaşifi',
+
+    // Analiz sayfası
+    'unfollowers_this_week': 'Bu Hafta Takipten Çıkanlar',
+    'drop_rate': 'Düşüş Oranı',
+    'worst_day': 'En Kötü Gün',
+    'daily_distribution': 'Günlük Dağılım',
+    'recent_unfollowers': 'Son Takipten Çıkanlar',
+    'total': 'toplam',
+
+    // Güncelleme dialog
+    'update_data_title': 'Verileri Güncelle',
+    'update_data_message': 'Verilerinizi güncellemek mi istiyorsunuz?',
+    'yes': 'Evet',
+    'no': 'Hayır',
+    'last_update': 'Son güncelleme',
+
     // Ayarlar
     'delete_data': 'Verileri Sil',
     'about': 'Hakkında',
@@ -279,6 +303,30 @@ class AppLocalizations {
     'since_yesterday': 'Since yesterday',
     'this_week': 'this week',
     'urgent': 'URGENT',
+
+    // Activity hour nicknames
+    'early_bird': '🌅 Early Bird',
+    'morning_person': 'Morning Person',
+    'lunch_break_scroller': 'Lunch Break Scroller',
+    'afternoon_explorer': 'Afternoon Explorer',
+    'evening_browser': 'Evening Browser',
+    'night_owl': '🦉 Night Owl',
+    'midnight_explorer': 'Midnight Explorer',
+
+    // Analyze page
+    'unfollowers_this_week': 'Unfollowers This Week',
+    'drop_rate': 'Drop Rate',
+    'worst_day': 'Worst Day',
+    'daily_distribution': 'Daily Distribution',
+    'recent_unfollowers': 'Recent Unfollowers',
+    'total': 'total',
+
+    // Update dialog
+    'update_data_title': 'Update Data',
+    'update_data_message': 'Do you want to update your data?',
+    'yes': 'Yes',
+    'no': 'No',
+    'last_update': 'Last update',
 
     // Settings
     'delete_data': 'Delete Data',

@@ -3,11 +3,11 @@ import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
 
 /// Active Hour Card (En Aktif Saat)
-/// Görseldeki gibi büyük saat gösterimi
+/// Saate göre emoji ve lakap ile birlikte gösterilir
 class ActiveHourCard extends StatelessWidget {
   final String activeHour;
   final double changePercentage;
-  final List<double> hourlyData; // 24 saatlik veri
+  final List<double> hourlyData;
 
   const ActiveHourCard({
     super.key,
@@ -22,6 +22,9 @@ class ActiveHourCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    // Saate göre emoji ve lakap al
+    final hourInfo = _getHourInfo(activeHour, l10n);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -34,18 +37,37 @@ class ActiveHourCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
+          // Header row with badge
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                l10n.get('active_hour'),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.lightTextSecondary,
-                ),
+              Row(
+                children: [
+                  // Daire içinde alarm ikonu
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.darkAccent.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.access_time,
+                      size: 14,
+                      color: AppColors.darkAccent,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.get('active_hour'),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
+                    ),
+                  ),
+                ],
               ),
               // Değişim badge
               Container(
@@ -59,7 +81,7 @@ class ActiveHourCard extends StatelessWidget {
                 child: Text(
                   '${changePercentage >= 0 ? '+' : ''}${changePercentage.toStringAsFixed(0)}%',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: changePercentage >= 0
                         ? AppColors.darkSuccess
@@ -70,17 +92,42 @@ class ActiveHourCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
-          // Büyük saat gösterimi
+          // Saat ve Emoji
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                activeHour,
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(
+                  hourInfo['emoji']!,
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 4),
+
+          // Lakap
           Text(
-            activeHour,
+            hourInfo['nickname']!,
             style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: isDark
-                  ? AppColors.darkTextPrimary
-                  : AppColors.lightTextPrimary,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.darkPrimary,
             ),
           ),
 
@@ -100,13 +147,45 @@ class ActiveHourCard extends StatelessWidget {
     );
   }
 
+  /// Saate göre emoji ve lakap döndür
+  Map<String, String> _getHourInfo(String hour, AppLocalizations l10n) {
+    // Saat değerini çıkar (örn: "9 PM" -> 21, "8 AM" -> 8)
+    final parts = hour.split(' ');
+    int hourNum = int.tryParse(parts[0]) ?? 12;
+    if (parts.length > 1 && parts[1].toUpperCase() == 'PM' && hourNum != 12) {
+      hourNum += 12;
+    }
+    if (parts.length > 1 && parts[1].toUpperCase() == 'AM' && hourNum == 12) {
+      hourNum = 0;
+    }
+
+    // Saate göre emoji ve lakap
+    if (hourNum >= 5 && hourNum < 9) {
+      return {'emoji': '🐦', 'nickname': l10n.get('early_bird')};
+    } else if (hourNum >= 9 && hourNum < 12) {
+      return {'emoji': '☀️', 'nickname': l10n.get('morning_person')};
+    } else if (hourNum >= 12 && hourNum < 14) {
+      return {'emoji': '🌞', 'nickname': l10n.get('lunch_break_scroller')};
+    } else if (hourNum >= 14 && hourNum < 18) {
+      return {'emoji': '💼', 'nickname': l10n.get('afternoon_explorer')};
+    } else if (hourNum >= 18 && hourNum < 21) {
+      return {'emoji': '🌆', 'nickname': l10n.get('evening_browser')};
+    } else if (hourNum >= 21 && hourNum < 24) {
+      return {'emoji': '🦉', 'nickname': l10n.get('night_owl')};
+    } else {
+      return {'emoji': '🌙', 'nickname': l10n.get('midnight_explorer')};
+    }
+  }
+
   List<Widget> _buildMiniChart(bool isDark) {
-    // Son 6 saatin verisini göster
     final displayData = hourlyData.length >= 6
         ? hourlyData.sublist(hourlyData.length - 6)
         : hourlyData;
 
+    if (displayData.isEmpty) return [];
+
     final maxVal = displayData.reduce((a, b) => a > b ? a : b);
+    if (maxVal == 0) return [];
 
     return displayData.asMap().entries.map((entry) {
       final isMax = entry.value == maxVal;

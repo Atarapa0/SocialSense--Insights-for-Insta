@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
+import 'package:socialsense/presentation/screens/upload/upload_screen.dart';
+import 'package:socialsense/presentation/screens/analyze/analyze_drop_screen.dart';
 import 'package:socialsense/presentation/widgets/dashboard/priority_card.dart';
-import 'package:socialsense/presentation/widgets/dashboard/ghost_followers_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/activity_hours_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/stats_row.dart';
-import 'package:socialsense/presentation/widgets/dashboard/weekly_report_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/top_fans_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/active_hour_card.dart';
 
@@ -21,6 +21,9 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentNavIndex = 0;
 
+  // Simüle edilmiş güncelleme tarihi
+  final DateTime _lastUpdateDate = DateTime(2026, 1, 20, 14, 30);
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -33,13 +36,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           : AppColors.lightBackground,
       body: SafeArea(child: _buildBody(context, l10n, isDark)),
       bottomNavigationBar: _buildBottomNav(context, l10n, isDark),
-      floatingActionButton: _buildFAB(isDark),
+      floatingActionButton: _buildFAB(context, l10n, isDark),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
   Widget _buildBody(BuildContext context, AppLocalizations l10n, bool isDark) {
-    // Farklı tab içerikleri
     switch (_currentNavIndex) {
       case 0:
         return _buildHomeContent(context, l10n, isDark);
@@ -67,26 +69,148 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           const SizedBox(height: 16),
 
-          // Header (Selamlama + Profil)
+          // Header (Selamlama + Profil + Güncelleme tarihi)
           _buildHeader(l10n, isDark),
 
           const SizedBox(height: 24),
 
-          // Priority Card (Unfollowers)
-          const PriorityCard(
-            unfollowersCount: 45,
-            message:
-                'You lost 45 followers this week.\nUsually this happens on Tuesdays.',
+          // Priority Card (Unfollowers) - tıklanabilir
+          GestureDetector(
+            onTap: () => _navigateToAnalyzeDrop(context),
+            child: const PriorityCard(
+              unfollowersCount: 47,
+              message:
+                  'You lost 47 followers this week.\nUsually this happens on Tuesdays.',
+            ),
           ),
 
           const SizedBox(height: 16),
 
-          // Ghost Followers Card
-          const GhostFollowersCard(ghostPercentage: 12, changePercentage: -2),
+          // Ghost Followers ve Active Hour yan yana
+          Row(
+            children: [
+              // Ghost Followers (küçük versiyon)
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkCard : AppColors.lightCard,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.darkBorder
+                          : AppColors.lightBorder,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            l10n.get('ghost_followers'),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary,
+                            ),
+                          ),
+                          Icon(
+                            Icons.visibility_off,
+                            size: 14,
+                            color: isDark
+                                ? AppColors.darkTextHint
+                                : AppColors.lightTextHint,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Center(
+                        child: SizedBox(
+                          width: 70,
+                          height: 70,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              SizedBox(
+                                width: 70,
+                                height: 70,
+                                child: CircularProgressIndicator(
+                                  value: 0.28,
+                                  strokeWidth: 6,
+                                  backgroundColor: isDark
+                                      ? AppColors.darkBorder
+                                      : AppColors.lightBorder,
+                                  valueColor: const AlwaysStoppedAnimation(
+                                    AppColors.darkPrimary,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '28%',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark
+                                      ? AppColors.darkTextPrimary
+                                      : AppColors.lightTextPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Center(
+                        child: Text(
+                          'Ghost\nFollowers',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 11,
+                            height: 1.2,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.lightTextSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // Active Hour
+              const Expanded(
+                child: ActiveHourCard(
+                  activeHour: '9 PM',
+                  changePercentage: 5,
+                  hourlyData: [0.2, 0.3, 0.4, 0.6, 0.8, 1.0],
+                ),
+              ),
+            ],
+          ),
 
           const SizedBox(height: 16),
 
-          // Activity Hours Card
+          // Top 3 Fans
+          TopFansCard(
+            fans: const [
+              TopFan(username: 'sarah_j', likes: 54, comments: 12, rank: 1),
+              TopFan(username: 'mike_designs', likes: 42, comments: 8, rank: 2),
+              TopFan(username: 'emma_art', likes: 38, comments: 5, rank: 3),
+            ],
+            onViewAll: () {
+              // TODO: Tüm takipçileri göster
+            },
+          ),
+
+          const SizedBox(height: 16),
+
+          // Activity Hours Card (haftalık)
           const ActivityHoursCard(
             peakTime: '8 PM',
             activityData: [0.3, 0.5, 0.8, 0.6, 0.9, 0.4, 0.7],
@@ -102,18 +226,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             reachChange: 1200,
           ),
 
-          const SizedBox(height: 16),
-
-          // Weekly Report Card
-          const WeeklyReportCard(),
-
           const SizedBox(height: 100), // Bottom nav için boşluk
         ],
       ),
     );
   }
 
-  /// Header (Selamlama + Profil)
+  /// Header (Selamlama + Profil + Güncelleme tarihi)
   Widget _buildHeader(AppLocalizations l10n, bool isDark) {
     final hour = DateTime.now().hour;
     String greeting;
@@ -125,10 +244,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       greeting = l10n.get('good_evening');
     }
 
+    // Güncelleme tarihi formatı
+    final updateText =
+        '${l10n.get('last_update')}: ${_formatDate(_lastUpdateDate)}';
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Sol: Selamlama
+        // Sol: Selamlama ve güncelleme tarihi
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -143,7 +266,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Alex Carter', // TODO: Gerçek kullanıcı adı
+              'Alex Carter',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -152,13 +275,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     : AppColors.lightTextPrimary,
               ),
             ),
+            const SizedBox(height: 4),
+            // Güncelleme tarihi
+            Row(
+              children: [
+                Icon(
+                  Icons.update,
+                  size: 12,
+                  color: isDark
+                      ? AppColors.darkTextHint
+                      : AppColors.lightTextHint,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  updateText,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark
+                        ? AppColors.darkTextHint
+                        : AppColors.lightTextHint,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
 
         // Sağ: Bildirim + Profil
         Row(
           children: [
-            // Bildirim ikonu
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -173,7 +318,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ? AppColors.darkTextSecondary
                         : AppColors.lightTextSecondary,
                   ),
-                  // Bildirim noktası
                   Positioned(
                     right: 0,
                     top: 0,
@@ -189,10 +333,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             ),
-
             const SizedBox(width: 12),
-
-            // Profil resmi
             Container(
               width: 44,
               height: 44,
@@ -208,6 +349,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ],
     );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inDays == 0) {
+      return 'Today ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    } else if (diff.inDays == 1) {
+      return 'Yesterday';
+    } else if (diff.inDays < 7) {
+      return '${diff.inDays} days ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
   }
 
   /// Raporlar placeholder
@@ -349,7 +505,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 index: 1,
                 isDark: isDark,
               ),
-              const SizedBox(width: 60), // FAB için boşluk
+              const SizedBox(width: 60),
               _buildNavItem(
                 icon: Icons.notifications_outlined,
                 activeIcon: Icons.notifications,
@@ -412,8 +568,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  /// Floating Action Button (ortadaki + butonu)
-  Widget _buildFAB(bool isDark) {
+  /// Floating Action Button - Güncelleme dialog'u ile
+  Widget _buildFAB(BuildContext context, AppLocalizations l10n, bool isDark) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -427,12 +583,135 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       child: FloatingActionButton(
-        onPressed: () {
-          // TODO: Yeni analiz veya ZIP yükleme
-        },
+        onPressed: () => _showUpdateDialog(context, l10n, isDark),
         backgroundColor: Colors.transparent,
         elevation: 0,
         child: const Icon(Icons.add, color: Colors.white, size: 28),
+      ),
+    );
+  }
+
+  /// Güncelleme dialog'u
+  void _showUpdateDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool isDark,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkCard : AppColors.lightCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.darkPrimary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.update,
+                color: AppColors.darkPrimary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              l10n.get('update_data_title'),
+              style: TextStyle(
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          l10n.get('update_data_message'),
+          style: TextStyle(
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.lightTextSecondary,
+          ),
+        ),
+        actions: [
+          // Hayır butonu
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              l10n.get('no'),
+              style: TextStyle(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
+              ),
+            ),
+          ),
+          // Evet butonu
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _navigateToUpload(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.darkPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              l10n.get('yes'),
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToUpload(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const UploadScreen()),
+    );
+  }
+
+  void _navigateToAnalyzeDrop(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AnalyzeDropScreen(
+          unfollowersCount: 47,
+          unfollowers: [
+            Unfollower(
+              username: 'john_doe',
+              unfollowedAt: DateTime.now().subtract(const Duration(days: 1)),
+              daysSinceUnfollow: 1,
+            ),
+            Unfollower(
+              username: 'jane_smith',
+              unfollowedAt: DateTime.now().subtract(const Duration(days: 2)),
+              daysSinceUnfollow: 2,
+            ),
+            Unfollower(
+              username: 'photo_lover',
+              unfollowedAt: DateTime.now().subtract(const Duration(days: 2)),
+              daysSinceUnfollow: 2,
+            ),
+            Unfollower(
+              username: 'travel_addict',
+              unfollowedAt: DateTime.now().subtract(const Duration(days: 3)),
+              daysSinceUnfollow: 3,
+            ),
+            Unfollower(
+              username: 'foodie_gram',
+              unfollowedAt: DateTime.now().subtract(const Duration(days: 4)),
+              daysSinceUnfollow: 4,
+            ),
+          ],
+        ),
       ),
     );
   }
