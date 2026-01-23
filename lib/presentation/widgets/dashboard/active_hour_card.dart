@@ -26,7 +26,8 @@ class ActiveHourCard extends StatelessWidget {
     final hourInfo = _getHourInfo(activeHour, l10n);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      height: 200, // Sabit yükseklik
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : AppColors.lightCard,
         borderRadius: BorderRadius.circular(20),
@@ -36,6 +37,7 @@ class ActiveHourCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Header row with badge
           Row(
@@ -43,24 +45,23 @@ class ActiveHourCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  // Daire içinde alarm ikonu
                   Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       color: AppColors.darkAccent.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.access_time,
-                      size: 14,
+                      size: 12,
                       color: AppColors.darkAccent,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   Text(
                     l10n.get('active_hour'),
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 10,
                       fontWeight: FontWeight.w500,
                       color: isDark
                           ? AppColors.darkTextSecondary
@@ -69,19 +70,18 @@ class ActiveHourCard extends StatelessWidget {
                   ),
                 ],
               ),
-              // Değişim badge
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
                   color: changePercentage >= 0
                       ? AppColors.darkSuccess.withValues(alpha: 0.1)
                       : AppColors.darkAccent.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   '${changePercentage >= 0 ? '+' : ''}${changePercentage.toStringAsFixed(0)}%',
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: FontWeight.w600,
                     color: changePercentage >= 0
                         ? AppColors.darkSuccess
@@ -92,50 +92,44 @@ class ActiveHourCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Saat ve Emoji
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 activeHour,
                 style: TextStyle(
-                  fontSize: 36,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: isDark
                       ? AppColors.darkTextPrimary
                       : AppColors.lightTextPrimary,
                 ),
               ),
-              const SizedBox(width: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text(
-                  hourInfo['emoji']!,
-                  style: const TextStyle(fontSize: 24),
-                ),
-              ),
+              const SizedBox(width: 6),
+              Text(hourInfo['emoji']!, style: const TextStyle(fontSize: 20)),
             ],
           ),
 
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
 
           // Lakap
           Text(
             hourInfo['nickname']!,
-            style: TextStyle(
-              fontSize: 13,
+            style: const TextStyle(
+              fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: AppColors.darkPrimary,
+              color: AppColors.darkSuccess,
             ),
           ),
 
-          const SizedBox(height: 16),
+          const Spacer(),
 
           // Mini bar chart
           SizedBox(
-            height: 40,
+            height: 35,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -149,7 +143,6 @@ class ActiveHourCard extends StatelessWidget {
 
   /// Saate göre emoji ve lakap döndür
   Map<String, String> _getHourInfo(String hour, AppLocalizations l10n) {
-    // Saat değerini çıkar (örn: "9 PM" -> 21, "8 AM" -> 8)
     final parts = hour.split(' ');
     int hourNum = int.tryParse(parts[0]) ?? 12;
     if (parts.length > 1 && parts[1].toUpperCase() == 'PM' && hourNum != 12) {
@@ -159,7 +152,6 @@ class ActiveHourCard extends StatelessWidget {
       hourNum = 0;
     }
 
-    // Saate göre emoji ve lakap
     if (hourNum >= 5 && hourNum < 9) {
       return {'emoji': '🐦', 'nickname': l10n.get('early_bird')};
     } else if (hourNum >= 9 && hourNum < 12) {
@@ -191,8 +183,8 @@ class ActiveHourCard extends StatelessWidget {
       final isMax = entry.value == maxVal;
 
       return Container(
-        width: 16,
-        height: 40 * (entry.value / maxVal).clamp(0.1, 1.0),
+        width: 14,
+        height: 35 * (entry.value / maxVal).clamp(0.15, 1.0),
         decoration: BoxDecoration(
           color: isMax
               ? AppColors.darkAccent

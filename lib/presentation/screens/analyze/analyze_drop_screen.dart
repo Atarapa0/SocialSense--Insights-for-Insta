@@ -237,57 +237,61 @@ class AnalyzeDropScreen extends StatelessWidget {
 
           // Bar chart
           SizedBox(
-            height: 120,
+            height: 140,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: List.generate(7, (index) {
                 final value = values[index];
                 final isMax = value == maxVal;
-                final height = (value / maxVal) * 80 + 20;
+                final barHeight = (value / maxVal) * 70 + 15;
 
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    // Değer
-                    Text(
-                      value.toString(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isMax
-                            ? AppColors.darkAccent
-                            : isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.lightTextSecondary,
+                return SizedBox(
+                  width: 36,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Değer
+                      Text(
+                        value.toString(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isMax
+                              ? AppColors.darkAccent
+                              : isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Bar
-                    Container(
-                      width: 32,
-                      height: height,
-                      decoration: BoxDecoration(
-                        color: isMax
-                            ? AppColors.darkAccent
-                            : AppColors.darkPrimary.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 6),
+                      // Bar
+                      Container(
+                        width: 28,
+                        height: barHeight,
+                        decoration: BoxDecoration(
+                          color: isMax
+                              ? AppColors.darkAccent
+                              : AppColors.darkPrimary.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Gün
-                    Text(
-                      days[index],
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isMax
-                            ? AppColors.darkAccent
-                            : isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.lightTextSecondary,
+                      const SizedBox(height: 6),
+                      // Gün
+                      Text(
+                        days[index],
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: isMax
+                              ? AppColors.darkAccent
+                              : isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               }),
             ),

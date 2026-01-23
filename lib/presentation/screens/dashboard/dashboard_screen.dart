@@ -88,11 +88,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           // Ghost Followers ve Active Hour yan yana
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Ghost Followers (küçük versiyon)
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  height: 200, // Sabit yükseklik
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: isDark ? AppColors.darkCard : AppColors.lightCard,
                     borderRadius: BorderRadius.circular(20),
@@ -108,13 +110,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            l10n.get('ghost_followers'),
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: isDark
-                                  ? AppColors.darkTextSecondary
-                                  : AppColors.lightTextSecondary,
+                          Flexible(
+                            child: Text(
+                              l10n.get('ghost_followers'),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.lightTextSecondary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           Icon(
@@ -126,7 +131,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const Spacer(),
                       Center(
                         child: SizedBox(
                           width: 70,
@@ -162,7 +167,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const Spacer(),
                       Center(
                         child: Text(
                           'Ghost\nFollowers',
