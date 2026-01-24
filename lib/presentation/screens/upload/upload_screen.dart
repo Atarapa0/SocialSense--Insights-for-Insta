@@ -1,12 +1,26 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:file_picker/file_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
+import 'package:socialsense/core/providers/instagram_data_provider.dart';
 import 'package:socialsense/presentation/screens/dashboard/dashboard_screen.dart';
 
 /// ZIP Yükleme Ekranı
 /// Kullanıcının Instagram verisini yüklediği sayfa
-class UploadScreen extends StatelessWidget {
+class UploadScreen extends StatefulWidget {
   const UploadScreen({super.key});
+
+  @override
+  State<UploadScreen> createState() => _UploadScreenState();
+}
+
+class _UploadScreenState extends State<UploadScreen> {
+  bool _isLoading = false;
+  String? _errorMessage;
+  String? _selectedFileName;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +44,69 @@ class UploadScreen extends StatelessWidget {
               _buildUploadArea(context, l10n, isDark),
 
               const SizedBox(height: 32),
+
+              // Hata mesajı
+              if (_errorMessage != null)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.red.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.red),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // Seçilen dosya adı
+              if (_selectedFileName != null)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color:
+                        (isDark
+                                ? AppColors.darkPrimary
+                                : AppColors.lightPrimary)
+                            .withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.folder_zip,
+                        color: isDark
+                            ? AppColors.darkPrimary
+                            : AppColors.lightPrimary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _selectedFileName!,
+                          style: TextStyle(
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.lightTextPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
               // Güvenlik badge
               _buildSecurityBadge(l10n, isDark),
@@ -103,134 +180,127 @@ class UploadScreen extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        l10n.get('secure_upload'),
+        l10n.get('upload_your_data'),
         style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
           color: isDark
               ? AppColors.darkTextPrimary
               : AppColors.lightTextPrimary,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
         ),
       ),
       centerTitle: true,
     );
   }
 
-  /// Yükleme alanı - Dashed circle
   Widget _buildUploadArea(
     BuildContext context,
     AppLocalizations l10n,
     bool isDark,
   ) {
     return GestureDetector(
-      onTap: () => _selectFile(context),
-      child: Container(
-        width: 280,
-        height: 280,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-            width: 2,
-            strokeAlign: BorderSide.strokeAlignInside,
-          ),
-        ),
+      onTap: _isLoading ? null : () => _selectFile(context, l10n),
+      child: SizedBox(
+        width: 200,
+        height: 200,
         child: CustomPaint(
           painter: _DashedCirclePainter(
             color: isDark
-                ? AppColors.darkPrimary.withValues(alpha: 0.3)
-                : AppColors.lightPrimary.withValues(alpha: 0.3),
+                ? AppColors.darkPrimary.withValues(alpha: 0.5)
+                : AppColors.lightPrimary.withValues(alpha: 0.5),
           ),
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // İkon alanı
-                _buildUploadIcon(isDark),
-
-                const SizedBox(height: 20),
-
-                // Başlık
-                Text(
-                  l10n.get('upload_zip'),
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.lightTextPrimary,
+            child: _isLoading
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            isDark
+                                ? AppColors.darkPrimary
+                                : AppColors.lightPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.get('processing'),
+                        style: TextStyle(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
+                        ),
+                      ),
+                    ],
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              isDark
+                                  ? AppColors.darkPrimary
+                                  : AppColors.lightPrimary,
+                              isDark
+                                  ? AppColors.darkPrimaryLight
+                                  : AppColors.lightPrimaryLight,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.folder_zip_outlined,
+                          size: 35,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.get('tap_to_upload'),
+                        style: TextStyle(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Alt metin
-                Text(
-                  l10n.get('drag_drop_or_tap'),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),
     );
   }
 
-  /// Upload ikonu
-  Widget _buildUploadIcon(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.darkPrimary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Icon(Icons.folder, size: 48, color: AppColors.darkPrimary),
-          Positioned(
-            right: -8,
-            bottom: -8,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: AppColors.darkSuccess,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.lock, size: 16, color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Güvenlik badge
   Widget _buildSecurityBadge(AppLocalizations l10n, bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.darkSuccess.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.darkSuccess.withValues(alpha: 0.3)),
+        color: Colors.green.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.verified_user, size: 18, color: AppColors.darkSuccess),
+          const Icon(Icons.verified_user, size: 18, color: Colors.green),
           const SizedBox(width: 8),
           Text(
-            l10n.get('secure_environment'),
-            style: TextStyle(
+            l10n.get('fully_private'),
+            style: const TextStyle(
+              color: Colors.green,
+              fontWeight: FontWeight.w500,
               fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppColors.darkSuccess,
             ),
           ),
         ],
@@ -238,63 +308,120 @@ class UploadScreen extends StatelessWidget {
     );
   }
 
-  /// Dosya seç butonu
   Widget _buildSelectFileButton(BuildContext context, AppLocalizations l10n) {
     return SizedBox(
       width: double.infinity,
       height: 56,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF5B5CFF), Color(0xFF00D9D9)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : () => _selectFile(context, l10n),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.darkPrimary,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.darkPrimary.withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+          elevation: 0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_isLoading)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  strokeWidth: 2,
+                ),
+              )
+            else
+              const Icon(Icons.upload_file, size: 22, color: Colors.white),
+            const SizedBox(width: 12),
+            Text(
+              _isLoading ? l10n.get('processing') : l10n.get('select_file'),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
           ],
-        ),
-        child: ElevatedButton(
-          onPressed: () => _selectFile(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.upload_file, size: 22, color: Colors.white),
-              const SizedBox(width: 12),
-              Text(
-                l10n.get('select_file'),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
 
-  void _selectFile(BuildContext context) {
-    // TODO: Gerçek ZIP yükleme işlemi sonra eklenecek
-    // Şimdilik Dashboard'a yönlendir (test için)
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const DashboardScreen()),
-    );
+  Future<void> _selectFile(BuildContext context, AppLocalizations l10n) async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Dosya seçici aç
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['zip'],
+        withData: kIsWeb, // Web için bytes gerekiyor
+      );
+
+      if (result == null || result.files.isEmpty) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final file = result.files.first;
+      setState(() {
+        _selectedFileName = file.name;
+      });
+
+      // Provider'ı al
+      final dataProvider = Provider.of<InstagramDataProvider>(
+        context,
+        listen: false,
+      );
+
+      bool success = false;
+
+      if (kIsWeb) {
+        // Web: bytes ile yükle
+        if (file.bytes != null) {
+          success = await dataProvider.loadFromBytes(file.bytes!);
+        } else {
+          throw Exception('Dosya okunamadı');
+        }
+      } else {
+        // Mobile/Desktop: Dosya yolu ile yükle
+        if (file.path != null) {
+          success = await dataProvider.loadFromZipFile(File(file.path!));
+        } else {
+          throw Exception('Dosya yolu bulunamadı');
+        }
+      }
+
+      if (success) {
+        // Başarılı - Dashboard'a git
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const DashboardScreen()),
+          );
+        }
+      } else {
+        // Hata
+        setState(() {
+          _errorMessage = dataProvider.error ?? l10n.get('error_invalid_file');
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Hata: ${e.toString()}';
+        _isLoading = false;
+      });
+    }
   }
 }
 

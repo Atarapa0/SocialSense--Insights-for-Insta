@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
+import 'package:socialsense/core/providers/instagram_data_provider.dart';
 import 'package:socialsense/presentation/screens/upload/upload_screen.dart';
 import 'package:socialsense/presentation/screens/analyze/analyze_drop_screen.dart';
 import 'package:socialsense/presentation/widgets/dashboard/priority_card.dart';
@@ -15,6 +17,8 @@ import 'package:socialsense/presentation/widgets/reports/direct_messages_card.da
 import 'package:socialsense/presentation/widgets/reports/activity_timeline_card.dart';
 import 'package:socialsense/presentation/widgets/reports/interests_detail_card.dart';
 import 'package:socialsense/presentation/widgets/reports/saved_content_detail_card.dart';
+import 'package:socialsense/presentation/widgets/alerts/alert_card.dart';
+import 'package:socialsense/presentation/widgets/settings/settings_tile.dart';
 
 /// Dashboard Ana Ekranı
 /// Instagram istatistiklerinin gösterildiği ana sayfa
@@ -28,199 +32,89 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentNavIndex = 0;
 
-  // Simüle edilmiş güncelleme tarihi
-  final DateTime _lastUpdateDate = DateTime(2026, 1, 20, 14, 30);
+  // Helper fonksiyon: veri yoksa "---" göster
+  String _formatNumber(int? value) {
+    if (value == null || value == 0) return '---';
+    return value.toString();
+  }
 
-  // ===================== RAPORLAR VERİLERİ =====================
+  String _formatPercent(double? value) {
+    if (value == null || value == 0.0) return '---';
+    return '${value.toStringAsFixed(1)}%';
+  }
 
-  // Takipçi Detayları
-  final int _mutualFollowersCount = 33;
-  final List<String> _mutualFollowers = [
-    '@beerkaay_07',
-    '@user123',
-    '@travel_lover',
-  ];
-  final int _notFollowingYouCount = 245;
-  final List<String> _notFollowingYou = [
-    '@celebaccount',
-    '@brandpage',
-    '@famous_person',
-  ];
-  final int _youDontFollowCount = 15;
-  final List<String> _youDontFollow = [
-    '@orbitalhubstudio',
-    '@art_gallery',
-    '@music_lover',
-  ];
+  // ============ REPORTS İÇİN GEÇİCİ PLACEHOLDER VERİLER ============
+  // (ZIP'den okunamayan veriler için placeholder, sonra güncellenir)
 
-  // Hesap Analizleri
-  final List<AccountAnalysis> _mostLikedAccounts = [
-    const AccountAnalysis(username: '@travel_adventures', count: 156),
-    const AccountAnalysis(username: '@food_paradise', count: 134),
-    const AccountAnalysis(username: '@art_gallery', count: 98),
-    const AccountAnalysis(username: '@tech_news', count: 87),
-    const AccountAnalysis(username: '@fashion_daily', count: 76),
-  ];
-  final List<AccountAnalysis> _mostCommentedAccounts = [
-    const AccountAnalysis(username: '@bestfriend_forever', count: 45),
-    const AccountAnalysis(username: '@family_photo', count: 32),
-    const AccountAnalysis(username: '@colleague_work', count: 28),
-    const AccountAnalysis(username: '@old_friend', count: 21),
-    const AccountAnalysis(username: '@neighbor_life', count: 15),
-  ];
+  List<AccountAnalysis> get _mostLikedAccounts {
+    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
+    final topLiked = provider.topLikedAccounts;
+    if (topLiked.isEmpty) return [];
+    return topLiked.entries
+        .take(5)
+        .map((e) => AccountAnalysis(username: '@${e.key}', count: e.value))
+        .toList();
+  }
 
-  // Paylaşım Analizleri
-  final List<SharingAnalysis> _receivedFromAccounts = [
-    const SharingAnalysis(username: 'Derman S. GÖKCE', shareCount: 131),
-    const SharingAnalysis(username: 'Ahmet Yılmaz', shareCount: 87),
-    const SharingAnalysis(username: 'Elif Kaya', shareCount: 65),
-    const SharingAnalysis(username: 'Mehmet Öz', shareCount: 43),
-    const SharingAnalysis(username: 'Zeynep Demir', shareCount: 32),
-  ];
-  final List<SharingAnalysis> _sentToAccounts = [
-    const SharingAnalysis(username: 'simaozlem', shareCount: 98),
-    const SharingAnalysis(username: 'Can Yücel', shareCount: 76),
-    const SharingAnalysis(username: 'Ayşe Tan', shareCount: 54),
-    const SharingAnalysis(username: 'Fatma Nur', shareCount: 43),
-    const SharingAnalysis(username: 'Ali Veli', shareCount: 31),
-  ];
+  List<AccountAnalysis> get _mostCommentedAccounts {
+    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
+    final topCommented = provider.topCommentedAccounts;
+    if (topCommented.isEmpty) return [];
+    return topCommented.entries
+        .take(5)
+        .map((e) => AccountAnalysis(username: '@${e.key}', count: e.value))
+        .toList();
+  }
 
-  // Direkt Mesajlar
-  final int _totalChats = 50;
-  final int _totalMessages = 13563;
-  final int _sentMessages = 6270;
-  final int _receivedMessages = 5466;
-  final List<MessageAnalysis> _mostMessaged = [
-    const MessageAnalysis(username: 'En yakın arkadaş', messageCount: 2341),
-    const MessageAnalysis(username: 'Aile grubu', messageCount: 1876),
-    const MessageAnalysis(username: 'İş arkadaşı', messageCount: 987),
-    const MessageAnalysis(username: 'Eski dost', messageCount: 654),
-    const MessageAnalysis(username: 'Komşu', messageCount: 432),
-  ];
-  final List<MessageAnalysis> _mostMessagedBy = [
-    const MessageAnalysis(username: 'Sevgili', messageCount: 3456),
-    const MessageAnalysis(username: 'Anne', messageCount: 1234),
-    const MessageAnalysis(username: 'Kardeş', messageCount: 876),
-    const MessageAnalysis(username: 'Arkadaş', messageCount: 567),
-    const MessageAnalysis(username: 'Kuzen', messageCount: 345),
-  ];
+  // Placeholder veriler (ZIP'de olmayan veriler)
+  // Provider'dan alınan veriler
+  DateTime? get _lastUpdateDate {
+    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
+    return provider.lastUpdateDate;
+  }
 
-  // Aktivite grafiği verileri
-  final List<ActivityDataPoint> _likeActivityData = [
-    const ActivityDataPoint(label: '25 Eki', value: 65),
-    const ActivityDataPoint(label: '1 Kas', value: 80),
-    const ActivityDataPoint(label: '8 Kas', value: 75),
-    const ActivityDataPoint(label: '16 Kas', value: 90),
-    const ActivityDataPoint(label: '24 Kas', value: 85),
-    const ActivityDataPoint(label: '2 Ara', value: 110),
-    const ActivityDataPoint(label: '10 Ara', value: 260),
-    const ActivityDataPoint(label: '18 Ara', value: 180),
-    const ActivityDataPoint(label: '27 Ara', value: 140),
-    const ActivityDataPoint(label: '4 Oca', value: 95),
-    const ActivityDataPoint(label: '12 Oca', value: 85),
-    const ActivityDataPoint(label: '24 Oca', value: 100),
-  ];
+  int get _mutualFollowersCount {
+    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
+    return provider.mutualFollowers.length;
+  }
 
-  // İlgi alanları kategorileri
-  final List<InterestCategory> _interestCategories = [
-    const InterestCategory(
-      name: 'Spor',
-      count: 5,
-      subcategories: [
-        'Soccer',
-        'Basketball',
-        'Types of Sports',
-        'Motorsports',
-        'Football Family of Sports',
-      ],
-    ),
-    const InterestCategory(
-      name: 'Yemek & İçecek',
-      count: 4,
-      subcategories: [
-        'Foods',
-        'Prepared Foods & Dishes',
-        'Non-Alcoholic Beverages',
-        'Drinks',
-      ],
-    ),
-    const InterestCategory(
-      name: 'Oyun & Teknoloji',
-      count: 1,
-      subcategories: ['Video Games'],
-    ),
-    const InterestCategory(
-      name: 'Moda & Güzellik',
-      count: 1,
-      subcategories: ['Beauty'],
-    ),
-    const InterestCategory(
-      name: 'Hayvanlar',
-      count: 7,
-      subcategories: [
-        'Birds',
-        'Mammals',
-        'Dogs',
-        'Monkeys',
-        'Primates',
-        'Animals',
-        'Cats',
-      ],
-    ),
-    const InterestCategory(
-      name: 'Sanat & Eğlence',
-      count: 6,
-      subcategories: [
-        'TV & Movies Celebrities',
-        'TV & Movies by Genre',
-        'Anime TV & Movies',
-        'Music by Genre',
-        'Visual Arts',
-        'Animation TV & Movies',
-      ],
-    ),
-    const InterestCategory(
-      name: 'Seyahat',
-      count: 7,
-      subcategories: [
-        'Asia Travel',
-        'Aviation',
-        'Southern Europe Travel',
-        'Travel Destinations',
-        'Europe Travel',
-        'Travel by Region',
-        'Western Asia Travel',
-      ],
-    ),
-    const InterestCategory(
-      name: 'Diğer',
-      count: 16,
-      subcategories: [
-        'Pigeons',
-        'Pizza',
-        'Vehicle Events',
-        'Ground Transportation',
-        'Turtles',
-        'Small Motor Vehicles',
-        'Lizards',
-        'Cars & Trucks',
-      ],
-    ),
-  ];
+  List<String> get _mutualFollowers {
+    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
+    return provider.mutualFollowers.take(3).map((u) => '@$u').toList();
+  }
 
-  // Kayıtlı içerik hesapları
-  final List<SavedContentAccount> _savedContentAccounts = [
-    const SavedContentAccount(username: '@toonkritik'),
-    const SavedContentAccount(username: '@theanimehakase'),
-    const SavedContentAccount(username: '@guclukadinrehberi'),
-    const SavedContentAccount(username: '@anime.channel.tr'),
-    const SavedContentAccount(username: '@animeninevreni'),
-    const SavedContentAccount(username: '@filmkesifleri'),
-    const SavedContentAccount(username: '@ahmetselim_kaya'),
-    const SavedContentAccount(username: '@deeptalkstr'),
-    const SavedContentAccount(username: '@asya_delisii'),
-    const SavedContentAccount(username: '@sinemori'),
-  ];
+  int get _notFollowingYouCount {
+    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
+    return provider.notFollowingBack.length;
+  }
+
+  List<String> get _notFollowingYou {
+    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
+    return provider.notFollowingBack.take(3).map((u) => '@$u').toList();
+  }
+
+  int get _youDontFollowCount {
+    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
+    return provider.youDontFollow.length;
+  }
+
+  List<String> get _youDontFollow {
+    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
+    return provider.youDontFollow.take(3).map((u) => '@$u').toList();
+  }
+
+  // Placeholder veriler (ZIP'de olmayan veya henüz parse edilmeyen veriler)
+  final List<SharingAnalysis> _receivedFromAccounts = [];
+  final List<SharingAnalysis> _sentToAccounts = [];
+  final int _totalChats = 0;
+  final int _totalMessages = 0;
+  final int _sentMessages = 0;
+  final int _receivedMessages = 0;
+  final List<MessageAnalysis> _mostMessaged = [];
+  final List<MessageAnalysis> _mostMessagedBy = [];
+  final List<ActivityDataPoint> _likeActivityData = [];
+  final List<InterestCategory> _interestCategories = [];
+  final List<SavedContentAccount> _savedContentAccounts = [];
 
   @override
   Widget build(BuildContext context) {
@@ -448,8 +342,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     // Güncelleme tarihi formatı
-    final updateText =
-        '${l10n.get('last_update')}: ${_formatDate(_lastUpdateDate)}';
+    final updateText = _lastUpdateDate != null
+        ? '${l10n.get('last_update')}: ${_formatDate(_lastUpdateDate!)}'
+        : '${l10n.get('last_update')}: ---';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -698,68 +593,611 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  /// Uyarılar placeholder
+  /// Uyarılar listesi
+  List<AlertItem> _alerts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAlerts();
+  }
+
+  void _initializeAlerts() {
+    _alerts = [
+      AlertItem(
+        id: '1',
+        type: AlertType.followerDrop,
+        title: 'Takipçi Düşüşü',
+        description: 'Son 7 günde 23 takipçi kaybettiniz',
+        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
+        data: {'count': 23},
+      ),
+      AlertItem(
+        id: '2',
+        type: AlertType.ghostFollower,
+        title: 'Hayalet Takipçi Uyarısı',
+        description: 'Hayalet takipçi oranınız %32 oldu',
+        timestamp: DateTime.now().subtract(const Duration(hours: 5)),
+        data: {'rate': 32},
+      ),
+      AlertItem(
+        id: '3',
+        type: AlertType.engagementDrop,
+        title: 'Etkileşim Düşüşü',
+        description: 'Etkileşim oranınız %1.8\'e düştü',
+        timestamp: DateTime.now().subtract(const Duration(days: 1)),
+        data: {'rate': 1.8},
+      ),
+      AlertItem(
+        id: '4',
+        type: AlertType.activeHourChanged,
+        title: 'Aktif Saat Değişti',
+        description: 'Takipçileriniz artık 21:00\'da daha aktif',
+        timestamp: DateTime.now().subtract(const Duration(days: 2)),
+        data: {'hour': 21},
+      ),
+      AlertItem(
+        id: '5',
+        type: AlertType.tip,
+        title: 'İpucu',
+        description:
+            'Akşam saatlerinde paylaşım yaparak etkileşimi artırabilirsiniz',
+        timestamp: DateTime.now().subtract(const Duration(days: 3)),
+        isRead: true,
+      ),
+    ];
+  }
+
+  /// Uyarılar ekranı
   Widget _buildAlertsContent(AppLocalizations l10n, bool isDark) {
-    return Center(
+    if (_alerts.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: (isDark ? AppColors.darkPrimary : AppColors.lightPrimary)
+                    .withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.notifications_off_outlined,
+                size: 40,
+                color: isDark ? AppColors.darkPrimary : AppColors.lightPrimary,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              l10n.get('no_alerts'),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.get('no_alerts_desc'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final unreadCount = _alerts.where((a) => !a.isRead).length;
+
+    return Column(
+      children: [
+        // Header
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.get('alerts'),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
+                    ),
+                  ),
+                  if (unreadCount > 0)
+                    Text(
+                      '$unreadCount okunmamış',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.lightTextSecondary,
+                      ),
+                    ),
+                ],
+              ),
+              if (_alerts.isNotEmpty)
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _alerts.clear();
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(l10n.get('clear_all')),
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: isDark
+                            ? AppColors.darkCard
+                            : AppColors.lightTextPrimary,
+                      ),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.clear_all,
+                    size: 18,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
+                  ),
+                  label: Text(
+                    l10n.get('clear_all'),
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+
+        // Uyarılar listesi
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: _alerts.length,
+            itemBuilder: (context, index) {
+              final alert = _alerts[index];
+              return AlertCard(
+                alert: alert,
+                onTap: () {
+                  setState(() {
+                    _alerts[index] = alert.copyWith(isRead: true);
+                  });
+                },
+                onDismiss: () {
+                  setState(() {
+                    _alerts.removeAt(index);
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Ayarlar ekranı
+  Widget _buildSettingsContent(AppLocalizations l10n, bool isDark) {
+    return SingleChildScrollView(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.notifications_active,
-            size: 64,
-            color: isDark ? AppColors.darkTextHint : AppColors.lightTextHint,
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: Text(
+              l10n.get('settings'),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
+              ),
+            ),
           ),
+
+          // ==================== GÖRÜNÜM ====================
+          SettingsSectionHeader(title: l10n.get('appearance')),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : AppColors.lightCard,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Tema seçimi
+                SettingsTile(
+                  icon: Icons.dark_mode_outlined,
+                  title: l10n.get('theme'),
+                  subtitle: isDark
+                      ? l10n.get('dark_mode')
+                      : l10n.get('light_mode'),
+                  iconColor: const Color(0xFF5B5CFF),
+                  trailing: Switch(
+                    value: isDark,
+                    onChanged: (value) {
+                      // TODO: Tema değiştirme işlevi
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Tema değiştirme yakında eklenecek'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    activeColor: AppColors.darkPrimary,
+                  ),
+                ),
+
+                // Dil seçimi
+                SettingsTile(
+                  icon: Icons.language,
+                  title: l10n.get('language'),
+                  subtitle: l10n.locale == 'tr'
+                      ? l10n.get('turkish')
+                      : l10n.get('english'),
+                  iconColor: const Color(0xFF2ECC71),
+                  showDivider: false,
+                  onTap: () => _showLanguageDialog(l10n, isDark),
+                ),
+              ],
+            ),
+          ),
+
+          // ==================== VERİ YÖNETİMİ ====================
+          SettingsSectionHeader(title: l10n.get('data_management')),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : AppColors.lightCard,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Veriyi yeniden yükle
+                SettingsTile(
+                  icon: Icons.refresh,
+                  title: l10n.get('reload_data'),
+                  iconColor: const Color(0xFF3498DB),
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const UploadScreen(),
+                      ),
+                    );
+                  },
+                ),
+
+                // Önbelleği temizle
+                SettingsTile(
+                  icon: Icons.cleaning_services_outlined,
+                  title: l10n.get('clear_cache'),
+                  iconColor: const Color(0xFFF39C12),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(l10n.get('cache_cleared')),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                ),
+
+                // Verileri sil
+                SettingsTile(
+                  icon: Icons.delete_outline,
+                  title: l10n.get('delete_data'),
+                  iconColor: const Color(0xFFE74C3C),
+                  showDivider: false,
+                  onTap: () => _showDeleteConfirmDialog(l10n, isDark),
+                ),
+              ],
+            ),
+          ),
+
+          // ==================== HAKKINDA ====================
+          SettingsSectionHeader(title: l10n.get('about')),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : AppColors.lightCard,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Uygulama versiyonu
+                SettingsTile(
+                  icon: Icons.info_outline,
+                  title: l10n.get('version'),
+                  subtitle: '1.0.0',
+                  iconColor: const Color(0xFF9B59B6),
+                  onTap: null,
+                  trailing: Text(
+                    'v1.0.0',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isDark
+                          ? AppColors.darkTextHint
+                          : AppColors.lightTextHint,
+                    ),
+                  ),
+                ),
+
+                // Gizlilik politikası
+                SettingsTile(
+                  icon: Icons.privacy_tip_outlined,
+                  title: l10n.get('privacy_policy'),
+                  iconColor: const Color(0xFF1ABC9C),
+                  onTap: () {
+                    // TODO: Gizlilik politikası sayfasını aç
+                  },
+                ),
+
+                // Kullanım koşulları
+                SettingsTile(
+                  icon: Icons.description_outlined,
+                  title: l10n.get('terms_of_use'),
+                  iconColor: const Color(0xFF34495E),
+                  showDivider: false,
+                  onTap: () {
+                    // TODO: Kullanım koşulları sayfasını aç
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // ==================== YARDIM ====================
+          SettingsSectionHeader(title: l10n.get('help')),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : AppColors.lightCard,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // SSS
+                SettingsTile(
+                  icon: Icons.help_outline,
+                  title: l10n.get('faq'),
+                  iconColor: const Color(0xFF3498DB),
+                  onTap: () {
+                    // TODO: SSS sayfasını aç
+                  },
+                ),
+
+                // İletişim
+                SettingsTile(
+                  icon: Icons.mail_outline,
+                  title: l10n.get('contact'),
+                  iconColor: const Color(0xFFE67E22),
+                  showDivider: false,
+                  onTap: () {
+                    // TODO: İletişim sayfasını aç
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // ==================== UYGULAMA İŞLEMLERİ ====================
           const SizedBox(height: 16),
-          Text(
-            l10n.get('alerts'),
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : AppColors.lightCard,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Uygulamayı değerlendir
+                SettingsTile(
+                  icon: Icons.star_outline,
+                  title: l10n.get('rate_app'),
+                  iconColor: const Color(0xFFF1C40F),
+                  onTap: () {
+                    // TODO: App Store/Play Store'a yönlendir
+                  },
+                ),
+
+                // Uygulamayı paylaş
+                SettingsTile(
+                  icon: Icons.share_outlined,
+                  title: l10n.get('share_app'),
+                  iconColor: const Color(0xFF2ECC71),
+                  showDivider: false,
+                  onTap: () {
+                    // TODO: Paylaşım sheet'i aç
+                  },
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Coming soon...',
-            style: TextStyle(
-              color: isDark ? AppColors.darkTextHint : AppColors.lightTextHint,
-            ),
-          ),
+
+          const SizedBox(height: 100), // Bottom nav için boşluk
         ],
       ),
     );
   }
 
-  /// Ayarlar placeholder
-  Widget _buildSettingsContent(AppLocalizations l10n, bool isDark) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.settings,
-            size: 64,
-            color: isDark ? AppColors.darkTextHint : AppColors.lightTextHint,
+  /// Dil seçim dialog'u
+  void _showLanguageDialog(AppLocalizations l10n, bool isDark) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkCard : AppColors.lightCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          l10n.get('language'),
+          style: TextStyle(
+            color: isDark
+                ? AppColors.darkTextPrimary
+                : AppColors.lightTextPrimary,
           ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.get('settings'),
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Text('🇹🇷', style: TextStyle(fontSize: 24)),
+              title: Text(
+                l10n.get('turkish'),
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
+                ),
+              ),
+              trailing: l10n.locale == 'tr'
+                  ? Icon(Icons.check_circle, color: AppColors.darkPrimary)
+                  : null,
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: Dil değiştirme
+              },
+            ),
+            ListTile(
+              leading: const Text('🇬🇧', style: TextStyle(fontSize: 24)),
+              title: Text(
+                l10n.get('english'),
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
+                ),
+              ),
+              trailing: l10n.locale == 'en'
+                  ? Icon(Icons.check_circle, color: AppColors.darkPrimary)
+                  : null,
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: Dil değiştirme
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Silme onay dialog'u
+  void _showDeleteConfirmDialog(AppLocalizations l10n, bool isDark) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkCard : AppColors.lightCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+            const SizedBox(width: 8),
+            Text(
+              l10n.get('delete_data'),
+              style: TextStyle(
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          l10n.get('confirm_delete'),
+          style: TextStyle(
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.lightTextSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              l10n.get('no'),
+              style: TextStyle(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
+              ),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Coming soon...',
-            style: TextStyle(
-              color: isDark ? AppColors.darkTextHint : AppColors.lightTextHint,
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(l10n.get('data_deleted')),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: Colors.red,
+                ),
+              );
+              // Welcome ekranına yönlendir
+              Navigator.pushReplacementNamed(context, '/');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
+            child: Text(l10n.get('yes')),
           ),
         ],
       ),

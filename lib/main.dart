@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
 import 'package:socialsense/core/theme/app_theme.dart';
+import 'package:socialsense/core/providers/instagram_data_provider.dart';
 import 'package:socialsense/presentation/providers/app_settings_provider.dart';
 import 'package:socialsense/presentation/screens/welcome/welcome_screen.dart';
 
@@ -13,9 +14,16 @@ void main() async {
   final settingsProvider = AppSettingsProvider();
   await settingsProvider.loadSettings();
 
+  // Instagram veri provider'ı
+  final dataProvider = InstagramDataProvider();
+  await dataProvider.loadLastUpdateDate();
+
   runApp(
-    ChangeNotifierProvider.value(
-      value: settingsProvider,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: settingsProvider),
+        ChangeNotifierProvider.value(value: dataProvider),
+      ],
       child: const SocialSenseApp(),
     ),
   );
