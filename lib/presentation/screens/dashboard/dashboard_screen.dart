@@ -8,6 +8,13 @@ import 'package:socialsense/presentation/widgets/dashboard/activity_hours_card.d
 import 'package:socialsense/presentation/widgets/dashboard/stats_row.dart';
 import 'package:socialsense/presentation/widgets/dashboard/top_fans_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/active_hour_card.dart';
+import 'package:socialsense/presentation/widgets/reports/follower_details_card.dart';
+import 'package:socialsense/presentation/widgets/reports/account_analysis_card.dart';
+import 'package:socialsense/presentation/widgets/reports/sharing_analysis_card.dart';
+import 'package:socialsense/presentation/widgets/reports/direct_messages_card.dart';
+import 'package:socialsense/presentation/widgets/reports/activity_timeline_card.dart';
+import 'package:socialsense/presentation/widgets/reports/interests_detail_card.dart';
+import 'package:socialsense/presentation/widgets/reports/saved_content_detail_card.dart';
 
 /// Dashboard Ana Ekranı
 /// Instagram istatistiklerinin gösterildiği ana sayfa
@@ -23,6 +30,197 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // Simüle edilmiş güncelleme tarihi
   final DateTime _lastUpdateDate = DateTime(2026, 1, 20, 14, 30);
+
+  // ===================== RAPORLAR VERİLERİ =====================
+
+  // Takipçi Detayları
+  final int _mutualFollowersCount = 33;
+  final List<String> _mutualFollowers = [
+    '@beerkaay_07',
+    '@user123',
+    '@travel_lover',
+  ];
+  final int _notFollowingYouCount = 245;
+  final List<String> _notFollowingYou = [
+    '@celebaccount',
+    '@brandpage',
+    '@famous_person',
+  ];
+  final int _youDontFollowCount = 15;
+  final List<String> _youDontFollow = [
+    '@orbitalhubstudio',
+    '@art_gallery',
+    '@music_lover',
+  ];
+
+  // Hesap Analizleri
+  final List<AccountAnalysis> _mostLikedAccounts = [
+    const AccountAnalysis(username: '@travel_adventures', count: 156),
+    const AccountAnalysis(username: '@food_paradise', count: 134),
+    const AccountAnalysis(username: '@art_gallery', count: 98),
+    const AccountAnalysis(username: '@tech_news', count: 87),
+    const AccountAnalysis(username: '@fashion_daily', count: 76),
+  ];
+  final List<AccountAnalysis> _mostCommentedAccounts = [
+    const AccountAnalysis(username: '@bestfriend_forever', count: 45),
+    const AccountAnalysis(username: '@family_photo', count: 32),
+    const AccountAnalysis(username: '@colleague_work', count: 28),
+    const AccountAnalysis(username: '@old_friend', count: 21),
+    const AccountAnalysis(username: '@neighbor_life', count: 15),
+  ];
+
+  // Paylaşım Analizleri
+  final List<SharingAnalysis> _receivedFromAccounts = [
+    const SharingAnalysis(username: 'Derman S. GÖKCE', shareCount: 131),
+    const SharingAnalysis(username: 'Ahmet Yılmaz', shareCount: 87),
+    const SharingAnalysis(username: 'Elif Kaya', shareCount: 65),
+    const SharingAnalysis(username: 'Mehmet Öz', shareCount: 43),
+    const SharingAnalysis(username: 'Zeynep Demir', shareCount: 32),
+  ];
+  final List<SharingAnalysis> _sentToAccounts = [
+    const SharingAnalysis(username: 'simaozlem', shareCount: 98),
+    const SharingAnalysis(username: 'Can Yücel', shareCount: 76),
+    const SharingAnalysis(username: 'Ayşe Tan', shareCount: 54),
+    const SharingAnalysis(username: 'Fatma Nur', shareCount: 43),
+    const SharingAnalysis(username: 'Ali Veli', shareCount: 31),
+  ];
+
+  // Direkt Mesajlar
+  final int _totalChats = 50;
+  final int _totalMessages = 13563;
+  final int _sentMessages = 6270;
+  final int _receivedMessages = 5466;
+  final List<MessageAnalysis> _mostMessaged = [
+    const MessageAnalysis(username: 'En yakın arkadaş', messageCount: 2341),
+    const MessageAnalysis(username: 'Aile grubu', messageCount: 1876),
+    const MessageAnalysis(username: 'İş arkadaşı', messageCount: 987),
+    const MessageAnalysis(username: 'Eski dost', messageCount: 654),
+    const MessageAnalysis(username: 'Komşu', messageCount: 432),
+  ];
+  final List<MessageAnalysis> _mostMessagedBy = [
+    const MessageAnalysis(username: 'Sevgili', messageCount: 3456),
+    const MessageAnalysis(username: 'Anne', messageCount: 1234),
+    const MessageAnalysis(username: 'Kardeş', messageCount: 876),
+    const MessageAnalysis(username: 'Arkadaş', messageCount: 567),
+    const MessageAnalysis(username: 'Kuzen', messageCount: 345),
+  ];
+
+  // Aktivite grafiği verileri
+  final List<ActivityDataPoint> _likeActivityData = [
+    const ActivityDataPoint(label: '25 Eki', value: 65),
+    const ActivityDataPoint(label: '1 Kas', value: 80),
+    const ActivityDataPoint(label: '8 Kas', value: 75),
+    const ActivityDataPoint(label: '16 Kas', value: 90),
+    const ActivityDataPoint(label: '24 Kas', value: 85),
+    const ActivityDataPoint(label: '2 Ara', value: 110),
+    const ActivityDataPoint(label: '10 Ara', value: 260),
+    const ActivityDataPoint(label: '18 Ara', value: 180),
+    const ActivityDataPoint(label: '27 Ara', value: 140),
+    const ActivityDataPoint(label: '4 Oca', value: 95),
+    const ActivityDataPoint(label: '12 Oca', value: 85),
+    const ActivityDataPoint(label: '24 Oca', value: 100),
+  ];
+
+  // İlgi alanları kategorileri
+  final List<InterestCategory> _interestCategories = [
+    const InterestCategory(
+      name: 'Spor',
+      count: 5,
+      subcategories: [
+        'Soccer',
+        'Basketball',
+        'Types of Sports',
+        'Motorsports',
+        'Football Family of Sports',
+      ],
+    ),
+    const InterestCategory(
+      name: 'Yemek & İçecek',
+      count: 4,
+      subcategories: [
+        'Foods',
+        'Prepared Foods & Dishes',
+        'Non-Alcoholic Beverages',
+        'Drinks',
+      ],
+    ),
+    const InterestCategory(
+      name: 'Oyun & Teknoloji',
+      count: 1,
+      subcategories: ['Video Games'],
+    ),
+    const InterestCategory(
+      name: 'Moda & Güzellik',
+      count: 1,
+      subcategories: ['Beauty'],
+    ),
+    const InterestCategory(
+      name: 'Hayvanlar',
+      count: 7,
+      subcategories: [
+        'Birds',
+        'Mammals',
+        'Dogs',
+        'Monkeys',
+        'Primates',
+        'Animals',
+        'Cats',
+      ],
+    ),
+    const InterestCategory(
+      name: 'Sanat & Eğlence',
+      count: 6,
+      subcategories: [
+        'TV & Movies Celebrities',
+        'TV & Movies by Genre',
+        'Anime TV & Movies',
+        'Music by Genre',
+        'Visual Arts',
+        'Animation TV & Movies',
+      ],
+    ),
+    const InterestCategory(
+      name: 'Seyahat',
+      count: 7,
+      subcategories: [
+        'Asia Travel',
+        'Aviation',
+        'Southern Europe Travel',
+        'Travel Destinations',
+        'Europe Travel',
+        'Travel by Region',
+        'Western Asia Travel',
+      ],
+    ),
+    const InterestCategory(
+      name: 'Diğer',
+      count: 16,
+      subcategories: [
+        'Pigeons',
+        'Pizza',
+        'Vehicle Events',
+        'Ground Transportation',
+        'Turtles',
+        'Small Motor Vehicles',
+        'Lizards',
+        'Cars & Trucks',
+      ],
+    ),
+  ];
+
+  // Kayıtlı içerik hesapları
+  final List<SavedContentAccount> _savedContentAccounts = [
+    const SavedContentAccount(username: '@toonkritik'),
+    const SavedContentAccount(username: '@theanimehakase'),
+    const SavedContentAccount(username: '@guclukadinrehberi'),
+    const SavedContentAccount(username: '@anime.channel.tr'),
+    const SavedContentAccount(username: '@animeninevreni'),
+    const SavedContentAccount(username: '@filmkesifleri'),
+    const SavedContentAccount(username: '@ahmetselim_kaya'),
+    const SavedContentAccount(username: '@deeptalkstr'),
+    const SavedContentAccount(username: '@asya_delisii'),
+    const SavedContentAccount(username: '@sinemori'),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +254,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  /// Ana sayfa içeriği
+  /// Ana sayfa içeriği (ESKİ TASARIM KORUNDU)
   Widget _buildHomeContent(
     BuildContext context,
     AppLocalizations l10n,
@@ -371,35 +569,130 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  /// Raporlar placeholder
+  /// Raporlar içeriği (YENİ İÇERİKLER EKLENDİ)
   Widget _buildReportsContent(AppLocalizations l10n, bool isDark) {
-    return Center(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.bar_chart,
-            size: 64,
-            color: isDark ? AppColors.darkTextHint : AppColors.lightTextHint,
-          ),
           const SizedBox(height: 16),
+
+          // Başlık
+          Row(
+            children: [
+              Icon(Icons.bar_chart, color: AppColors.darkPrimary, size: 24),
+              const SizedBox(width: 10),
+              Text(
+                'Detaylı Raporlar',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // Takipçi Detayları
+          FollowerDetailsCard(
+            mutualFollowersCount: _mutualFollowersCount,
+            mutualFollowers: _mutualFollowers,
+            notFollowingYouCount: _notFollowingYouCount,
+            notFollowingYou: _notFollowingYou,
+            youDontFollowCount: _youDontFollowCount,
+            youDontFollow: _youDontFollow,
+          ),
+
+          const SizedBox(height: 24),
+
+          // Hesap Analizleri
+          AccountAnalysisCard(
+            mostLikedCount: _mostLikedAccounts.length,
+            mostLikedAccounts: _mostLikedAccounts,
+            mostCommentedCount: _mostCommentedAccounts.length,
+            mostCommentedAccounts: _mostCommentedAccounts,
+          ),
+
+          const SizedBox(height: 24),
+
+          // Paylaşım Analizleri
+          SharingAnalysisCard(
+            receivedFromAccounts: _receivedFromAccounts,
+            sentToAccounts: _sentToAccounts,
+          ),
+
+          const SizedBox(height: 24),
+
+          // Direkt Mesajlar
+          DirectMessagesCard(
+            totalChats: _totalChats,
+            totalMessages: _totalMessages,
+            sentMessages: _sentMessages,
+            receivedMessages: _receivedMessages,
+            mostMessaged: _mostMessaged,
+            mostMessagedBy: _mostMessagedBy,
+          ),
+
+          const SizedBox(height: 24),
+
+          // Aktivite Zaman Çizelgesi Başlığı
           Text(
-            l10n.get('reports'),
+            'Aktivite Zaman Çizelgesi',
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
               color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+                  ? AppColors.darkTextPrimary
+                  : AppColors.lightTextPrimary,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Coming soon...',
-            style: TextStyle(
-              color: isDark ? AppColors.darkTextHint : AppColors.lightTextHint,
-            ),
+
+          const SizedBox(height: 16),
+
+          // Beğeni Aktivitesi Grafiği
+          ActivityTimelineCard(
+            title: 'Beğeni Aktivitesi',
+            subtitle: 'Son 90 gün',
+            dataPoints: _likeActivityData,
+            lineColor: const Color(0xFFFF6B9D),
+            hasData: true,
           ),
+
+          const SizedBox(height: 16),
+
+          // Yorum Aktivitesi Grafiği
+          ActivityTimelineCard(
+            title: 'Yorum Aktivitesi',
+            subtitle: 'Son 90 gün',
+            dataPoints: const [],
+            lineColor: const Color(0xFF4ECDC4),
+            hasData: false,
+          ),
+
+          const SizedBox(height: 24),
+
+          // İlgi Alanları (Detaylı)
+          InterestsDetailCard(
+            totalInterests: 47,
+            categories: _interestCategories,
+          ),
+
+          const SizedBox(height: 24),
+
+          // Kayıtlı İçerikler (Detaylı)
+          SavedContentDetailCard(
+            totalSavedContent: 60,
+            accounts: _savedContentAccounts,
+            storyLikesCount: 60,
+            storyLikesAccounts: _savedContentAccounts.take(5).toList(),
+          ),
+
+          const SizedBox(height: 100), // Bottom nav için boşluk
         ],
       ),
     );
