@@ -34,8 +34,17 @@ class InstagramDataProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      debugPrint('🔄 ZIP dosyası yükleniyor: ${zipFile.path}');
       _data = await InstagramDataParser.parseZipFile(zipFile);
       _lastUpdateDate = DateTime.now();
+
+      // Debug log
+      debugPrint('✅ Parse başarılı!');
+      debugPrint('📊 Takipçi: ${_data?.followers.length ?? 0}');
+      debugPrint('📊 Takip edilen: ${_data?.following.length ?? 0}');
+      debugPrint('📊 Beğeni: ${_data?.likes.length ?? 0}');
+      debugPrint('📊 Yorum: ${_data?.comments.length ?? 0}');
+      debugPrint('📊 hasData: ${_data?.hasData}');
 
       // Başarılı yükleme tarihini kaydet
       await _saveLastUpdateDate();
@@ -44,6 +53,7 @@ class InstagramDataProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
+      debugPrint('❌ Parse hatası: $e');
       _error = e.toString();
       _isLoading = false;
       notifyListeners();

@@ -432,6 +432,8 @@ class AppLocalizations {
     'error_general': 'An error occurred',
     'error_invalid_file': 'Invalid file format',
     'error_no_data': 'No data found',
+    'no_data_available':
+        'No data available. Please upload your Instagram data first.',
 
     // Buttons
     'btn_continue': 'Continue',

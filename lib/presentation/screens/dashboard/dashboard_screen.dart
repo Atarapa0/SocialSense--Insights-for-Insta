@@ -557,6 +557,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
         .map((e) => SavedContentAccount(username: '@${e.key}'))
         .toList();
 
+    // Debug log - Reports verileri
+    debugPrint('📊 REPORTS VERİLERİ:');
+    debugPrint('  - Mutual: $mutualCount, list: $mutualList');
+    debugPrint(
+      '  - Not Following: $notFollowingCount, list: $notFollowingList',
+    );
+    debugPrint(
+      '  - You Dont Follow: $youDontFollowCount, list: $youDontFollowList',
+    );
+    debugPrint('  - Top Liked: ${topLiked.length}');
+    debugPrint('  - Top Commented: ${topCommented.length}');
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(

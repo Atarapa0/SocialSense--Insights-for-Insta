@@ -31,6 +31,14 @@ class InstagramDataParser {
   static InstagramData parseZipBytesSync(Uint8List bytes) {
     final archive = ZipDecoder().decodeBytes(bytes);
 
+    // Debug: Tüm dosyaları listele
+    debugPrint('📁 ZIP içindeki dosyalar:');
+    for (final file in archive) {
+      if (file.isFile) {
+        debugPrint('  - ${file.name}');
+      }
+    }
+
     List<InstagramUser> followers = [];
     List<InstagramUser> following = [];
     List<InstagramLike> likes = [];
@@ -51,38 +59,51 @@ class InstagramDataParser {
         continue;
       }
 
+      // Sadece dosya adını al (yolu değil)
+      final baseName = fileName.split('/').last.toLowerCase();
+
       try {
-        // Takipçiler
-        if (fileName.contains('followers') && fileName.endsWith('.json')) {
+        // Takipçiler (followers_1.json, followers.json gibi)
+        if (baseName.startsWith('followers') && baseName.endsWith('.json')) {
           final content = utf8.decode(file.content as List<int>);
-          followers = _parseFollowers(content);
+          final parsed = _parseFollowers(content);
+          if (parsed.isNotEmpty) {
+            followers.addAll(parsed);
+            debugPrint('✅ Followers bulundu: ${parsed.length} kişi');
+          }
         }
-        // Takip edilenler
-        else if (fileName.contains('following') && fileName.endsWith('.json')) {
+        // Takip edilenler (following.json)
+        else if (baseName.startsWith('following') &&
+            baseName.endsWith('.json')) {
           final content = utf8.decode(file.content as List<int>);
-          following = _parseFollowing(content);
+          final parsed = _parseFollowing(content);
+          if (parsed.isNotEmpty) {
+            following.addAll(parsed);
+            debugPrint('✅ Following bulundu: ${parsed.length} kişi');
+          }
         }
         // Beğeniler
-        else if (fileName.contains('liked_posts') &&
-            fileName.endsWith('.json')) {
+        else if (baseName.contains('liked_posts') &&
+            baseName.endsWith('.json')) {
           final content = utf8.decode(file.content as List<int>);
           likes = _parseLikes(content);
+          debugPrint('✅ Likes bulundu: ${likes.length} beğeni');
         }
         // Yorumlar
-        else if (fileName.contains('post_comments') &&
-            fileName.endsWith('.json')) {
+        else if (baseName.contains('post_comments') &&
+            baseName.endsWith('.json')) {
           final content = utf8.decode(file.content as List<int>);
           comments = _parseComments(content);
         }
         // Kaydedilenler
-        else if (fileName.contains('saved_posts') &&
-            fileName.endsWith('.json')) {
+        else if (baseName.contains('saved_posts') &&
+            baseName.endsWith('.json')) {
           final content = utf8.decode(file.content as List<int>);
           savedItems = _parseSavedItems(content);
         }
         // İlgi alanları
-        else if (fileName.contains('your_topics') &&
-            fileName.endsWith('.json')) {
+        else if (baseName.contains('your_topics') &&
+            baseName.endsWith('.json')) {
           final content = utf8.decode(file.content as List<int>);
           interests = _parseInterests(content);
         }
@@ -164,6 +185,11 @@ class InstagramDataParser {
       }
 
       if (followingList.isEmpty) return [];
+
+      // Debug: İlk öğenin formatını göster
+      if (followingList.isNotEmpty) {
+        debugPrint('📋 Following ilk öğe formatı: ${followingList[0]}');
+      }
 
       return followingList
           .whereType<Map<String, dynamic>>()
