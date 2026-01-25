@@ -14,21 +14,42 @@ class InstagramUser {
   });
 
   factory InstagramUser.fromJson(Map<String, dynamic> json) {
-    // Instagram JSON formatı: {"string_list_data": [{"value": "username", "timestamp": 1234567890}]}
+    // Yeni Instagram formatı: {title: "username", string_list_data: [{href: ..., timestamp: ...}]}
+    // Eski format: {string_list_data: [{value: "username", href: ..., timestamp: ...}]}
+
+    String username = '';
+    String? profileUrl;
+    DateTime? followDate;
+
+    // Önce 'title' alanını kontrol et (yeni format)
+    if (json.containsKey('title') && json['title'] != null) {
+      username = json['title'] as String;
+    }
+
+    // string_list_data'dan ek bilgileri al
     final stringListData = json['string_list_data'] as List?;
     if (stringListData != null && stringListData.isNotEmpty) {
       final data = stringListData[0] as Map<String, dynamic>;
-      return InstagramUser(
-        username: data['value'] ?? '',
-        profileUrl: data['href'],
-        followDate: data['timestamp'] != null
-            ? DateTime.fromMillisecondsSinceEpoch(
-                (data['timestamp'] as int) * 1000,
-              )
-            : null,
-      );
+
+      // Eğer username hala boşsa, value'dan al (eski format)
+      if (username.isEmpty && data['value'] != null) {
+        username = data['value'] as String;
+      }
+
+      profileUrl = data['href'] as String?;
+
+      if (data['timestamp'] != null) {
+        followDate = DateTime.fromMillisecondsSinceEpoch(
+          (data['timestamp'] as int) * 1000,
+        );
+      }
     }
-    return InstagramUser(username: json['value'] ?? '');
+
+    return InstagramUser(
+      username: username,
+      profileUrl: profileUrl,
+      followDate: followDate,
+    );
   }
 }
 
@@ -45,15 +66,29 @@ class InstagramLike {
   });
 
   factory InstagramLike.fromJson(Map<String, dynamic> json) {
-    final stringListData = json['string_list_data'] as List?;
+    // Yeni Instagram formatı: {title: "username", string_list_data: [{href: ..., timestamp: ...}]}
+    // Eski format: {string_list_data: [{value: "username", href: ..., timestamp: ...}]}
+
     String username = '';
     DateTime timestamp = DateTime.now();
     String? href;
 
+    // Önce 'title' alanını kontrol et (yeni format)
+    if (json.containsKey('title') && json['title'] != null) {
+      username = json['title'] as String;
+    }
+
+    final stringListData = json['string_list_data'] as List?;
     if (stringListData != null && stringListData.isNotEmpty) {
       final data = stringListData[0] as Map<String, dynamic>;
-      username = data['value'] ?? '';
-      href = data['href'];
+
+      // Eğer username hala boşsa, value'dan al (eski format)
+      if (username.isEmpty && data['value'] != null) {
+        username = data['value'] as String;
+      }
+
+      href = data['href'] as String?;
+
       if (data['timestamp'] != null) {
         timestamp = DateTime.fromMillisecondsSinceEpoch(
           (data['timestamp'] as int) * 1000,
@@ -82,14 +117,25 @@ class InstagramComment {
   });
 
   factory InstagramComment.fromJson(Map<String, dynamic> json) {
-    final stringListData = json['string_list_data'] as List?;
+    // Yeni Instagram formatı: {title: "username", string_list_data: [{href: ..., timestamp: ...}]}
     String username = '';
     String? comment;
     DateTime timestamp = DateTime.now();
 
+    // Önce 'title' alanını kontrol et (yeni format - username burada)
+    if (json.containsKey('title') && json['title'] != null) {
+      username = json['title'] as String;
+    }
+
+    final stringListData = json['string_list_data'] as List?;
     if (stringListData != null && stringListData.isNotEmpty) {
       final data = stringListData[0] as Map<String, dynamic>;
-      username = data['value'] ?? '';
+
+      // Eğer username hala boşsa, value'dan al (eski format)
+      if (username.isEmpty && data['value'] != null) {
+        username = data['value'] as String;
+      }
+
       if (data['timestamp'] != null) {
         timestamp = DateTime.fromMillisecondsSinceEpoch(
           (data['timestamp'] as int) * 1000,
@@ -97,8 +143,8 @@ class InstagramComment {
       }
     }
 
-    // Yorum metni title içinde olabilir
-    comment = json['title'] as String?;
+    // Yorum metni ayrı bir alanda olabilir
+    comment = json['comment'] as String? ?? json['text'] as String?;
 
     return InstagramComment(
       username: username,
@@ -142,15 +188,27 @@ class InstagramSavedItem {
   });
 
   factory InstagramSavedItem.fromJson(Map<String, dynamic> json) {
-    final stringListData = json['string_list_data'] as List?;
+    // Yeni Instagram formatı: {title: "username", string_list_data: [{href: ..., timestamp: ...}]}
     String username = '';
     String? href;
     DateTime? savedDate;
 
+    // Önce 'title' alanını kontrol et (yeni format)
+    if (json.containsKey('title') && json['title'] != null) {
+      username = json['title'] as String;
+    }
+
+    final stringListData = json['string_list_data'] as List?;
     if (stringListData != null && stringListData.isNotEmpty) {
       final data = stringListData[0] as Map<String, dynamic>;
-      username = data['value'] ?? '';
-      href = data['href'];
+
+      // Eğer username hala boşsa, value'dan al (eski format)
+      if (username.isEmpty && data['value'] != null) {
+        username = data['value'] as String;
+      }
+
+      href = data['href'] as String?;
+
       if (data['timestamp'] != null) {
         savedDate = DateTime.fromMillisecondsSinceEpoch(
           (data['timestamp'] as int) * 1000,

@@ -226,10 +226,23 @@ class InstagramDataParser {
 
       if (likesList.isEmpty) return [];
 
-      return likesList
+      // Debug: İlk beğeninin formatını göster
+      if (likesList.isNotEmpty) {
+        debugPrint('📋 Likes ilk öğe formatı: ${likesList[0]}');
+      }
+
+      final result = likesList
           .whereType<Map<String, dynamic>>()
           .map((item) => InstagramLike.fromJson(item))
           .toList();
+
+      // Debug: İlk birkaç username'i göster
+      if (result.isNotEmpty) {
+        final firstUsernames = result.take(5).map((l) => l.username).toList();
+        debugPrint('📊 İlk 5 beğenilen hesap: $firstUsernames');
+      }
+
+      return result;
     } catch (e) {
       debugPrint('Likes parse hatası: $e');
       return [];

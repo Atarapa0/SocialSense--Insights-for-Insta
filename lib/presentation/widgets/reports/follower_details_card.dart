@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
+import 'package:socialsense/core/utils/instagram_launcher.dart';
 
 /// Takipçi Detayları Kartı
 /// Karşılıklı takipler, seni takip etmeyenler gibi bilgileri gösterir
@@ -170,50 +171,54 @@ class FollowerDetailsCard extends StatelessWidget {
   }
 
   Widget _buildAccountItem(int rank, String username, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          // Sıra numarası
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Center(
-              child: Text(
-                '$rank',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.darkPrimary,
+    return InkWell(
+      onTap: () => InstagramLauncher.openProfile(username),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          children: [
+            // Sıra numarası
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Center(
+                child: Text(
+                  '$rank',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkPrimary,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          // Kullanıcı adı
-          Expanded(
-            child: Text(
-              username,
-              style: TextStyle(
-                fontSize: 13,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.lightTextPrimary,
+            const SizedBox(width: 10),
+            // Kullanıcı adı
+            Expanded(
+              child: Text(
+                username,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          // Instagram'da aç ikonu
-          Icon(
-            Icons.open_in_new,
-            size: 14,
-            color: isDark ? AppColors.darkTextHint : AppColors.lightTextHint,
-          ),
-        ],
+            // Instagram'da aç ikonu
+            Icon(
+              Icons.open_in_new,
+              size: 14,
+              color: isDark ? AppColors.darkTextHint : AppColors.lightTextHint,
+            ),
+          ],
+        ),
       ),
     );
   }

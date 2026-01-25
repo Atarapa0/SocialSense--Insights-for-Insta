@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
 import 'package:socialsense/core/providers/instagram_data_provider.dart';
+import 'package:socialsense/presentation/providers/app_settings_provider.dart';
 import 'package:socialsense/presentation/screens/upload/upload_screen.dart';
 import 'package:socialsense/presentation/screens/analyze/analyze_drop_screen.dart';
 import 'package:socialsense/presentation/widgets/dashboard/priority_card.dart';
@@ -1004,13 +1005,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   trailing: Switch(
                     value: isDark,
                     onChanged: (value) {
-                      // TODO: Tema değiştirme işlevi
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Tema değiştirme yakında eklenecek'),
-                          behavior: SnackBarBehavior.floating,
-                        ),
+                      // Tema değiştir
+                      final settingsProvider = Provider.of<AppSettingsProvider>(
+                        context,
+                        listen: false,
                       );
+                      settingsProvider.toggleTheme();
                     },
                     activeColor: AppColors.darkPrimary,
                   ),
@@ -1020,7 +1020,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 SettingsTile(
                   icon: Icons.language,
                   title: l10n.get('language'),
-                  subtitle: l10n.locale == 'tr'
+                  subtitle: l10n.locale.languageCode == 'tr'
                       ? l10n.get('turkish')
                       : l10n.get('english'),
                   iconColor: const Color(0xFF2ECC71),
@@ -1241,7 +1241,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _showLanguageDialog(AppLocalizations l10n, bool isDark) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: isDark ? AppColors.darkCard : AppColors.lightCard,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
@@ -1265,12 +1265,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       : AppColors.lightTextPrimary,
                 ),
               ),
-              trailing: l10n.locale == 'tr'
+              trailing: l10n.locale.languageCode == 'tr'
                   ? Icon(Icons.check_circle, color: AppColors.darkPrimary)
                   : null,
               onTap: () {
-                Navigator.pop(context);
-                // TODO: Dil değiştirme
+                Navigator.pop(dialogContext);
+                // Dil değiştir - Türkçe
+                final settingsProvider = Provider.of<AppSettingsProvider>(
+                  context,
+                  listen: false,
+                );
+                settingsProvider.setLanguage(AppLanguage.turkish);
               },
             ),
             ListTile(
@@ -1283,12 +1288,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       : AppColors.lightTextPrimary,
                 ),
               ),
-              trailing: l10n.locale == 'en'
+              trailing: l10n.locale.languageCode == 'en'
                   ? Icon(Icons.check_circle, color: AppColors.darkPrimary)
                   : null,
               onTap: () {
-                Navigator.pop(context);
-                // TODO: Dil değiştirme
+                Navigator.pop(dialogContext);
+                // Dil değiştir - İngilizce
+                final settingsProvider = Provider.of<AppSettingsProvider>(
+                  context,
+                  listen: false,
+                );
+                settingsProvider.setLanguage(AppLanguage.english);
               },
             ),
           ],

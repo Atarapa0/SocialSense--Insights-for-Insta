@@ -53,6 +53,7 @@ dependencies:
   
   # Basit veri saklama için
   shared_preferences: ^2.3.4
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
