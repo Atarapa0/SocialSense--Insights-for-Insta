@@ -32,75 +32,10 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentNavIndex = 0;
 
-  // Helper fonksiyon: veri yoksa "---" göster
-  String _formatNumber(int? value) {
-    if (value == null || value == 0) return '---';
-    return value.toString();
-  }
-
-  String _formatPercent(double? value) {
-    if (value == null || value == 0.0) return '---';
-    return '${value.toStringAsFixed(1)}%';
-  }
-
-  // ============ REPORTS İÇİN GEÇİCİ PLACEHOLDER VERİLER ============
-  // (ZIP'den okunamayan veriler için placeholder, sonra güncellenir)
-
-  List<AccountAnalysis> get _mostLikedAccounts {
-    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
-    final topLiked = provider.topLikedAccounts;
-    if (topLiked.isEmpty) return [];
-    return topLiked.entries
-        .take(5)
-        .map((e) => AccountAnalysis(username: '@${e.key}', count: e.value))
-        .toList();
-  }
-
-  List<AccountAnalysis> get _mostCommentedAccounts {
-    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
-    final topCommented = provider.topCommentedAccounts;
-    if (topCommented.isEmpty) return [];
-    return topCommented.entries
-        .take(5)
-        .map((e) => AccountAnalysis(username: '@${e.key}', count: e.value))
-        .toList();
-  }
-
-  // Placeholder veriler (ZIP'de olmayan veriler)
-  // Provider'dan alınan veriler
+  // Provider'dan son güncelleme tarihini al
   DateTime? get _lastUpdateDate {
     final provider = Provider.of<InstagramDataProvider>(context, listen: false);
     return provider.lastUpdateDate;
-  }
-
-  int get _mutualFollowersCount {
-    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
-    return provider.mutualFollowers.length;
-  }
-
-  List<String> get _mutualFollowers {
-    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
-    return provider.mutualFollowers.take(3).map((u) => '@$u').toList();
-  }
-
-  int get _notFollowingYouCount {
-    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
-    return provider.notFollowingBack.length;
-  }
-
-  List<String> get _notFollowingYou {
-    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
-    return provider.notFollowingBack.take(3).map((u) => '@$u').toList();
-  }
-
-  int get _youDontFollowCount {
-    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
-    return provider.youDontFollow.length;
-  }
-
-  List<String> get _youDontFollow {
-    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
-    return provider.youDontFollow.take(3).map((u) => '@$u').toList();
   }
 
   // Placeholder veriler (ZIP'de olmayan veya henüz parse edilmeyen veriler)
@@ -114,7 +49,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<MessageAnalysis> _mostMessagedBy = [];
   final List<ActivityDataPoint> _likeActivityData = [];
   final List<InterestCategory> _interestCategories = [];
-  final List<SavedContentAccount> _savedContentAccounts = [];
 
   @override
   Widget build(BuildContext context) {
@@ -148,12 +82,77 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  /// Ana sayfa içeriği (ESKİ TASARIM KORUNDU)
+  /// Home içeriği (Ana Dashboard)
   Widget _buildHomeContent(
     BuildContext context,
     AppLocalizations l10n,
     bool isDark,
   ) {
+    // Provider'dan verileri al
+    final dataProvider = Provider.of<InstagramDataProvider>(context);
+    final hasData = dataProvider.hasData;
+
+    // Gerçek veriler
+    final unfollowersCount = dataProvider.notFollowingBack.length;
+    final ghostPercentage = dataProvider.ghostFollowerPercentage;
+    final activeHour = dataProvider.mostActiveHour;
+    final engagementRate = dataProvider.engagementRate;
+    final followersCount = dataProvider.followersCount;
+    final totalLikes = dataProvider.totalLikesCount;
+    final totalComments = dataProvider.totalCommentsCount;
+
+    // Top fans hesapla
+    final topLiked = dataProvider.topLikedAccounts;
+    final topCommented = dataProvider.topCommentedAccounts;
+
+    // Top 3 fans listesi oluştur
+    final topFansMap = <String, Map<String, int>>{};
+    for (final entry in topLiked.entries.take(10)) {
+      topFansMap[entry.key] = {'likes': entry.value, 'comments': 0};
+    }
+    for (final entry in topCommented.entries.take(10)) {
+      if (topFansMap.containsKey(entry.key)) {
+        topFansMap[entry.key]!['comments'] = entry.value;
+      } else {
+        topFansMap[entry.key] = {'likes': 0, 'comments': entry.value};
+      }
+    }
+    // Toplam etkileşime göre sırala
+    final sortedFans = topFansMap.entries.toList()
+      ..sort((a, b) {
+        final aTotal = a.value['likes']! + a.value['comments']!;
+        final bTotal = b.value['likes']! + b.value['comments']!;
+        return bTotal.compareTo(aTotal);
+      });
+
+    final topFans = sortedFans.take(3).toList().asMap().entries.map((entry) {
+      final fan = entry.value;
+      return TopFan(
+        username: fan.key,
+        likes: fan.value['likes']!,
+        comments: fan.value['comments']!,
+        rank: entry.key + 1,
+      );
+    }).toList();
+
+    // Saatlik aktivite verisi
+    final hourlyActivity = dataProvider.hourlyActivity;
+    final maxActivity = hourlyActivity.values.fold(1, (a, b) => a > b ? a : b);
+    final activityData = List.generate(7, (i) {
+      // Son 7 gün için aktivite
+      final hour = (DateTime.now().hour - 6 + i) % 24;
+      final value = hourlyActivity[hour] ?? 0;
+      return maxActivity > 0 ? value / maxActivity : 0.0;
+    });
+
+    // Active hour formatla
+    String formatHour(int hour) {
+      if (hour == 0) return '12 AM';
+      if (hour < 12) return '$hour AM';
+      if (hour == 12) return '12 PM';
+      return '${hour - 12} PM';
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -166,13 +165,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 24),
 
+          // Veri yoksa uyarı göster
+          if (!hasData)
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Colors.orange),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      l10n.get('no_data_available'),
+                      style: const TextStyle(color: Colors.orange),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
           // Priority Card (Unfollowers) - tıklanabilir
           GestureDetector(
             onTap: () => _navigateToAnalyzeDrop(context),
-            child: const PriorityCard(
-              unfollowersCount: 47,
-              message:
-                  'You lost 47 followers this week.\nUsually this happens on Tuesdays.',
+            child: PriorityCard(
+              unfollowersCount: unfollowersCount,
+              message: unfollowersCount > 0
+                  ? 'You have $unfollowersCount people not following you back.'
+                  : 'No unfollowers detected.',
             ),
           ),
 
@@ -235,7 +259,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 width: 70,
                                 height: 70,
                                 child: CircularProgressIndicator(
-                                  value: 0.28,
+                                  value: ghostPercentage / 100,
                                   strokeWidth: 6,
                                   backgroundColor: isDark
                                       ? AppColors.darkBorder
@@ -246,7 +270,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ),
                               Text(
-                                '28%',
+                                hasData
+                                    ? '${ghostPercentage.toStringAsFixed(0)}%'
+                                    : '---',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -281,11 +307,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(width: 12),
 
               // Active Hour
-              const Expanded(
+              Expanded(
                 child: ActiveHourCard(
-                  activeHour: '9 PM',
-                  changePercentage: 5,
-                  hourlyData: [0.2, 0.3, 0.4, 0.6, 0.8, 1.0],
+                  activeHour: hasData ? formatHour(activeHour) : '---',
+                  changePercentage: 0,
+                  hourlyData: activityData.isEmpty
+                      ? [0.2, 0.3, 0.4, 0.6, 0.8, 1.0]
+                      : activityData,
                 ),
               ),
             ],
@@ -295,11 +323,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           // Top 3 Fans
           TopFansCard(
-            fans: const [
-              TopFan(username: 'sarah_j', likes: 54, comments: 12, rank: 1),
-              TopFan(username: 'mike_designs', likes: 42, comments: 8, rank: 2),
-              TopFan(username: 'emma_art', likes: 38, comments: 5, rank: 3),
-            ],
+            fans: topFans.isEmpty
+                ? [
+                    const TopFan(
+                      username: '---',
+                      likes: 0,
+                      comments: 0,
+                      rank: 1,
+                    ),
+                    const TopFan(
+                      username: '---',
+                      likes: 0,
+                      comments: 0,
+                      rank: 2,
+                    ),
+                    const TopFan(
+                      username: '---',
+                      likes: 0,
+                      comments: 0,
+                      rank: 3,
+                    ),
+                  ]
+                : topFans,
             onViewAll: () {
               // TODO: Tüm takipçileri göster
             },
@@ -308,19 +353,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 16),
 
           // Activity Hours Card (haftalık)
-          const ActivityHoursCard(
-            peakTime: '8 PM',
-            activityData: [0.3, 0.5, 0.8, 0.6, 0.9, 0.4, 0.7],
+          ActivityHoursCard(
+            peakTime: hasData ? formatHour(activeHour) : '---',
+            activityData: activityData.isEmpty
+                ? const [0.3, 0.5, 0.8, 0.6, 0.9, 0.4, 0.7]
+                : activityData,
           ),
 
           const SizedBox(height: 16),
 
           // Stats Row (Engagement + Reach)
-          const StatsRow(
-            engagementRate: 4.8,
-            engagementChange: 0.5,
-            totalReach: 12500,
-            reachChange: 1200,
+          StatsRow(
+            engagementRate: hasData ? engagementRate : 0,
+            engagementChange: 0,
+            totalReach: hasData
+                ? (followersCount + totalLikes + totalComments)
+                : 0,
+            reachChange: 0,
           ),
 
           const SizedBox(height: 100), // Bottom nav için boşluk
@@ -466,6 +515,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   /// Raporlar içeriği (YENİ İÇERİKLER EKLENDİ)
   Widget _buildReportsContent(AppLocalizations l10n, bool isDark) {
+    // Provider'dan verileri al
+    final dataProvider = Provider.of<InstagramDataProvider>(context);
+    final hasData = dataProvider.hasData;
+
+    // Gerçek veriler
+    final mutualCount = dataProvider.mutualFollowers.length;
+    final mutualList = dataProvider.mutualFollowers
+        .take(3)
+        .map((u) => '@$u')
+        .toList();
+    final notFollowingCount = dataProvider.notFollowingBack.length;
+    final notFollowingList = dataProvider.notFollowingBack
+        .take(3)
+        .map((u) => '@$u')
+        .toList();
+    final youDontFollowCount = dataProvider.youDontFollow.length;
+    final youDontFollowList = dataProvider.youDontFollow
+        .take(3)
+        .map((u) => '@$u')
+        .toList();
+
+    // En çok beğenilen ve yorum yapılan hesaplar
+    final topLiked = dataProvider.topLikedAccounts;
+    final topCommented = dataProvider.topCommentedAccounts;
+
+    final mostLikedList = topLiked.entries
+        .take(5)
+        .map((e) => AccountAnalysis(username: '@${e.key}', count: e.value))
+        .toList();
+
+    final mostCommentedList = topCommented.entries
+        .take(5)
+        .map((e) => AccountAnalysis(username: '@${e.key}', count: e.value))
+        .toList();
+
+    // Kayıtlı içerik hesapları
+    final savedAccounts = dataProvider.topSavedAccounts;
+    final savedAccountsList = savedAccounts.entries
+        .take(10)
+        .map((e) => SavedContentAccount(username: '@${e.key}'))
+        .toList();
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -476,10 +567,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Başlık
           Row(
             children: [
-              Icon(Icons.bar_chart, color: AppColors.darkPrimary, size: 24),
+              const Icon(
+                Icons.bar_chart,
+                color: AppColors.darkPrimary,
+                size: 24,
+              ),
               const SizedBox(width: 10),
               Text(
-                'Detaylı Raporlar',
+                l10n.get('reports'),
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -493,51 +588,91 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 24),
 
+          // Veri yoksa uyarı göster
+          if (!hasData)
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Colors.orange),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      l10n.get('no_data_available'),
+                      style: const TextStyle(color: Colors.orange),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
           // Takipçi Detayları
           FollowerDetailsCard(
-            mutualFollowersCount: _mutualFollowersCount,
-            mutualFollowers: _mutualFollowers,
-            notFollowingYouCount: _notFollowingYouCount,
-            notFollowingYou: _notFollowingYou,
-            youDontFollowCount: _youDontFollowCount,
-            youDontFollow: _youDontFollow,
+            mutualFollowersCount: mutualCount,
+            mutualFollowers: mutualList.isEmpty ? ['---'] : mutualList,
+            notFollowingYouCount: notFollowingCount,
+            notFollowingYou: notFollowingList.isEmpty
+                ? ['---']
+                : notFollowingList,
+            youDontFollowCount: youDontFollowCount,
+            youDontFollow: youDontFollowList.isEmpty
+                ? ['---']
+                : youDontFollowList,
           ),
 
           const SizedBox(height: 24),
 
           // Hesap Analizleri
           AccountAnalysisCard(
-            mostLikedCount: _mostLikedAccounts.length,
-            mostLikedAccounts: _mostLikedAccounts,
-            mostCommentedCount: _mostCommentedAccounts.length,
-            mostCommentedAccounts: _mostCommentedAccounts,
+            mostLikedCount: mostLikedList.length,
+            mostLikedAccounts: mostLikedList.isEmpty
+                ? [const AccountAnalysis(username: '---', count: 0)]
+                : mostLikedList,
+            mostCommentedCount: mostCommentedList.length,
+            mostCommentedAccounts: mostCommentedList.isEmpty
+                ? [const AccountAnalysis(username: '---', count: 0)]
+                : mostCommentedList,
           ),
 
           const SizedBox(height: 24),
 
-          // Paylaşım Analizleri
+          // Paylaşım Analizleri (ZIP'de yok - placeholder)
           SharingAnalysisCard(
-            receivedFromAccounts: _receivedFromAccounts,
-            sentToAccounts: _sentToAccounts,
+            receivedFromAccounts: _receivedFromAccounts.isEmpty
+                ? [const SharingAnalysis(username: '---', shareCount: 0)]
+                : _receivedFromAccounts,
+            sentToAccounts: _sentToAccounts.isEmpty
+                ? [const SharingAnalysis(username: '---', shareCount: 0)]
+                : _sentToAccounts,
           ),
 
           const SizedBox(height: 24),
 
-          // Direkt Mesajlar
+          // Direkt Mesajlar (ZIP'de yok - placeholder)
           DirectMessagesCard(
             totalChats: _totalChats,
             totalMessages: _totalMessages,
             sentMessages: _sentMessages,
             receivedMessages: _receivedMessages,
-            mostMessaged: _mostMessaged,
-            mostMessagedBy: _mostMessagedBy,
+            mostMessaged: _mostMessaged.isEmpty
+                ? [const MessageAnalysis(username: '---', messageCount: 0)]
+                : _mostMessaged,
+            mostMessagedBy: _mostMessagedBy.isEmpty
+                ? [const MessageAnalysis(username: '---', messageCount: 0)]
+                : _mostMessagedBy,
           ),
 
           const SizedBox(height: 24),
 
           // Aktivite Zaman Çizelgesi Başlığı
           Text(
-            'Aktivite Zaman Çizelgesi',
+            l10n.get('activity_timeline'),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -551,40 +686,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           // Beğeni Aktivitesi Grafiği
           ActivityTimelineCard(
-            title: 'Beğeni Aktivitesi',
-            subtitle: 'Son 90 gün',
-            dataPoints: _likeActivityData,
+            title: l10n.get('like_activity'),
+            subtitle: l10n.get('last_90_days'),
+            dataPoints: _likeActivityData.isEmpty
+                ? const [ActivityDataPoint(label: '---', value: 0)]
+                : _likeActivityData,
             lineColor: const Color(0xFFFF6B9D),
-            hasData: true,
+            hasData: hasData && dataProvider.totalLikesCount > 0,
           ),
 
           const SizedBox(height: 16),
 
           // Yorum Aktivitesi Grafiği
           ActivityTimelineCard(
-            title: 'Yorum Aktivitesi',
-            subtitle: 'Son 90 gün',
+            title: l10n.get('comment_activity'),
+            subtitle: l10n.get('last_90_days'),
             dataPoints: const [],
             lineColor: const Color(0xFF4ECDC4),
-            hasData: false,
+            hasData: hasData && dataProvider.totalCommentsCount > 0,
           ),
 
           const SizedBox(height: 24),
 
           // İlgi Alanları (Detaylı)
           InterestsDetailCard(
-            totalInterests: 47,
-            categories: _interestCategories,
+            totalInterests: _interestCategories.isEmpty
+                ? 0
+                : _interestCategories.fold(0, (sum, cat) => sum + cat.count),
+            categories: _interestCategories.isEmpty
+                ? [
+                    const InterestCategory(
+                      name: '---',
+                      count: 0,
+                      subcategories: [],
+                    ),
+                  ]
+                : _interestCategories,
           ),
 
           const SizedBox(height: 24),
 
           // Kayıtlı İçerikler (Detaylı)
           SavedContentDetailCard(
-            totalSavedContent: 60,
-            accounts: _savedContentAccounts,
-            storyLikesCount: 60,
-            storyLikesAccounts: _savedContentAccounts.take(5).toList(),
+            totalSavedContent: savedAccountsList.length,
+            accounts: savedAccountsList.isEmpty
+                ? [const SavedContentAccount(username: '---')]
+                : savedAccountsList,
+            storyLikesCount: 0,
+            storyLikesAccounts: const [],
           ),
 
           const SizedBox(height: 100), // Bottom nav için boşluk

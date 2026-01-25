@@ -141,6 +141,10 @@ class AppLocalizations {
     'since_yesterday': 'Dünden beri',
     'this_week': 'bu hafta',
     'urgent': 'ACİL',
+    'activity_timeline': 'Aktivite Zaman Çizelgesi',
+    'like_activity': 'Beğeni Aktivitesi',
+    'comment_activity': 'Yorum Aktivitesi',
+    'last_90_days': 'Son 90 gün',
 
     // Aktivite saati lakapları
     'early_bird': '🌅 Erken Kalkan Kuş',
@@ -345,6 +349,10 @@ class AppLocalizations {
     'since_yesterday': 'Since yesterday',
     'this_week': 'this week',
     'urgent': 'URGENT',
+    'activity_timeline': 'Activity Timeline',
+    'like_activity': 'Like Activity',
+    'comment_activity': 'Comment Activity',
+    'last_90_days': 'Last 90 days',
 
     // Activity hour nicknames
     'early_bird': '🌅 Early Bird',
