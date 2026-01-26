@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
 
@@ -7,6 +8,7 @@ import 'package:socialsense/core/localization/app_localizations.dart';
 class AppSettingsProvider extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
   static const String _languageKey = 'language_code';
+  static const String _firstLaunchKey = 'first_launch_done';
 
   ThemeMode _themeMode = ThemeMode.dark;
   AppLanguage _language = AppLanguage.turkish;
@@ -25,10 +27,30 @@ class AppSettingsProvider extends ChangeNotifier {
     final themeIndex = prefs.getInt(_themeKey) ?? 1; // Varsayılan: dark
     _themeMode = themeIndex == 0 ? ThemeMode.light : ThemeMode.dark;
 
-    // Dil yükle
-    final langCode =
-        prefs.getString(_languageKey) ?? 'tr'; // Varsayılan: Türkçe
-    _language = langCode == 'en' ? AppLanguage.english : AppLanguage.turkish;
+    // Dil yükle - ilk sefer ise telefonun dilini kullan
+    final isFirstLaunch = prefs.getBool(_firstLaunchKey) ?? true;
+
+    if (isFirstLaunch) {
+      // Telefonun dilini algıla
+      final systemLocale = ui.PlatformDispatcher.instance.locale;
+      final systemLangCode = systemLocale.languageCode;
+
+      // Desteklenen dillerde mi kontrol et
+      if (systemLangCode == 'en') {
+        _language = AppLanguage.english;
+      } else {
+        // Türkçe veya desteklenmeyen diller için Türkçe
+        _language = AppLanguage.turkish;
+      }
+
+      // İlk açılış yapıldı olarak işaretle
+      await prefs.setBool(_firstLaunchKey, true);
+      await prefs.setString(_languageKey, _language.code);
+    } else {
+      // Daha önce kaydedilmiş dili kullan
+      final langCode = prefs.getString(_languageKey) ?? 'tr';
+      _language = langCode == 'en' ? AppLanguage.english : AppLanguage.turkish;
+    }
 
     notifyListeners();
   }

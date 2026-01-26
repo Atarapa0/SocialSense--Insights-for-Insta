@@ -183,8 +183,15 @@ class _LineChartPainter extends CustomPainter {
     final points = <Offset>[];
 
     for (int i = 0; i < dataPoints.length; i++) {
-      final x = size.width * i / (dataPoints.length - 1);
-      final normalizedValue = (dataPoints[i].value - minValue) / range;
+      final x = dataPoints.length > 1
+          ? size.width * i / (dataPoints.length - 1)
+          : size.width / 2; // Tek nokta varsa ortala
+
+      final range = maxValue - minValue;
+      final normalizedValue = range == 0
+          ? 0.5
+          : (dataPoints[i].value - minValue) / range;
+
       final y = size.height - (normalizedValue * size.height);
       points.add(Offset(x, y));
     }

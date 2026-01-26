@@ -199,7 +199,7 @@ class _UploadScreenState extends State<UploadScreen> {
     bool isDark,
   ) {
     return GestureDetector(
-      onTap: _isLoading ? null : () => _selectFile(context, l10n),
+      onTap: _isLoading ? null : _selectFile,
       child: SizedBox(
         width: 200,
         height: 200,
@@ -313,7 +313,7 @@ class _UploadScreenState extends State<UploadScreen> {
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: _isLoading ? null : () => _selectFile(context, l10n),
+        onPressed: _isLoading ? null : _selectFile,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.darkPrimary,
           foregroundColor: Colors.white,
@@ -351,7 +351,9 @@ class _UploadScreenState extends State<UploadScreen> {
     );
   }
 
-  Future<void> _selectFile(BuildContext context, AppLocalizations l10n) async {
+  Future<void> _selectFile() async {
+    final l10n = AppLocalizations.of(context);
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -373,11 +375,13 @@ class _UploadScreenState extends State<UploadScreen> {
       }
 
       final file = result.files.first;
+
       setState(() {
         _selectedFileName = file.name;
       });
 
       // Provider'ı al
+      if (!mounted) return;
       final dataProvider = Provider.of<InstagramDataProvider>(
         context,
         listen: false,
@@ -386,14 +390,14 @@ class _UploadScreenState extends State<UploadScreen> {
       bool success = false;
 
       if (kIsWeb) {
-        // Web: bytes ile yükle
+        // Web: Bytes kullan
         if (file.bytes != null) {
           success = await dataProvider.loadFromBytes(file.bytes!);
         } else {
-          throw Exception('Dosya okunamadı');
+          throw Exception('Dosya içeriği okunamadı');
         }
       } else {
-        // Mobile/Desktop: Dosya yolu ile yükle
+        // Mobil/Desktop: Dosya yolu kullan
         if (file.path != null) {
           success = await dataProvider.loadFromZipFile(File(file.path!));
         } else {
@@ -410,15 +414,25 @@ class _UploadScreenState extends State<UploadScreen> {
           );
         }
       } else {
-        // Hata
+        // Hata (Provider'dan gelen hata mesajını kullan veya varsayılan)
         setState(() {
           _errorMessage = dataProvider.error ?? l10n.get('error_invalid_file');
           _isLoading = false;
         });
       }
     } catch (e) {
+      String errorMessage;
+
+      if (e.toString().contains('HTML_FORMAT_ERROR')) {
+        errorMessage = l10n.get('error_html_format');
+      } else if (e.toString().contains('INVALID_ZIP_ERROR')) {
+        errorMessage = l10n.get('error_invalid_zip');
+      } else {
+        errorMessage = '${l10n.get('error_generic')}\n\n${e.toString()}';
+      }
+
       setState(() {
-        _errorMessage = 'Hata: ${e.toString()}';
+        _errorMessage = errorMessage;
         _isLoading = false;
       });
     }

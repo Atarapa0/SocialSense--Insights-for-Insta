@@ -93,6 +93,11 @@ class AppLocalizations {
     'local_processing_desc': 'Verileriniz asla cihazınızdan çıkmaz.',
     'supported_formats': 'Desteklenen formatlar: .zip, .rar, .7z',
     'select_file': 'Dosya Seç',
+    'error_html_format':
+        'Instagram verileriniz HTML formatında indirilmiş. Lütfen JSON formatında indirin.',
+    'error_invalid_zip':
+        'Bu ZIP dosyası Instagram verisi içermiyor. Lütfen doğru dosyayı seçin.',
+    'error_generic': 'Bir hata oluştu. Lütfen tekrar deneyin.',
 
     // Dashboard
     'good_morning': 'Günaydın',
@@ -106,9 +111,9 @@ class AppLocalizations {
 
     // İstatistikler
     'high_priority': 'Yüksek Öncelik',
-    'unfollowers': 'Takipten Çıkanlar',
-    'unfollowers_desc': 'Bu hafta %count takipçi kaybettiniz.',
-    'analyze_drop': 'Düşüşü Analiz Et',
+    'unfollowers': 'Seni Geri Takip Etmeyenler',
+    'unfollowers_desc': 'Takip ettiğin %count kişi seni geri takip etmiyor.',
+    'analyze_drop': 'Analiz Et',
     'ghost_followers': 'Hayalet Takipçiler',
     'inactive': 'İNAKTİF',
     'ghosts': 'Hayaletler',
@@ -156,12 +161,13 @@ class AppLocalizations {
     'midnight_explorer': 'Gece Yarısı Kaşifi',
 
     // Analiz sayfası
-    'unfollowers_this_week': 'Bu Hafta Takipten Çıkanlar',
+    'unfollowers_this_week': 'Seni Geri Takip Etmeyen Kişiler',
     'drop_rate': 'Düşüş Oranı',
     'worst_day': 'En Kötü Gün',
     'daily_distribution': 'Günlük Dağılım',
-    'recent_unfollowers': 'Son Takipten Çıkanlar',
+    'recent_unfollowers': 'Geri Takip Etmeyenler',
     'total': 'toplam',
+    'all_time': 'Tüm Zamanlar',
 
     // Güncelleme dialog
     'update_data_title': 'Verileri Güncelle',
@@ -301,6 +307,11 @@ class AppLocalizations {
     'local_processing_desc': 'Your data never leaves this device.',
     'supported_formats': 'Supported formats: .zip, .rar, .7z',
     'select_file': 'Select File',
+    'error_html_format':
+        'Your Instagram data was downloaded in HTML format. Please download in JSON format.',
+    'error_invalid_zip':
+        'This ZIP file does not contain Instagram data. Please select the correct file.',
+    'error_generic': 'An error occurred. Please try again.',
 
     // Dashboard
     'good_morning': 'Good Morning',
@@ -314,9 +325,9 @@ class AppLocalizations {
 
     // Statistics
     'high_priority': 'High Priority',
-    'unfollowers': 'Unfollowers',
-    'unfollowers_desc': 'You lost %count followers this week.',
-    'analyze_drop': 'Analyze Drop',
+    'unfollowers': 'Not Following Back',
+    'unfollowers_desc': '%count people you follow are not following you back.',
+    'analyze_drop': 'Analyze',
     'ghost_followers': 'Ghost Followers',
     'inactive': 'INACTIVE',
     'ghosts': 'Ghosts',
@@ -364,12 +375,13 @@ class AppLocalizations {
     'midnight_explorer': 'Midnight Explorer',
 
     // Analyze page
-    'unfollowers_this_week': 'Unfollowers This Week',
+    'unfollowers_this_week': 'People Not Following You Back',
     'drop_rate': 'Drop Rate',
     'worst_day': 'Worst Day',
     'daily_distribution': 'Daily Distribution',
-    'recent_unfollowers': 'Recent Unfollowers',
+    'recent_unfollowers': 'Not Following Back',
     'total': 'total',
+    'all_time': 'All Time',
 
     // Update dialog
     'update_data_title': 'Update Data',

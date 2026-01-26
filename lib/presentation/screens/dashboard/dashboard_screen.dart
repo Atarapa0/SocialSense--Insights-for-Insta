@@ -186,14 +186,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
-          // Priority Card (Unfollowers) - tıklanabilir
+          // Priority Card - tıklanabilir
           GestureDetector(
             onTap: () => _navigateToAnalyzeDrop(context),
             child: PriorityCard(
               unfollowersCount: unfollowersCount,
               message: unfollowersCount > 0
-                  ? 'You have $unfollowersCount people not following you back.'
-                  : 'No unfollowers detected.',
+                  ? 'Takip ettiğin $unfollowersCount kişi seni geri takip etmiyor.'
+                  : 'Herkes seni geri takip ediyor!',
             ),
           ),
 
@@ -787,7 +787,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Beğeni Aktivitesi Grafiği
           ActivityTimelineCard(
             title: l10n.get('like_activity'),
-            subtitle: l10n.get('last_90_days'),
+            subtitle: l10n.get('all_time'),
             dataPoints: dataProvider.monthlyLikeActivity.isEmpty
                 ? const [ActivityDataPoint(label: '---', value: 0)]
                 : dataProvider.monthlyLikeActivity
@@ -808,7 +808,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           if (dataProvider.totalCommentsCount > 0)
             ActivityTimelineCard(
               title: l10n.get('comment_activity'),
-              subtitle: l10n.get('last_90_days'),
+              subtitle: l10n.get('all_time'),
               dataPoints: const [ActivityDataPoint(label: '---', value: 0)],
               lineColor: const Color(0xFF4ECDC4),
               hasData: hasData && dataProvider.totalCommentsCount > 0,

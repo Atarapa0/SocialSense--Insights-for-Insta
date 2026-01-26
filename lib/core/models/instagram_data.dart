@@ -370,43 +370,61 @@ class InstagramData {
     return counts;
   }
 
-  /// Son 3 aylık beğeni aktivitesi (ay bazında)
+  /// Aylık beğeni aktivitesi (Tüm veriler)
   List<Map<String, dynamic>> get monthlyLikeActivity {
+    if (likes.isEmpty) return [];
+
+    final activityMap = <String, int>{};
+
+    // Tüm beğenileri gez ve ay bazında say
+    for (final like in likes) {
+      final key =
+          '${like.timestamp.year}-${like.timestamp.month.toString().padLeft(2, '0')}';
+      activityMap[key] = (activityMap[key] ?? 0) + 1;
+    }
+
+    // Map'i sıralı listeye dönüştür ve eksik ayları doldur
+    // En eski tarih (veriden gelen)
+    final sortedKeys = activityMap.keys.toList()..sort();
+    if (sortedKeys.isEmpty) return [];
+
+    final firstKeyParts = sortedKeys.first.split('-').map(int.parse).toList();
+    var currentDate = DateTime(firstKeyParts[0], firstKeyParts[1]);
+
+    // Bitiş tarihi (şimdi)
     final now = DateTime.now();
+    final endDate = DateTime(now.year, now.month);
+
     final result = <Map<String, dynamic>>[];
+    final monthNames = [
+      'Oca',
+      'Şub',
+      'Mar',
+      'Nis',
+      'May',
+      'Haz',
+      'Tem',
+      'Ağu',
+      'Eyl',
+      'Eki',
+      'Kas',
+      'Ara',
+    ];
 
-    for (int i = 2; i >= 0; i--) {
-      final targetMonth = DateTime(now.year, now.month - i, 1);
-      final monthEnd = DateTime(targetMonth.year, targetMonth.month + 1, 0);
+    while (currentDate.isBefore(endDate) ||
+        currentDate.isAtSameMomentAs(endDate)) {
+      final key =
+          '${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}';
+      final count = activityMap[key] ?? 0;
 
-      final count = likes
-          .where(
-            (l) =>
-                l.timestamp.isAfter(
-                  targetMonth.subtract(const Duration(days: 1)),
-                ) &&
-                l.timestamp.isBefore(monthEnd.add(const Duration(days: 1))),
-          )
-          .length;
+      // Label formatı: Oca '23
+      final label =
+          '${monthNames[currentDate.month - 1]} \'${currentDate.year.toString().substring(2)}';
 
-      // Ay ismi
-      final monthNames = [
-        'Oca',
-        'Şub',
-        'Mar',
-        'Nis',
-        'May',
-        'Haz',
-        'Tem',
-        'Ağu',
-        'Eyl',
-        'Eki',
-        'Kas',
-        'Ara',
-      ];
-      final monthName = monthNames[targetMonth.month - 1];
+      result.add({'label': label, 'value': count});
 
-      result.add({'label': monthName, 'value': count});
+      // Bir sonraki ay
+      currentDate = DateTime(currentDate.year, currentDate.month + 1);
     }
 
     return result;

@@ -80,10 +80,10 @@ class FollowerDetailsCard extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        // Seni Takip Etmeyenler
+        // Seni Geri Takip Etmeyenler
         _buildFollowerSection(
           context,
-          title: 'Seni Takip Etmeyenler',
+          title: 'Seni Geri Takip\nEtmeyenler',
           count: notFollowingYouCount,
           accounts: notFollowingYou,
           onTap: onNotFollowingYouTap,

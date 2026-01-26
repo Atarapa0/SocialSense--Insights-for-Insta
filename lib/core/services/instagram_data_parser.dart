@@ -39,6 +39,48 @@ class InstagramDataParser {
       }
     }
 
+    // HTML format kontrolü - JSON yerine HTML varsa uyar
+    bool hasHtmlFiles = false;
+    bool hasJsonFiles = false;
+    bool hasInstagramData = false;
+
+    for (final file in archive) {
+      if (!file.isFile) continue;
+      final fileName = file.name.toLowerCase();
+
+      // Mac meta dosyalarını atla
+      if (fileName.contains('__macosx') || fileName.contains('/._')) continue;
+
+      if (fileName.endsWith('.html')) {
+        hasHtmlFiles = true;
+      }
+      if (fileName.endsWith('.json')) {
+        hasJsonFiles = true;
+      }
+      // Instagram verisi olup olmadığını kontrol et
+      if (fileName.contains('followers') ||
+          fileName.contains('following') ||
+          fileName.contains('personal_information') ||
+          fileName.contains('likes') ||
+          fileName.contains('messages')) {
+        hasInstagramData = true;
+      }
+    }
+
+    if (hasHtmlFiles && !hasJsonFiles) {
+      throw FormatException(
+        'HTML_FORMAT_ERROR: Instagram verileriniz HTML formatında indirilmiş. '
+        'Lütfen Instagram ayarlarından verileri JSON formatında indirin.',
+      );
+    }
+
+    if (!hasInstagramData) {
+      throw FormatException(
+        'INVALID_ZIP_ERROR: Bu ZIP dosyası Instagram verisi içermiyor. '
+        'Lütfen Instagram\'dan indirdiğiniz doğru dosyayı seçin.',
+      );
+    }
+
     List<InstagramUser> followers = [];
     List<InstagramUser> following = [];
     List<InstagramLike> likes = [];
@@ -133,9 +175,26 @@ class InstagramDataParser {
                     if (userData != null) {
                       final stringList =
                           userData['string_map_data'] as Map<String, dynamic>?;
-                      if (stringList != null &&
-                          stringList.containsKey('Username')) {
-                        username = stringList['Username']['value'] as String?;
+                      if (stringList != null) {
+                        debugPrint(
+                          'String Map Keys: ${stringList.keys.toList()}',
+                        );
+                        // Username veya Kullanıcı adı ara (Case insensitive)
+                        for (final key in stringList.keys) {
+                          final lowerKey = key.toLowerCase();
+                          if (lowerKey.contains('username') ||
+                              lowerKey.contains('kullanıcı adı') ||
+                              lowerKey.contains('kullanici adi')) {
+                            debugPrint('Username key found: $key');
+
+                            final valObj = stringList[key];
+                            if (valObj is Map && valObj.containsKey('value')) {
+                              username = valObj['value'] as String?;
+                              debugPrint('Username found: $username');
+                              if (username != null) break;
+                            }
+                          }
+                        }
                       }
                     }
                   }
