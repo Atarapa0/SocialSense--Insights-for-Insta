@@ -113,22 +113,25 @@ class _SavedContentDetailCardState extends State<SavedContentDetailCard> {
             (account) => _buildAccountItem(account, isDark),
           ),
 
-          // View All Button
-          if (widget.accounts.length > 5 && !_showAll) ...[
+          // Tümünü Gör / Kapat Butonu
+          if (widget.accounts.length > 5) ...[
             const SizedBox(height: 12),
             InkWell(
               onTap: () {
                 setState(() {
-                  _showAll = true;
+                  _showAll = !_showAll;
                 });
               },
+              borderRadius: BorderRadius.circular(8),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Tümünü Gör (+${widget.accounts.length - 5})',
+                      _showAll
+                          ? 'Daha Az Göster'
+                          : 'Tümünü Gör (+${widget.accounts.length - 5})',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -136,8 +139,10 @@ class _SavedContentDetailCardState extends State<SavedContentDetailCard> {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(
-                      Icons.keyboard_arrow_down,
+                    Icon(
+                      _showAll
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
                       size: 16,
                       color: AppColors.darkAccent,
                     ),

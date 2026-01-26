@@ -93,22 +93,25 @@ class _InterestsDetailCardState extends State<InterestsDetailCard> {
           // Kategoriler Grid
           _buildCategoriesGrid(isDark),
 
-          // Tümünü Gör Butonu
-          if (widget.categories.length > 5 && !_showAll) ...[
+          // Tümünü Gör / Kapat Butonu
+          if (widget.categories.length > 5) ...[
             const SizedBox(height: 16),
             InkWell(
               onTap: () {
                 setState(() {
-                  _showAll = true;
+                  _showAll = !_showAll;
                 });
               },
+              borderRadius: BorderRadius.circular(8),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Tümünü Gör (+${widget.totalInterests - 5})',
+                      _showAll
+                          ? 'Daha Az Göster'
+                          : 'Tümünü Gör (+${widget.totalInterests - 5})',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -116,8 +119,10 @@ class _InterestsDetailCardState extends State<InterestsDetailCard> {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(
-                      Icons.keyboard_arrow_down,
+                    Icon(
+                      _showAll
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
                       size: 16,
                       color: AppColors.darkAccent,
                     ),

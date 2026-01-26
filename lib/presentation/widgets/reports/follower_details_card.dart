@@ -49,30 +49,33 @@ class FollowerDetailsCard extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Karşılıklı Takipler ve Seni Takip Edip Takip Etmediğin
-        Row(
-          children: [
-            Expanded(
-              child: _buildFollowerSection(
-                context,
-                title: 'Karşılıklı Takipler',
-                count: mutualFollowersCount,
-                accounts: mutualFollowers,
-                onTap: onMutualTap,
-                isDark: isDark,
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _buildFollowerSection(
+                  context,
+                  title: 'Karşılıklı\nTakipler',
+                  count: mutualFollowersCount,
+                  accounts: mutualFollowers,
+                  onTap: onMutualTap,
+                  isDark: isDark,
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildFollowerSection(
-                context,
-                title: 'Seni Takip Edip Takip Etmediğin',
-                count: youDontFollowCount,
-                accounts: youDontFollow,
-                onTap: onYouDontFollowTap,
-                isDark: isDark,
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildFollowerSection(
+                  context,
+                  title: 'Geri Takip\nEtmediklerin',
+                  count: youDontFollowCount,
+                  accounts: youDontFollow,
+                  onTap: onYouDontFollowTap,
+                  isDark: isDark,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
 
         const SizedBox(height: 12),
@@ -153,14 +156,28 @@ class FollowerDetailsCard extends StatelessWidget {
               return _buildAccountItem(index + 1, account, isDark);
             }),
 
-            if (accounts.length > 3) ...[
-              const SizedBox(height: 8),
-              Text(
-                '+${accounts.length - 3} hesap daha',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AppColors.darkPrimary,
-                  fontWeight: FontWeight.w500,
+            if (count > 3) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkPrimary.withValues(alpha: 0.1)
+                      : AppColors.lightPrimary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    'Tümü Gör',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? AppColors.darkPrimary
+                          : AppColors.lightPrimary,
+                    ),
+                  ),
                 ),
               ),
             ],

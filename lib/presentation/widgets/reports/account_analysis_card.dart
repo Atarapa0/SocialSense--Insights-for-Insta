@@ -51,34 +51,37 @@ class AccountAnalysisCard extends StatelessWidget {
         const SizedBox(height: 16),
 
         // En Çok Beğendiğin ve En Çok Yorum Yaptığın
-        Row(
-          children: [
-            Expanded(
-              child: _buildAnalysisSection(
-                context,
-                title: 'En Çok Beğendiğin Hesaplar',
-                count: mostLikedCount,
-                accounts: mostLikedAccounts,
-                onTap: onMostLikedTap,
-                isDark: isDark,
-                iconData: Icons.favorite,
-                iconColor: const Color(0xFFFF6B6B),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _buildAnalysisSection(
+                  context,
+                  title: 'En Çok\nBeğendiğin H...',
+                  count: mostLikedCount,
+                  accounts: mostLikedAccounts,
+                  onTap: onMostLikedTap,
+                  isDark: isDark,
+                  iconData: Icons.favorite,
+                  iconColor: const Color(0xFFFF6B6B),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildAnalysisSection(
-                context,
-                title: 'En Çok Yorum Yaptığın Hesaplar',
-                count: mostCommentedCount,
-                accounts: mostCommentedAccounts,
-                onTap: onMostCommentedTap,
-                isDark: isDark,
-                iconData: Icons.chat_bubble,
-                iconColor: const Color(0xFF4ECDC4),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildAnalysisSection(
+                  context,
+                  title: 'En Çok Yorum\nYaptığın Hesa...',
+                  count: mostCommentedCount,
+                  accounts: mostCommentedAccounts,
+                  onTap: onMostCommentedTap,
+                  isDark: isDark,
+                  iconData: Icons.chat_bubble,
+                  iconColor: const Color(0xFF4ECDC4),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -140,19 +143,33 @@ class AccountAnalysisCard extends StatelessWidget {
             ),
             const SizedBox(height: 14),
 
-            // Hesap listesi (ilk 5)
-            ...accounts.take(5).map((account) {
+            // Hesap listesi (ilk 3)
+            ...accounts.take(3).map((account) {
               return _buildAccountItem(account, isDark, iconData, iconColor);
             }),
 
-            if (accounts.length > 5) ...[
-              const SizedBox(height: 8),
-              Text(
-                '+${accounts.length - 5} hesap daha',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AppColors.darkPrimary,
-                  fontWeight: FontWeight.w500,
+            if (count > 3) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkPrimary.withValues(alpha: 0.1)
+                      : AppColors.lightPrimary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    'Tümünü Gör',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? AppColors.darkPrimary
+                          : AppColors.lightPrimary,
+                    ),
+                  ),
                 ),
               ),
             ],

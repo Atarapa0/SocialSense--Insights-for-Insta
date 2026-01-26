@@ -99,28 +99,31 @@ class DirectMessagesCard extends StatelessWidget {
           const SizedBox(height: 20),
 
           // En Çok Yazdığın ve Sana En Çok Yazan
-          Row(
-            children: [
-              Expanded(
-                child: _buildPersonList(
-                  icon: Icons.send,
-                  title: 'En Çok Yazdığın Kişiler',
-                  accounts: mostMessaged,
-                  onTap: onMostMessagedTap,
-                  isDark: isDark,
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _buildPersonList(
+                    icon: Icons.send,
+                    title: 'En Çok\nYazdığın Kişiler',
+                    accounts: mostMessaged,
+                    onTap: onMostMessagedTap,
+                    isDark: isDark,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildPersonList(
-                  icon: Icons.inbox,
-                  title: 'Sana En Çok Yazan Kişiler',
-                  accounts: mostMessagedBy,
-                  onTap: onMostMessagedByTap,
-                  isDark: isDark,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildPersonList(
+                    icon: Icons.inbox,
+                    title: 'Sana En Çok\nYazan Kişiler',
+                    accounts: mostMessagedBy,
+                    onTap: onMostMessagedByTap,
+                    isDark: isDark,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -222,9 +225,36 @@ class DirectMessagesCard extends StatelessWidget {
             const SizedBox(height: 12),
 
             // Kişi listesi
-            ...accounts.take(5).map((account) {
+            ...accounts.take(3).map((account) {
               return _buildPersonItem(account, isDark);
             }),
+
+            // Tümünü Gör Butonu
+            if (accounts.length > 3) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkPrimary.withValues(alpha: 0.1)
+                      : AppColors.lightPrimary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    'Tümünü Gör',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? AppColors.darkPrimary
+                          : AppColors.lightPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
