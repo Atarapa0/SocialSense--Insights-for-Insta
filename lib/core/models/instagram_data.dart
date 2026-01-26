@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 /// Instagram veri modelleri
 /// ZIP dosyasından parse edilen verileri temsil eder
 
@@ -14,9 +16,6 @@ class InstagramUser {
   });
 
   factory InstagramUser.fromJson(Map<String, dynamic> json) {
-    // Yeni Instagram formatı: {title: "username", string_list_data: [{href: ..., timestamp: ...}]}
-    // Eski format: {string_list_data: [{value: "username", href: ..., timestamp: ...}]}
-
     String username = '';
     String? profileUrl;
     DateTime? followDate;
@@ -58,22 +57,20 @@ class InstagramLike {
   final String username;
   final String? mediaUrl;
   final DateTime timestamp;
+  final bool isStory;
 
   const InstagramLike({
     required this.username,
     this.mediaUrl,
     required this.timestamp,
+    this.isStory = false,
   });
 
   factory InstagramLike.fromJson(Map<String, dynamic> json) {
-    // Yeni Instagram formatı: {title: "username", string_list_data: [{href: ..., timestamp: ...}]}
-    // Eski format: {string_list_data: [{value: "username", href: ..., timestamp: ...}]}
-
     String username = '';
     DateTime timestamp = DateTime.now();
     String? href;
 
-    // Önce 'title' alanını kontrol et (yeni format)
     if (json.containsKey('title') && json['title'] != null) {
       username = json['title'] as String;
     }
@@ -82,7 +79,6 @@ class InstagramLike {
     if (stringListData != null && stringListData.isNotEmpty) {
       final data = stringListData[0] as Map<String, dynamic>;
 
-      // Eğer username hala boşsa, value'dan al (eski format)
       if (username.isEmpty && data['value'] != null) {
         username = data['value'] as String;
       }
@@ -100,6 +96,10 @@ class InstagramLike {
       username: username,
       mediaUrl: href,
       timestamp: timestamp,
+      isStory:
+          href?.contains('/s/') == true ||
+          href?.contains('story') == true ||
+          (json['title'] as String?)?.toLowerCase().contains('story') == true,
     );
   }
 }
@@ -117,12 +117,10 @@ class InstagramComment {
   });
 
   factory InstagramComment.fromJson(Map<String, dynamic> json) {
-    // Yeni Instagram formatı: {title: "username", string_list_data: [{href: ..., timestamp: ...}]}
     String username = '';
     String? comment;
     DateTime timestamp = DateTime.now();
 
-    // Önce 'title' alanını kontrol et (yeni format - username burada)
     if (json.containsKey('title') && json['title'] != null) {
       username = json['title'] as String;
     }
@@ -131,7 +129,6 @@ class InstagramComment {
     if (stringListData != null && stringListData.isNotEmpty) {
       final data = stringListData[0] as Map<String, dynamic>;
 
-      // Eğer username hala boşsa, value'dan al (eski format)
       if (username.isEmpty && data['value'] != null) {
         username = data['value'] as String;
       }
@@ -143,7 +140,6 @@ class InstagramComment {
       }
     }
 
-    // Yorum metni ayrı bir alanda olabilir
     comment = json['comment'] as String? ?? json['text'] as String?;
 
     return InstagramComment(
@@ -166,13 +162,11 @@ class InstagramMessage {
     this.lastMessageDate,
   });
 
-  /// Mesaj klasöründen parse et
   factory InstagramMessage.fromFolder(
     String folderName,
     int msgCount,
     DateTime? lastDate,
   ) {
-    // Klasör adından kullanıcı adını çıkar: "username_1234567890" -> "username"
     String username = folderName;
     final underscoreIndex = folderName.lastIndexOf('_');
     if (underscoreIndex > 0) {
@@ -208,12 +202,10 @@ class InstagramSavedItem {
   });
 
   factory InstagramSavedItem.fromJson(Map<String, dynamic> json) {
-    // Yeni Instagram formatı: {title: "username", string_list_data: [{href: ..., timestamp: ...}]}
     String username = '';
     String? href;
     DateTime? savedDate;
 
-    // Önce 'title' alanını kontrol et (yeni format)
     if (json.containsKey('title') && json['title'] != null) {
       username = json['title'] as String;
     }
@@ -222,7 +214,6 @@ class InstagramSavedItem {
     if (stringListData != null && stringListData.isNotEmpty) {
       final data = stringListData[0] as Map<String, dynamic>;
 
-      // Eğer username hala boşsa, value'dan al (eski format)
       if (username.isEmpty && data['value'] != null) {
         username = data['value'] as String;
       }
@@ -245,9 +236,8 @@ class InstagramSavedItem {
 }
 
 /// Ana Instagram veri modeli
-/// Tüm parse edilen verileri içerir
 class InstagramData {
-  final String? username; // Kullanıcı adı
+  final String? username;
   final List<InstagramUser> followers;
   final List<InstagramUser> following;
   final List<InstagramLike> likes;
@@ -255,8 +245,13 @@ class InstagramData {
   final List<InstagramSavedItem> savedItems;
   final List<InstagramInterest> interests;
   final List<InstagramMessage> messages;
+  final List<String> closeFriends;
+  final List<InstagramLike> storyLikes;
   final DateTime? dataExportDate;
   final DateTime loadedAt;
+  final Map<String, int> topReelsSent;
+  final Map<String, int> topReelsReceived;
+  final String? fullName;
 
   InstagramData({
     this.username,
@@ -267,11 +262,15 @@ class InstagramData {
     required this.savedItems,
     required this.interests,
     this.messages = const [],
+    this.closeFriends = const [],
+    this.storyLikes = const [],
+    this.topReelsSent = const {},
+    this.topReelsReceived = const {},
+    this.fullName,
     this.dataExportDate,
     DateTime? loadedAt,
   }) : loadedAt = loadedAt ?? DateTime.now();
 
-  /// Boş veri
   factory InstagramData.empty() {
     return InstagramData(
       username: null,
@@ -282,13 +281,18 @@ class InstagramData {
       savedItems: [],
       interests: [],
       messages: [],
+      closeFriends: [],
+      storyLikes: [],
+      topReelsSent: {},
+      topReelsReceived: {},
+      fullName: null,
     );
   }
 
-  /// Veri var mı kontrolü
   bool get hasData => followers.isNotEmpty || following.isNotEmpty;
 
-  /// Karşılıklı takipleşenler
+  // --- Analiz Getterları ---
+
   List<String> get mutualFollowers {
     final followerUsernames = followers
         .map((f) => f.username.toLowerCase())
@@ -299,7 +303,6 @@ class InstagramData {
     return followerUsernames.intersection(followingUsernames).toList();
   }
 
-  /// Sizi takip etmeyenler (siz takip ediyorsunuz ama onlar etmiyor)
   List<String> get notFollowingBack {
     final followerUsernames = followers
         .map((f) => f.username.toLowerCase())
@@ -310,7 +313,6 @@ class InstagramData {
         .toList();
   }
 
-  /// Sizin takip etmedikleriniz (onlar takip ediyor ama siz etmiyorsunuz)
   List<String> get youDontFollow {
     final followingUsernames = following
         .map((f) => f.username.toLowerCase())
@@ -321,7 +323,6 @@ class InstagramData {
         .toList();
   }
 
-  /// En çok beğenilen hesaplar
   Map<String, int> get topLikedAccounts {
     final counts = <String, int>{};
     for (final like in likes) {
@@ -332,7 +333,6 @@ class InstagramData {
     return Map.fromEntries(sorted.take(10));
   }
 
-  /// En çok yorum yapılan hesaplar
   Map<String, int> get topCommentedAccounts {
     final counts = <String, int>{};
     for (final comment in comments) {
@@ -343,7 +343,28 @@ class InstagramData {
     return Map.fromEntries(sorted.take(10));
   }
 
-  /// Saatlik aktivite dağılımı (beğeniler)
+  Map<String, int> get topSavedAccounts {
+    final counts = <String, int>{};
+    for (final item in savedItems) {
+      counts[item.username] = (counts[item.username] ?? 0) + 1;
+    }
+    final sorted = counts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    return Map.fromEntries(sorted.take(10));
+  }
+
+  List<InstagramMessage> get topMessagedUsers {
+    final sorted = List<InstagramMessage>.from(messages)
+      ..sort((a, b) => b.messageCount.compareTo(a.messageCount));
+    return sorted.take(10).toList();
+  }
+
+  int get totalMessageCount {
+    return messages.fold(0, (sum, msg) => sum + msg.messageCount);
+  }
+
+  int get totalConversationCount => messages.length;
+
   Map<int, int> get hourlyLikeActivity {
     final counts = <int, int>{};
     for (final like in likes) {
@@ -353,14 +374,12 @@ class InstagramData {
     return counts;
   }
 
-  /// En aktif saat
   int get mostActiveHour {
     final hourly = hourlyLikeActivity;
     if (hourly.isEmpty) return 12;
     return hourly.entries.reduce((a, b) => a.value > b.value ? a : b).key;
   }
 
-  /// Günlük aktivite dağılımı
   Map<int, int> get weekdayActivity {
     final counts = <int, int>{};
     for (final like in likes) {
@@ -370,28 +389,19 @@ class InstagramData {
     return counts;
   }
 
-  /// Aylık beğeni aktivitesi (Tüm veriler)
   List<Map<String, dynamic>> get monthlyLikeActivity {
     if (likes.isEmpty) return [];
-
     final activityMap = <String, int>{};
-
-    // Tüm beğenileri gez ve ay bazında say
     for (final like in likes) {
       final key =
           '${like.timestamp.year}-${like.timestamp.month.toString().padLeft(2, '0')}';
       activityMap[key] = (activityMap[key] ?? 0) + 1;
     }
-
-    // Map'i sıralı listeye dönüştür ve eksik ayları doldur
-    // En eski tarih (veriden gelen)
     final sortedKeys = activityMap.keys.toList()..sort();
     if (sortedKeys.isEmpty) return [];
 
     final firstKeyParts = sortedKeys.first.split('-').map(int.parse).toList();
     var currentDate = DateTime(firstKeyParts[0], firstKeyParts[1]);
-
-    // Bitiş tarihi (şimdi)
     final now = DateTime.now();
     final endDate = DateTime(now.year, now.month);
 
@@ -416,24 +426,16 @@ class InstagramData {
       final key =
           '${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}';
       final count = activityMap[key] ?? 0;
-
-      // Label formatı: Oca '23
       final label =
           '${monthNames[currentDate.month - 1]} \'${currentDate.year.toString().substring(2)}';
-
       result.add({'label': label, 'value': count});
-
-      // Bir sonraki ay
       currentDate = DateTime(currentDate.year, currentDate.month + 1);
     }
-
     return result;
   }
 
-  /// Engagement rate tahmini (basit hesaplama)
   double get estimatedEngagementRate {
     if (followers.isEmpty) return 0.0;
-    // Son 30 günlük aktivite / takipçi sayısı
     final recentLikes = likes
         .where(
           (l) => l.timestamp.isAfter(
@@ -444,8 +446,7 @@ class InstagramData {
     return (recentLikes / followers.length) * 100;
   }
 
-  /// Ghost follower tahmini (son 90 gün etkileşim olmayanlar)
-  int get estimatedGhostFollowers {
+  List<String> get ghostFollowersList {
     final activeUsernames = <String>{};
     final cutoffDate = DateTime.now().subtract(const Duration(days: 90));
 
@@ -461,59 +462,232 @@ class InstagramData {
     final followerUsernames = followers
         .map((f) => f.username.toLowerCase())
         .toSet();
-    final ghostCount = followerUsernames.difference(activeUsernames).length;
+    final activeSet = activeUsernames;
 
-    return ghostCount;
-  }
+    // Aktif olmayanları bul
+    final ghosts = followerUsernames.difference(activeSet);
 
-  /// Ghost follower listesi (isimleri döndürür)
-  List<String> get ghostFollowersList {
-    final activeUsernames = <String>{};
-    // Tüm zamanların etkileşimleri
-    for (final like in likes) {
-      activeUsernames.add(like.username.toLowerCase());
-    }
-    for (final comment in comments) {
-      activeUsernames.add(comment.username.toLowerCase());
-    }
-
-    // Mesajlaşanlar da aktif sayılabilir ama şimdilik like/comment yeterli
-
+    // Orijinal kullanıcı adlarını bulmak için followers listesini kullan
     return followers
-        .where((f) => !activeUsernames.contains(f.username.toLowerCase()))
+        .where((f) => ghosts.contains(f.username.toLowerCase()))
         .map((f) => f.username)
         .toList();
   }
 
-  /// Ghost follower yüzdesi
+  int get estimatedGhostFollowers => ghostFollowersList.length;
+
   double get ghostFollowerPercentage {
     if (followers.isEmpty) return 0.0;
     return (estimatedGhostFollowers / followers.length) * 100;
   }
 
-  /// En çok kaydedilen hesaplar
-  Map<String, int> get topSavedAccounts {
+  Map<String, int> get topStoryLikedAccounts {
     final counts = <String, int>{};
-    for (final item in savedItems) {
-      counts[item.username] = (counts[item.username] ?? 0) + 1;
+    for (final like in storyLikes) {
+      if (like.username.isNotEmpty) {
+        counts[like.username] = (counts[like.username] ?? 0) + 1;
+      }
     }
-    final sorted = counts.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    return Map.fromEntries(sorted.take(10));
+    final sortedKeys = counts.keys.toList()
+      ..sort((a, b) => counts[b]!.compareTo(counts[a]!));
+
+    return Map.fromEntries(
+      sortedKeys.take(20).map((k) => MapEntry(k, counts[k]!)),
+    );
   }
 
-  /// En çok mesajlaşılan kişiler (sıralı)
-  List<InstagramMessage> get topMessagedUsers {
-    final sorted = List<InstagramMessage>.from(messages)
-      ..sort((a, b) => b.messageCount.compareTo(a.messageCount));
-    return sorted.take(10).toList();
+  Map<String, double> get timeDistribution {
+    int morning = 0;
+    int afternoon = 0;
+    int evening = 0;
+    int night = 0;
+
+    int total = likes.length + comments.length;
+    if (total == 0) return {};
+
+    void process(DateTime dt) {
+      final h = dt.hour;
+      if (h >= 6 && h < 12)
+        morning++;
+      else if (h >= 12 && h < 18)
+        afternoon++;
+      else if (h >= 18 && h < 24)
+        evening++;
+      else
+        night++;
+    }
+
+    likes.forEach((l) => process(l.timestamp));
+    comments.forEach((c) => process(c.timestamp));
+
+    return {
+      'morning': (morning / total) * 100,
+      'afternoon': (afternoon / total) * 100,
+      'evening': (evening / total) * 100,
+      'night': (night / total) * 100,
+    };
   }
 
-  /// Toplam mesaj sayısı
-  int get totalMessageCount {
-    return messages.fold(0, (sum, m) => sum + m.messageCount);
+  Map<String, double> get weekDistribution {
+    int weekday = 0;
+    int weekend = 0;
+    int total = likes.length + comments.length;
+    if (total == 0) return {};
+
+    void process(DateTime dt) {
+      final d = dt.weekday;
+      if (d >= 1 && d <= 5)
+        weekday++;
+      else
+        weekend++;
+    }
+
+    likes.forEach((l) => process(l.timestamp));
+    comments.forEach((c) => process(c.timestamp));
+
+    return {
+      'weekday': (weekday / total) * 100,
+      'weekend': (weekend / total) * 100,
+    };
   }
 
-  /// Toplam konuşma sayısı
-  int get totalConversationCount => messages.length;
+  Map<String, List<String>> get categorizedInterests {
+    final categories = <String, List<String>>{
+      'Spor': [],
+      'Yemek & İçecek': [],
+      'Oyun & Teknoloji': [],
+      'Moda & Güzellik': [],
+      'Hayvanlar': [],
+      'Sanat & Eğlence': [],
+      'Seyahat': [],
+      'Diğer': [],
+    };
+
+    final keywords = {
+      'Spor': [
+        'sport',
+        'football',
+        'soccer',
+        'basketball',
+        'tennis',
+        'fitness',
+        'gym',
+        'athlete',
+        'motor',
+        'racing',
+      ],
+      'Yemek & İçecek': [
+        'food',
+        'drink',
+        'cooking',
+        'recipe',
+        'kitchen',
+        'restaurant',
+        'coffee',
+        'tea',
+        'chocolate',
+        'cake',
+        'beverage',
+        'meal',
+        'dish',
+      ],
+      'Oyun & Teknoloji': [
+        'game',
+        'gaming',
+        'video game',
+        'console',
+        'tech',
+        'computer',
+        'software',
+        'app',
+        'mobile',
+        'internet',
+        'cyber',
+        'robot',
+        'ai',
+        'gadget',
+      ],
+      'Moda & Güzellik': [
+        'fashion',
+        'beauty',
+        'makeup',
+        'style',
+        'clothing',
+        'shoes',
+        'dress',
+        'accessories',
+        'hair',
+        'skin',
+        'cosmetic',
+      ],
+      'Hayvanlar': [
+        'animal',
+        'pet',
+        'dog',
+        'cat',
+        'bird',
+        'fish',
+        'wildlife',
+        'nature',
+        'zoo',
+        'veterinary',
+      ],
+      'Sanat & Eğlence': [
+        'art',
+        'music',
+        'movie',
+        'film',
+        'cinema',
+        'tv',
+        'show',
+        'entertainment',
+        'concert',
+        'festival',
+        'dance',
+        'book',
+        'literature',
+        'design',
+        'drawing',
+      ],
+      'Seyahat': [
+        'travel',
+        'trip',
+        'holiday',
+        'vacation',
+        'tourism',
+        'hotel',
+        'flight',
+        'airline',
+        'destination',
+        'beach',
+        'mountain',
+        'camping',
+      ],
+    };
+
+    for (final interest in interests) {
+      for (final item in interest.items) {
+        bool categorized = false;
+        final lowerItem = item.toLowerCase();
+
+        for (final entry in keywords.entries) {
+          if (entry.value.any((k) => lowerItem.contains(k))) {
+            if (!categories[entry.key]!.contains(item)) {
+              categories[entry.key]!.add(item);
+            }
+            categorized = true;
+            break;
+          }
+        }
+
+        if (!categorized) {
+          if (!categories['Diğer']!.contains(item)) {
+            categories['Diğer']!.add(item);
+          }
+        }
+      }
+    }
+
+    return Map.fromEntries(categories.entries.where((e) => e.value.isNotEmpty));
+  }
 }

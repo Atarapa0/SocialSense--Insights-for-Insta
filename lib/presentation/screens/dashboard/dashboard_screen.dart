@@ -20,7 +20,10 @@ import 'package:socialsense/presentation/widgets/reports/account_analysis_card.d
 import 'package:socialsense/presentation/widgets/reports/direct_messages_card.dart';
 
 import 'package:socialsense/presentation/widgets/reports/activity_timeline_card.dart';
-import 'package:socialsense/presentation/widgets/reports/interests_detail_card.dart';
+import 'package:socialsense/presentation/widgets/reports/time_distribution_card.dart';
+import 'package:socialsense/presentation/widgets/reports/interests_distribution_card.dart';
+import 'package:socialsense/presentation/widgets/reports/story_likes_card.dart';
+import 'package:socialsense/presentation/widgets/reports/close_friends_card.dart';
 import 'package:socialsense/presentation/widgets/reports/saved_content_detail_card.dart';
 import 'package:socialsense/presentation/widgets/alerts/alert_card.dart';
 import 'package:socialsense/presentation/widgets/settings/settings_tile.dart';
@@ -372,14 +375,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 16),
 
-          // Stats Row (Engagement + Reach)
+          // İstatistikler (Karşılıklı, Geri Takip Etmiyor, vb.)
           StatsRow(
-            engagementRate: hasData ? engagementRate : 0,
-            engagementChange: 0,
-            totalReach: hasData
-                ? (followersCount + totalLikes + totalComments)
+            mutualCount: hasData ? dataProvider.mutualFollowers.length : 0,
+            notFollowingBackCount: hasData
+                ? dataProvider.notFollowingBack.length
                 : 0,
-            reachChange: 0,
+            // Topic sayısını alıyoruz (her interest objesi topicleri subcategory olarak tutabilir veya tek tek)
+            interestsCount: hasData
+                ? dataProvider.categorizedInterests.values.fold(
+                    0,
+                    (sum, list) => sum + list.length,
+                  )
+                : 0,
+            savedCount: hasData ? dataProvider.savedItems.length : 0,
+            onTap: () {
+              setState(() => _currentNavIndex = 1);
+            },
           ),
 
           const SizedBox(height: 100), // Bottom nav için boşluk
@@ -816,27 +828,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 24),
 
-          // İlgi Alanları (Detaylı)
-          InterestsDetailCard(
-            totalInterests: dataProvider.interests.length,
-            categories: dataProvider.interests.isEmpty
-                ? [
-                    const InterestCategory(
-                      name: '---',
-                      count: 0,
-                      subcategories: [],
-                    ),
-                  ]
-                : dataProvider.interests
-                      .map(
-                        (i) => InterestCategory(
-                          name: i.category,
-                          count: 1,
-                          subcategories: i.items,
-                        ),
-                      )
-                      .toList(),
-          ),
+          const SizedBox(height: 24),
+
+          // Zaman Dağılımı
+          if (hasData)
+            TimeDistributionCard(
+              timeData: dataProvider.timeDistribution,
+              weekData: dataProvider.weekDistribution,
+            ),
+
+          const SizedBox(height: 24),
+
+          // İlgi Alanları (Kategorili)
+          if (hasData)
+            InterestsDistributionCard(
+              interests: dataProvider.categorizedInterests,
+            ),
+
+          const SizedBox(height: 24),
+
+          // Hikaye Beğenileri
+          if (hasData)
+            StoryLikesCard(storyLikes: dataProvider.topStoryLikedAccounts),
+
+          const SizedBox(height: 24),
+
+          // Yakın Arkadaşlar
+          if (hasData)
+            CloseFriendsCard(closeFriends: dataProvider.closeFriends),
 
           const SizedBox(height: 24),
 

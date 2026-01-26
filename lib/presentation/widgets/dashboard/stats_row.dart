@@ -1,146 +1,150 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
-import 'package:socialsense/core/localization/app_localizations.dart';
 
-/// Stats Row (Engagement Rate + Total Reach)
-/// İki küçük istatistik kartı yan yana
+/// Stats Row (Karşılıklı, Geri Takip Etmiyor, İlgi Alanı, Kayıtlı İçerik)
+/// 2x2 Grid şeklinde istatistik kartları
 class StatsRow extends StatelessWidget {
-  final double engagementRate;
-  final double engagementChange;
-  final int totalReach;
-  final int reachChange;
+  final int mutualCount;
+  final int notFollowingBackCount;
+  final int interestsCount;
+  final int savedCount;
+  final VoidCallback onTap;
 
   const StatsRow({
     super.key,
-    required this.engagementRate,
-    required this.engagementChange,
-    required this.totalReach,
-    required this.reachChange,
+    required this.mutualCount,
+    required this.notFollowingBackCount,
+    required this.interestsCount,
+    required this.savedCount,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Row(
-      children: [
-        // Engagement Rate
-        Expanded(
-          child: _buildStatCard(
-            icon: Icons.thumb_up_outlined,
-            iconColor: AppColors.darkPrimary,
-            label: l10n.get('engagement_rate'),
-            value: '${engagementRate.toStringAsFixed(1)}%',
-            change: '+${engagementChange.toStringAsFixed(1)}%',
-            isPositive: engagementChange > 0,
-            isDark: isDark,
-          ),
-        ),
-
-        const SizedBox(width: 12),
-
-        // Total Reach
-        Expanded(
-          child: _buildStatCard(
-            icon: Icons.people_outline,
-            iconColor: AppColors.darkAccentOrange,
-            label: l10n.get('total_reach'),
-            value: _formatNumber(totalReach),
-            change: '+${_formatNumber(reachChange)}',
-            isPositive: reachChange > 0,
-            isDark: isDark,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard({
-    required IconData icon,
-    required Color iconColor,
-    required String label,
-    required String value,
-    required String change,
-    required bool isPositive,
-    required bool isDark,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : AppColors.lightCard,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: onTap,
+      child: GridView.count(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 2.2, // Daha yatay kartlar (Görseldeki gibi)
         children: [
-          // İkon
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: iconColor, size: 20),
+          _buildStatCard(
+            context,
+            'Karşılıklı',
+            mutualCount,
+            Icons.people_outline,
+            const Color(0xFF00C853), // Yeşil
+            isDark,
           ),
-
-          const SizedBox(height: 12),
-
-          // Label
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
-            ),
+          _buildStatCard(
+            context,
+            'Geri Takip Etmiyor',
+            notFollowingBackCount,
+            Icons.person_off_outlined,
+            const Color(0xFFFF9100), // Turuncu
+            isDark,
           ),
-
-          const SizedBox(height: 4),
-
-          // Value ve Change
-          Row(
-            children: [
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.lightTextPrimary,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                change,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: isPositive
-                      ? AppColors.darkSuccess
-                      : AppColors.darkAccent,
-                ),
-              ),
-            ],
+          _buildStatCard(
+            context,
+            'İlgi Alanı',
+            interestsCount,
+            Icons.auto_awesome_outlined,
+            const Color(0xFFFFD600), // Sarı
+            isDark,
+          ),
+          _buildStatCard(
+            context,
+            'Kayıtlı İçerik',
+            savedCount,
+            Icons.bookmark_border,
+            const Color(0xFF00B8D4), // Cyan
+            isDark,
           ),
         ],
       ),
     );
   }
 
-  /// Sayı formatı (1000 -> 1k, 1000000 -> 1M)
+  Widget _buildStatCard(
+    BuildContext context,
+    String label,
+    int value,
+    IconData icon,
+    Color color,
+    bool isDark,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.lightCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: Colors.white, size: 16),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _formatNumber(value),
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.lightTextPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _formatNumber(int number) {
-    if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}k';
-    }
-    return number.toString();
+    // Binlik ayırıcı olarak nokta kullan (Örn: 18.343)
+    return number.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]}.',
+    );
   }
 }

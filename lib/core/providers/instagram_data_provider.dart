@@ -190,4 +190,24 @@ class InstagramDataProvider extends ChangeNotifier {
 
   /// İlgi alanları
   List<InstagramInterest> get interests => _data?.interests ?? [];
+
+  /// Zaman dağılımı
+  Map<String, double> get timeDistribution => _data?.timeDistribution ?? {};
+
+  /// Haftalık dağılım (Weekday vs Weekend)
+  Map<String, double> get weekDistribution => _data?.weekDistribution ?? {};
+
+  /// Kategorize edilmiş ilgi alanları
+  Map<String, List<String>> get categorizedInterests =>
+      _data?.categorizedInterests ?? {};
+
+  /// Hikaye beğenileri
+  Map<String, int> get topStoryLikedAccounts =>
+      _data?.topStoryLikedAccounts ?? {};
+
+  /// Yakın arkadaşlar
+  List<String> get closeFriends => _data?.closeFriends ?? [];
+
+  /// Kayıtlı gönderiler listesi
+  List<InstagramSavedItem> get savedItems => _data?.savedItems ?? [];
 }

@@ -87,6 +87,8 @@ class InstagramDataParser {
     List<InstagramComment> comments = [];
     List<InstagramSavedItem> savedItems = [];
     List<InstagramInterest> interests = [];
+    List<String> closeFriends = [];
+    List<InstagramLike> storyLikes = [];
     String? username;
 
     // Mesajlar için: klasör adı -> mesaj sayısı
@@ -154,6 +156,21 @@ class InstagramDataParser {
           final content = utf8.decode(file.content as List<int>);
           interests = _parseInterests(content);
         }
+        // Hikaye Beğenileri
+        else if ((baseName.contains('story_likes') ||
+                (baseName.contains('likes') && baseName.contains('story'))) &&
+            baseName.endsWith('.json')) {
+          final content = utf8.decode(file.content as List<int>);
+          storyLikes = _parseStoryLikes(content);
+          debugPrint('✅ Story Likes bulundu: ${storyLikes.length} beğeni');
+        }
+        // Yakın Arkadaşlar
+        else if (baseName.contains('close_friends') &&
+            baseName.endsWith('.json')) {
+          final content = utf8.decode(file.content as List<int>);
+          closeFriends = _parseCloseFriends(content);
+          debugPrint('✅ Close Friends bulundu: ${closeFriends.length} kişi');
+        }
         // Profil bilgisi (daha genel arama)
         else if (username == null &&
             (baseName.contains('personal') ||
@@ -213,6 +230,18 @@ class InstagramDataParser {
                     final uData = uList[0] as Map<String, dynamic>?;
                     if (uData != null) {
                       username = uData['username'] as String?;
+                    }
+                  }
+                }
+
+                // 4. Genel tarama (Fallback)
+                if (username == null) {
+                  for (final key in profileData.keys) {
+                    final k = key.toString().toLowerCase();
+                    if ((k == 'username' || k.contains('user_name')) &&
+                        profileData[key] is String) {
+                      username = profileData[key] as String;
+                      break;
                     }
                   }
                 }
@@ -279,6 +308,8 @@ class InstagramDataParser {
       savedItems: savedItems,
       interests: interests,
       messages: messages,
+      closeFriends: closeFriends,
+      storyLikes: storyLikes,
       dataExportDate: DateTime.now(),
     );
   }
@@ -484,41 +515,105 @@ class InstagramDataParser {
     try {
       final data = json.decode(jsonContent);
 
-      if (data is Map && data.containsKey('topics_your_topics')) {
-        final topics = data['topics_your_topics'] as List;
-        return topics.map((item) {
-          // 1. Eski format: string_list_data
-          final stringListData = item['string_list_data'] as List?;
-          if (stringListData != null && stringListData.isNotEmpty) {
-            return InstagramInterest(
-              category: stringListData[0]['value'] ?? 'Unknown',
-              items: [],
-            );
-          }
+      List<String> topicsList = [];
 
-          // 2. Yeni format: string_map_data -> Ad/Name -> value
-          final stringMapData =
-              item['string_map_data'] as Map<String, dynamic>?;
-          if (stringMapData != null) {
-            // Map içindeki ilk value'yu bulmaya çalışalım
-            for (final key in stringMapData.keys) {
-              final valData = stringMapData[key];
-              if (valData is Map && valData.containsKey('value')) {
-                return InstagramInterest(
-                  category: valData['value'] ?? 'Unknown',
-                  items: [],
-                );
+      if (data is Map) {
+        // topics_your_topics
+        for (final key in data.keys) {
+          if (key.toString().contains('topics') ||
+              key.toString().contains('interests')) {
+            final list = data[key] as List?;
+            if (list != null) {
+              for (final item in list) {
+                // 1. String List Data
+                final stringListData = item['string_list_data'] as List?;
+                if (stringListData != null && stringListData.isNotEmpty) {
+                  final val = stringListData[0]['value'];
+                  if (val != null) topicsList.add(val.toString());
+                }
+                // 2. String Map Data
+                final stringMapData =
+                    item['string_map_data'] as Map<String, dynamic>?;
+                if (stringMapData != null) {
+                  for (final k in stringMapData.keys) {
+                    final valData = stringMapData[k];
+                    if (valData is Map && valData.containsKey('value')) {
+                      topicsList.add(valData['value'].toString());
+                    }
+                  }
+                }
               }
             }
           }
+        }
+      } else if (data is List) {
+        // Liste ise direkt string olabilir veya obje
+        // ...
+      }
 
-          return const InstagramInterest(category: 'Unknown', items: []);
-        }).toList();
+      if (topicsList.isNotEmpty) {
+        return [
+          InstagramInterest(category: 'All Interests', items: topicsList),
+        ];
       }
 
       return [];
     } catch (e) {
       debugPrint('Interests parse hatası: $e');
+      return [];
+    }
+  }
+
+  /// Close Friends parse et
+  static List<String> _parseCloseFriends(String jsonContent) {
+    try {
+      final data = json.decode(jsonContent);
+      List<String> friends = [];
+
+      if (data is Map) {
+        if (data.containsKey('relationships_close_friends')) {
+          final list = data['relationships_close_friends'] as List? ?? [];
+          for (final item in list) {
+            final stringListData = item['string_list_data'] as List?;
+            if (stringListData != null && stringListData.isNotEmpty) {
+              final val = stringListData[0]['value'];
+              if (val != null) friends.add(val.toString());
+            }
+          }
+        }
+      }
+      return friends;
+    } catch (e) {
+      debugPrint('Close Friends parse hatası: $e');
+      return [];
+    }
+  }
+
+  /// Story Likes parse et
+  static List<InstagramLike> _parseStoryLikes(String jsonContent) {
+    try {
+      final data = json.decode(jsonContent);
+      List<dynamic> likesList = [];
+
+      if (data is Map) {
+        // story_activities_story_likes
+        for (final key in data.keys) {
+          if (key.contains('story_likes') && data[key] is List) {
+            likesList = data[key] as List;
+          }
+        }
+      }
+
+      if (likesList.isEmpty) return [];
+
+      return likesList
+          .whereType<Map<String, dynamic>>()
+          .map(
+            (item) => InstagramLike.fromJson(item),
+          ) // isStory check zaten var
+          .toList();
+    } catch (e) {
+      debugPrint('Story Likes parse hatası: $e');
       return [];
     }
   }
