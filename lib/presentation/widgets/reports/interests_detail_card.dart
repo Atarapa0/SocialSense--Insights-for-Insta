@@ -18,11 +18,14 @@ class InterestCategory {
 class InterestsDetailCard extends StatefulWidget {
   final int totalInterests;
   final List<InterestCategory> categories;
+  // Callback artık kullanılmıyor, state içinde toggle yapıyoruz
+  // final VoidCallback? onViewAll;
 
   const InterestsDetailCard({
     super.key,
     required this.totalInterests,
     required this.categories,
+    // this.onViewAll,
   });
 
   @override
@@ -31,6 +34,7 @@ class InterestsDetailCard extends StatefulWidget {
 
 class _InterestsDetailCardState extends State<InterestsDetailCard> {
   final Set<String> _expandedCategories = {};
+  bool _showAll = false;
 
   @override
   Widget build(BuildContext context) {
@@ -88,16 +92,55 @@ class _InterestsDetailCardState extends State<InterestsDetailCard> {
 
           // Kategoriler Grid
           _buildCategoriesGrid(isDark),
+
+          // Tümünü Gör Butonu
+          if (widget.categories.length > 5 && !_showAll) ...[
+            const SizedBox(height: 16),
+            InkWell(
+              onTap: () {
+                setState(() {
+                  _showAll = true;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Tümünü Gör (+${widget.totalInterests - 5})',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.darkAccent,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 16,
+                      color: AppColors.darkAccent,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildCategoriesGrid(bool isDark) {
+    // İlk 5 kategori veya hepsi (_showAll true ise hepsi)
+    final displayCategories = (_showAll || widget.categories.length <= 5)
+        ? widget.categories
+        : widget.categories.take(5).toList();
+
     return Wrap(
       spacing: 12,
       runSpacing: 12,
-      children: widget.categories.map((category) {
+      children: displayCategories.map((category) {
         final isExpanded = _expandedCategories.contains(category.name);
 
         return _buildCategoryCard(category, isExpanded, isDark);
@@ -173,64 +216,54 @@ class _InterestsDetailCardState extends State<InterestsDetailCard> {
               ],
             ),
           ),
-          const SizedBox(height: 12),
 
-          // Alt kategoriler
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children:
-                (isExpanded
-                        ? category.subcategories
-                        : category.subcategories.take(5).toList())
-                    .map((subcategory) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? AppColors.darkCard
-                              : AppColors.lightCard,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isDark
-                                ? AppColors.darkBorder
-                                : AppColors.lightBorder,
-                          ),
-                        ),
-                        child: Text(
-                          subcategory,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.lightTextSecondary,
-                          ),
-                        ),
-                      );
-                    })
-                    .toList(),
-          ),
-
-          // Daha fazla göster
-          if (!isExpanded && category.subcategories.length > 5) ...[
+          if (isExpanded) ...[
+            const SizedBox(height: 12),
+            // Alt kategoriler
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: category.subcategories.map((subcategory) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkCard : AppColors.lightCard,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.darkBorder
+                          : AppColors.lightBorder,
+                    ),
+                  ),
+                  child: Text(
+                    subcategory,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ] else if (category.subcategories.isNotEmpty) ...[
+            // Kapalıyken ilk birkaç tanesini göster (küçük önizleme)
             const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _expandedCategories.add(category.name);
-                });
-              },
-              child: Text(
-                '+ ${category.subcategories.length - 5} daha',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AppColors.darkPrimary,
-                  fontWeight: FontWeight.w500,
-                ),
+            Text(
+              '${category.subcategories.take(3).join(", ")}${category.subcategories.length > 3 ? "..." : ""}',
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
+                fontStyle: FontStyle.italic,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ],

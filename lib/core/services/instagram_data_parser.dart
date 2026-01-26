@@ -106,7 +106,8 @@ class InstagramDataParser {
           savedItems = _parseSavedItems(content);
         }
         // İlgi alanları
-        else if (baseName.contains('your_topics') &&
+        else if ((baseName.contains('your_topics') ||
+                baseName.contains('recommended_topics')) &&
             baseName.endsWith('.json')) {
           final content = utf8.decode(file.content as List<int>);
           interests = _parseInterests(content);
@@ -427,6 +428,7 @@ class InstagramDataParser {
       if (data is Map && data.containsKey('topics_your_topics')) {
         final topics = data['topics_your_topics'] as List;
         return topics.map((item) {
+          // 1. Eski format: string_list_data
           final stringListData = item['string_list_data'] as List?;
           if (stringListData != null && stringListData.isNotEmpty) {
             return InstagramInterest(
@@ -434,6 +436,23 @@ class InstagramDataParser {
               items: [],
             );
           }
+
+          // 2. Yeni format: string_map_data -> Ad/Name -> value
+          final stringMapData =
+              item['string_map_data'] as Map<String, dynamic>?;
+          if (stringMapData != null) {
+            // Map içindeki ilk value'yu bulmaya çalışalım
+            for (final key in stringMapData.keys) {
+              final valData = stringMapData[key];
+              if (valData is Map && valData.containsKey('value')) {
+                return InstagramInterest(
+                  category: valData['value'] ?? 'Unknown',
+                  items: [],
+                );
+              }
+            }
+          }
+
           return const InstagramInterest(category: 'Unknown', items: []);
         }).toList();
       }

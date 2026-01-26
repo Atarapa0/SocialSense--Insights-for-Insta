@@ -10,7 +10,7 @@ class SavedContentAccount {
 }
 
 /// Kayıtlı İçerikler Detay Kartı (Raporlar için)
-class SavedContentDetailCard extends StatelessWidget {
+class SavedContentDetailCard extends StatefulWidget {
   final int totalSavedContent;
   final List<SavedContentAccount> accounts;
   final int storyLikesCount;
@@ -25,6 +25,13 @@ class SavedContentDetailCard extends StatelessWidget {
   });
 
   @override
+  State<SavedContentDetailCard> createState() => _SavedContentDetailCardState();
+}
+
+class _SavedContentDetailCardState extends State<SavedContentDetailCard> {
+  bool _showAll = false;
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -35,12 +42,18 @@ class SavedContentDetailCard extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Hikaye Beğenileri (opsiyonel)
-        if (storyLikesAccounts.isNotEmpty) _buildStoryLikesSection(isDark),
+        if (widget.storyLikesAccounts.isNotEmpty)
+          _buildStoryLikesSection(isDark),
       ],
     );
   }
 
   Widget _buildSavedContentSection(bool isDark) {
+    // İlk 5 hesap veya hepsi
+    final displayAccounts = (_showAll || widget.accounts.length <= 5)
+        ? widget.accounts
+        : widget.accounts.take(5).toList();
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -96,7 +109,43 @@ class SavedContentDetailCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           // Hesap listesi
-          ...accounts.map((account) => _buildAccountItem(account, isDark)),
+          ...displayAccounts.map(
+            (account) => _buildAccountItem(account, isDark),
+          ),
+
+          // View All Button
+          if (widget.accounts.length > 5 && !_showAll) ...[
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () {
+                setState(() {
+                  _showAll = true;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Tümünü Gör (+${widget.accounts.length - 5})',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.darkAccent,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 16,
+                      color: AppColors.darkAccent,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -141,7 +190,7 @@ class SavedContentDetailCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '($storyLikesCount)',
+                  '(${widget.storyLikesCount})',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -154,7 +203,7 @@ class SavedContentDetailCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Hesap listesi
-          ...storyLikesAccounts.map(
+          ...widget.storyLikesAccounts.map(
             (account) => _buildAccountItem(account, isDark),
           ),
         ],

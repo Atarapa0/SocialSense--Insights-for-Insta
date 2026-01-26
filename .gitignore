@@ -66,3 +66,4 @@ instagram-*.zip
 .env.local
 secrets.dart
 api_keys.dart
+*zip

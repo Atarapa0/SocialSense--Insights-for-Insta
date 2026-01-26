@@ -9,6 +9,7 @@ import 'package:socialsense/presentation/screens/upload/upload_screen.dart';
 import 'package:socialsense/presentation/screens/analyze/analyze_drop_screen.dart';
 import 'package:socialsense/presentation/screens/analyze/ghost_followers_screen.dart';
 import 'package:socialsense/presentation/screens/analyze/follower_list_screen.dart';
+import 'package:socialsense/presentation/screens/reports/top_fans_list_screen.dart';
 import 'package:socialsense/presentation/widgets/dashboard/priority_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/activity_hours_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/stats_row.dart';
@@ -117,7 +118,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return bTotal.compareTo(aTotal);
       });
 
-    final topFans = sortedFans.take(3).toList().asMap().entries.map((entry) {
+    // Tüm Top Fans Listesi
+    final allTopFans = sortedFans.asMap().entries.map((entry) {
       final fan = entry.value;
       return TopFan(
         username: fan.key,
@@ -126,6 +128,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         rank: entry.key + 1,
       );
     }).toList();
+
+    // Sadece ilk 3 tanesi
+    final topFans = allTopFans.take(3).toList();
 
     // Saatlik aktivite verisi
     final hourlyActivity = dataProvider.hourlyActivity;
@@ -346,7 +351,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ]
                 : topFans,
             onViewAll: () {
-              // TODO: Tüm takipçileri göster
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TopFansListScreen(fans: allTopFans),
+                ),
+              );
             },
           ),
 
@@ -711,28 +721,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
 
           const SizedBox(height: 24),
-
-          // İlgi Alanları
-          InterestsDetailCard(
-            totalInterests: dataProvider.interests.length,
-            categories: dataProvider.interests.isEmpty
-                ? [
-                    const InterestCategory(
-                      name: '---',
-                      count: 0,
-                      subcategories: [],
-                    ),
-                  ]
-                : dataProvider.interests
-                      .map(
-                        (i) => InterestCategory(
-                          name: i.category,
-                          count: 1,
-                          subcategories: i.items,
-                        ),
-                      )
-                      .toList(),
-          ),
 
           const SizedBox(height: 24),
 
