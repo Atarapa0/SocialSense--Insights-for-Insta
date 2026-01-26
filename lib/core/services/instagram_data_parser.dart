@@ -111,45 +111,59 @@ class InstagramDataParser {
           final content = utf8.decode(file.content as List<int>);
           interests = _parseInterests(content);
         }
-        // Profil bilgisi
-        else if ((baseName.contains('personal_information') ||
-                baseName.contains('profile_info')) &&
+        // Profil bilgisi (daha genel arama)
+        else if (username == null &&
+            (baseName.contains('personal') ||
+                baseName.contains('profile') ||
+                baseName.contains('account')) &&
             baseName.endsWith('.json')) {
           try {
             final content = utf8.decode(file.content as List<int>);
-            final profileData = json.decode(content);
+            // Dosya çok büyükse parse etme (performans için)
+            if (content.length < 100000) {
+              final profileData = json.decode(content);
 
-            // Instagram formati: profile_user veya profile alaninda olabilir
-            if (profileData is Map) {
-              // Yeni format
-              if (profileData.containsKey('profile_user')) {
-                final profile = profileData['profile_user'] as List?;
-                if (profile != null && profile.isNotEmpty) {
-                  final userData = profile[0] as Map<String, dynamic>?;
-                  if (userData != null) {
-                    final stringList =
-                        userData['string_map_data'] as Map<String, dynamic>?;
-                    if (stringList != null &&
-                        stringList.containsKey('Username')) {
-                      username = stringList['Username']['value'] as String?;
+              if (profileData is Map) {
+                // 1. Yeni format: profile_user -> [0] -> string_map_data -> Username -> value
+                if (profileData.containsKey('profile_user')) {
+                  final profile = profileData['profile_user'] as List?;
+                  if (profile != null && profile.isNotEmpty) {
+                    final userData = profile[0] as Map<String, dynamic>?;
+                    if (userData != null) {
+                      final stringList =
+                          userData['string_map_data'] as Map<String, dynamic>?;
+                      if (stringList != null &&
+                          stringList.containsKey('Username')) {
+                        username = stringList['Username']['value'] as String?;
+                      }
+                    }
+                  }
+                }
+
+                // 2. Basit format: username
+                if (username == null && profileData.containsKey('username')) {
+                  username = profileData['username'] as String?;
+                }
+
+                // 3. Account Information: profile_username
+                if (username == null &&
+                    profileData.containsKey('profile_username')) {
+                  final uList = profileData['profile_username'] as List?;
+                  if (uList != null && uList.isNotEmpty) {
+                    final uData = uList[0] as Map<String, dynamic>?;
+                    if (uData != null) {
+                      username = uData['username'] as String?;
                     }
                   }
                 }
               }
-              // Eski format veya basit format
-              if (username == null && profileData.containsKey('username')) {
-                username = profileData['username'] as String?;
-              }
-              if (username == null && profileData.containsKey('name')) {
-                username = profileData['name'] as String?;
-              }
-            }
 
-            if (username != null) {
-              debugPrint('✅ Username bulundu: $username');
+              if (username != null) {
+                debugPrint('✅ Username bulundu ($fileName): $username');
+              }
             }
           } catch (e) {
-            debugPrint('Profil parse hatası: $e');
+            // Sessizce geç
           }
         }
 

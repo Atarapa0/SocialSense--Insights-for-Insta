@@ -141,6 +141,9 @@ class InstagramDataProvider extends ChangeNotifier {
   /// Sizi takip etmeyenler
   List<String> get notFollowingBack => _data?.notFollowingBack ?? [];
 
+  /// Ghost follower listesi
+  List<String> get ghostFollowersList => _data?.ghostFollowersList ?? [];
+
   /// Sizin takip etmedikleriniz
   List<String> get youDontFollow => _data?.youDontFollow ?? [];
 

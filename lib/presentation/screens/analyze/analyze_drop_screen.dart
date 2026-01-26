@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
+import 'package:socialsense/core/utils/instagram_launcher.dart';
 
 /// Unfollowers modeli
 class Unfollower {
@@ -350,75 +351,79 @@ class AnalyzeDropScreen extends StatelessWidget {
   }
 
   Widget _buildUnfollowerItem(Unfollower unfollower, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          // Avatar
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.darkAccent.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Text(
-                unfollower.username[0].toUpperCase(),
-                style: const TextStyle(
-                  color: AppColors.darkAccent,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+    return InkWell(
+      onTap: () => InstagramLauncher.openProfile(unfollower.username),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        child: Row(
+          children: [
+            // Avatar
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.darkAccent.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Text(
+                  unfollower.username[0].toUpperCase(),
+                  style: const TextStyle(
+                    color: AppColors.darkAccent,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
-          ),
 
-          const SizedBox(width: 14),
+            const SizedBox(width: 14),
 
-          // Kullanıcı bilgisi
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '@${unfollower.username}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.lightTextPrimary,
+            // Kullanıcı bilgisi
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    unfollower.username,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${unfollower.daysSinceUnfollow} days ago',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
+                  const SizedBox(height: 4),
+                  Text(
+                    'Detected just now', // ZIP'te tarih yok
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          // Unfollow ikonu
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.darkAccent.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+            // Unfollow ikonu
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.darkAccent.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.person_remove,
+                color: AppColors.darkAccent,
+                size: 18,
+              ),
             ),
-            child: const Icon(
-              Icons.person_remove,
-              color: AppColors.darkAccent,
-              size: 18,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

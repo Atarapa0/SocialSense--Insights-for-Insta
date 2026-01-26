@@ -448,6 +448,25 @@ class InstagramData {
     return ghostCount;
   }
 
+  /// Ghost follower listesi (isimleri döndürür)
+  List<String> get ghostFollowersList {
+    final activeUsernames = <String>{};
+    // Tüm zamanların etkileşimleri
+    for (final like in likes) {
+      activeUsernames.add(like.username.toLowerCase());
+    }
+    for (final comment in comments) {
+      activeUsernames.add(comment.username.toLowerCase());
+    }
+
+    // Mesajlaşanlar da aktif sayılabilir ama şimdilik like/comment yeterli
+
+    return followers
+        .where((f) => !activeUsernames.contains(f.username.toLowerCase()))
+        .map((f) => f.username)
+        .toList();
+  }
+
   /// Ghost follower yüzdesi
   double get ghostFollowerPercentage {
     if (followers.isEmpty) return 0.0;

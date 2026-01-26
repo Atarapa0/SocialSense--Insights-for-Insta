@@ -4,8 +4,11 @@ import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
 import 'package:socialsense/core/providers/instagram_data_provider.dart';
 import 'package:socialsense/presentation/providers/app_settings_provider.dart';
+import 'package:socialsense/core/utils/instagram_launcher.dart';
 import 'package:socialsense/presentation/screens/upload/upload_screen.dart';
 import 'package:socialsense/presentation/screens/analyze/analyze_drop_screen.dart';
+import 'package:socialsense/presentation/screens/analyze/ghost_followers_screen.dart';
+import 'package:socialsense/presentation/screens/analyze/follower_list_screen.dart';
 import 'package:socialsense/presentation/widgets/dashboard/priority_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/activity_hours_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/stats_row.dart';
@@ -197,98 +200,106 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               // Ghost Followers (küçük versiyon)
               Expanded(
-                child: Container(
-                  height: 200, // Sabit yükseklik
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkCard : AppColors.lightCard,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isDark
-                          ? AppColors.darkBorder
-                          : AppColors.lightBorder,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              l10n.get('ghost_followers'),
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: isDark
-                                    ? AppColors.darkTextSecondary
-                                    : AppColors.lightTextSecondary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Icon(
-                            Icons.visibility_off,
-                            size: 14,
-                            color: isDark
-                                ? AppColors.darkTextHint
-                                : AppColors.lightTextHint,
-                          ),
-                        ],
+                child: GestureDetector(
+                  onTap: () => _navigateToGhostFollowers(context),
+                  child: Container(
+                    height: 200, // Sabit yükseklik
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.darkCard : AppColors.lightCard,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColors.darkBorder
+                            : AppColors.lightBorder,
                       ),
-                      const Spacer(),
-                      Center(
-                        child: SizedBox(
-                          width: 70,
-                          height: 70,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              SizedBox(
-                                width: 70,
-                                height: 70,
-                                child: CircularProgressIndicator(
-                                  value: ghostPercentage / 100,
-                                  strokeWidth: 6,
-                                  backgroundColor: isDark
-                                      ? AppColors.darkBorder
-                                      : AppColors.lightBorder,
-                                  valueColor: const AlwaysStoppedAnimation(
-                                    AppColors.darkPrimary,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                l10n.get('ghost_followers'),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Icon(
+                              Icons.visibility_off,
+                              size: 14,
+                              color: isDark
+                                  ? AppColors.darkTextHint
+                                  : AppColors.lightTextHint,
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        Center(
+                          child: SizedBox(
+                            width: 70,
+                            height: 70,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 70,
+                                  height: 70,
+                                  child: CircularProgressIndicator(
+                                    value: ghostPercentage / 100,
+                                    strokeWidth: 8,
+                                    backgroundColor: isDark
+                                        ? AppColors.darkBackground
+                                        : AppColors.lightBackground,
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                          AppColors.darkAccent,
+                                        ),
+                                    strokeCap: StrokeCap.round,
                                   ),
                                 ),
-                              ),
-                              Text(
-                                hasData
-                                    ? '${ghostPercentage.toStringAsFixed(0)}%'
-                                    : '---',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark
-                                      ? AppColors.darkTextPrimary
-                                      : AppColors.lightTextPrimary,
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '${ghostPercentage.toStringAsFixed(0)}%',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark
+                                            ? AppColors.darkTextPrimary
+                                            : AppColors.lightTextPrimary,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      const Spacer(),
-                      Center(
-                        child: Text(
-                          'Ghost\nFollowers',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 11,
-                            height: 1.2,
-                            color: isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.lightTextSecondary,
+                        const Spacer(),
+                        Center(
+                          child: Text(
+                            l10n.get('ghost_followers_desc'),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 10,
+                              height: 1.2,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -391,107 +402,144 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
     final displayName = dataProvider.username ?? 'Kullanıcı';
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Sol: Selamlama ve güncelleme tarihi
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return InkWell(
+      onTap: () {
+        if (dataProvider.username != null) {
+          InstagramLauncher.openProfile(dataProvider.username!);
+        }
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              '$greeting,',
-              style: TextStyle(
-                fontSize: 14,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.lightTextSecondary,
-              ),
+            // Sol: Selamlama ve güncelleme tarihi
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$greeting,',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  displayName,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // Güncelleme tarihi
+                Row(
+                  children: [
+                    Icon(
+                      Icons.update,
+                      size: 12,
+                      color: isDark
+                          ? AppColors.darkTextHint
+                          : AppColors.lightTextHint,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      updateText,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark
+                            ? AppColors.darkTextHint
+                            : AppColors.lightTextHint,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              displayName,
 
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.lightTextPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            // Güncelleme tarihi
+            // Sağ: Bildirim + Profil
             Row(
               children: [
-                Icon(
-                  Icons.update,
-                  size: 12,
-                  color: isDark
-                      ? AppColors.darkTextHint
-                      : AppColors.lightTextHint,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  updateText,
-                  style: TextStyle(
-                    fontSize: 11,
+                // Bildirim ikonu (tıklanabilir değil, sadece gösterim)
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
                     color: isDark
-                        ? AppColors.darkTextHint
-                        : AppColors.lightTextHint,
+                        ? AppColors.darkSurface
+                        : AppColors.lightSurface,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Stack(
+                    children: [
+                      Icon(
+                        Icons.notifications_outlined,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.lightTextSecondary,
+                      ),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: AppColors.darkAccent,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Profil Avatar
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(2),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkBackground
+                            : AppColors.lightBackground,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          displayName.isNotEmpty
+                              ? displayName[0].toUpperCase()
+                              : '?',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? AppColors.darkPrimary
+                                : AppColors.lightPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
           ],
         ),
-
-        // Sağ: Bildirim + Profil
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Stack(
-                children: [
-                  Icon(
-                    Icons.notifications_outlined,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
-                  ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.darkAccent,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                gradient: AppColors.primaryGradient,
-              ),
-              child: const Center(
-                child: Icon(Icons.person, color: Colors.white, size: 24),
-              ),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 
@@ -633,6 +681,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
             youDontFollow: youDontFollowList.isEmpty
                 ? ['---']
                 : youDontFollowList,
+            onMutualTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FollowerListScreen(
+                  title: 'Karşılıklı Takipler',
+                  followers: dataProvider.mutualFollowers,
+                ),
+              ),
+            ),
+            onNotFollowingYouTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FollowerListScreen(
+                  title: 'Seni Takip Etmeyenler',
+                  followers: dataProvider.notFollowingBack,
+                ),
+              ),
+            ),
+            onYouDontFollowTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FollowerListScreen(
+                  title: 'Takip Etmediklerin',
+                  followers: dataProvider.youDontFollow,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // İlgi Alanları
+          InterestsDetailCard(
+            totalInterests: dataProvider.interests.length,
+            categories: dataProvider.interests.isEmpty
+                ? [
+                    const InterestCategory(
+                      name: '---',
+                      count: 0,
+                      subcategories: [],
+                    ),
+                  ]
+                : dataProvider.interests
+                      .map(
+                        (i) => InterestCategory(
+                          name: i.category,
+                          count: 1,
+                          subcategories: i.items,
+                        ),
+                      )
+                      .toList(),
           ),
 
           const SizedBox(height: 24),
@@ -1600,38 +1699,47 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _navigateToAnalyzeDrop(BuildContext context) {
+    // Provider verilerini al
+    final dataProvider = Provider.of<InstagramDataProvider>(
+      context,
+      listen: false,
+    );
+    final notFollowingBack = dataProvider.notFollowingBack;
+
+    // Unfollower listesini oluştur (Not Following Back listesi)
+    final unfollowers = notFollowingBack.map((username) {
+      return Unfollower(
+        username: username,
+        unfollowedAt: DateTime.now(), // Tam tarih ZIP'te yok
+        daysSinceUnfollow: 0,
+      );
+    }).toList();
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => AnalyzeDropScreen(
-          unfollowersCount: 47,
-          unfollowers: [
-            Unfollower(
-              username: 'john_doe',
-              unfollowedAt: DateTime.now().subtract(const Duration(days: 1)),
-              daysSinceUnfollow: 1,
-            ),
-            Unfollower(
-              username: 'jane_smith',
-              unfollowedAt: DateTime.now().subtract(const Duration(days: 2)),
-              daysSinceUnfollow: 2,
-            ),
-            Unfollower(
-              username: 'photo_lover',
-              unfollowedAt: DateTime.now().subtract(const Duration(days: 2)),
-              daysSinceUnfollow: 2,
-            ),
-            Unfollower(
-              username: 'travel_addict',
-              unfollowedAt: DateTime.now().subtract(const Duration(days: 3)),
-              daysSinceUnfollow: 3,
-            ),
-            Unfollower(
-              username: 'foodie_gram',
-              unfollowedAt: DateTime.now().subtract(const Duration(days: 4)),
-              daysSinceUnfollow: 4,
-            ),
-          ],
+          unfollowersCount: notFollowingBack.length,
+          unfollowers: unfollowers,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToGhostFollowers(BuildContext context) {
+    // Provider verilerini al
+    final dataProvider = Provider.of<InstagramDataProvider>(
+      context,
+      listen: false,
+    );
+    final ghostFollowers = dataProvider.ghostFollowersList;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => GhostFollowersScreen(
+          ghostCount: ghostFollowers.length,
+          ghostFollowers: ghostFollowers,
         ),
       ),
     );
