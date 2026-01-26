@@ -73,7 +73,7 @@ class DirectMessagesCard extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // İstatistik kartları
+          // İstatistik kartları - tek satırda 2 kart
           Row(
             children: [
               Expanded(
@@ -87,27 +87,9 @@ class DirectMessagesCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _buildStatCard(
-                  label: 'Toplam Mesaj',
+                  label: 'Mesaj',
                   value: totalMessages,
                   color: Colors.white,
-                  isDark: isDark,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _buildStatCard(
-                  label: 'Gönderilen (Metin)',
-                  value: sentMessages,
-                  color: const Color(0xFF4CAF50),
-                  isDark: isDark,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _buildStatCard(
-                  label: 'Alınan (Metin)',
-                  value: receivedMessages,
-                  color: const Color(0xFF4ECDC4),
                   isDark: isDark,
                 ),
               ),

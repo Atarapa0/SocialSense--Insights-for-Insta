@@ -13,8 +13,8 @@ import 'package:socialsense/presentation/widgets/dashboard/top_fans_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/active_hour_card.dart';
 import 'package:socialsense/presentation/widgets/reports/follower_details_card.dart';
 import 'package:socialsense/presentation/widgets/reports/account_analysis_card.dart';
-import 'package:socialsense/presentation/widgets/reports/sharing_analysis_card.dart';
 import 'package:socialsense/presentation/widgets/reports/direct_messages_card.dart';
+
 import 'package:socialsense/presentation/widgets/reports/activity_timeline_card.dart';
 import 'package:socialsense/presentation/widgets/reports/interests_detail_card.dart';
 import 'package:socialsense/presentation/widgets/reports/saved_content_detail_card.dart';
@@ -38,10 +38,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final provider = Provider.of<InstagramDataProvider>(context, listen: false);
     return provider.lastUpdateDate;
   }
-
-  // Placeholder veriler (ZIP'de olmayan veya henüz parse edilmeyen veriler)
-  final List<ActivityDataPoint> _likeActivityData = [];
-  final List<InterestCategory> _interestCategories = [];
 
   @override
   Widget build(BuildContext context) {
@@ -705,32 +701,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ActivityTimelineCard(
             title: l10n.get('like_activity'),
             subtitle: l10n.get('last_90_days'),
-            dataPoints: _likeActivityData.isEmpty
+            dataPoints: dataProvider.monthlyLikeActivity.isEmpty
                 ? const [ActivityDataPoint(label: '---', value: 0)]
-                : _likeActivityData,
+                : dataProvider.monthlyLikeActivity
+                      .map(
+                        (e) => ActivityDataPoint(
+                          label: e['label'] as String,
+                          value: (e['value'] as int).toDouble(),
+                        ),
+                      )
+                      .toList(),
             lineColor: const Color(0xFFFF6B9D),
             hasData: hasData && dataProvider.totalLikesCount > 0,
           ),
 
           const SizedBox(height: 16),
 
-          // Yorum Aktivitesi Grafiği
-          ActivityTimelineCard(
-            title: l10n.get('comment_activity'),
-            subtitle: l10n.get('last_90_days'),
-            dataPoints: const [],
-            lineColor: const Color(0xFF4ECDC4),
-            hasData: hasData && dataProvider.totalCommentsCount > 0,
-          ),
+          // Yorumlar henüz parse edilmiyor, bu kartı kaldırabiliriz veya boş bırakabiliriz
+          if (dataProvider.totalCommentsCount > 0)
+            ActivityTimelineCard(
+              title: l10n.get('comment_activity'),
+              subtitle: l10n.get('last_90_days'),
+              dataPoints: const [ActivityDataPoint(label: '---', value: 0)],
+              lineColor: const Color(0xFF4ECDC4),
+              hasData: hasData && dataProvider.totalCommentsCount > 0,
+            ),
 
           const SizedBox(height: 24),
 
           // İlgi Alanları (Detaylı)
           InterestsDetailCard(
-            totalInterests: _interestCategories.isEmpty
-                ? 0
-                : _interestCategories.fold(0, (sum, cat) => sum + cat.count),
-            categories: _interestCategories.isEmpty
+            totalInterests: dataProvider.interests.length,
+            categories: dataProvider.interests.isEmpty
                 ? [
                     const InterestCategory(
                       name: '---',
@@ -738,7 +740,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       subcategories: [],
                     ),
                   ]
-                : _interestCategories,
+                : dataProvider.interests
+                      .map(
+                        (i) => InterestCategory(
+                          name: i.category,
+                          count: 1,
+                          subcategories: i.items,
+                        ),
+                      )
+                      .toList(),
           ),
 
           const SizedBox(height: 24),

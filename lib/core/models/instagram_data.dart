@@ -370,6 +370,48 @@ class InstagramData {
     return counts;
   }
 
+  /// Son 3 aylık beğeni aktivitesi (ay bazında)
+  List<Map<String, dynamic>> get monthlyLikeActivity {
+    final now = DateTime.now();
+    final result = <Map<String, dynamic>>[];
+
+    for (int i = 2; i >= 0; i--) {
+      final targetMonth = DateTime(now.year, now.month - i, 1);
+      final monthEnd = DateTime(targetMonth.year, targetMonth.month + 1, 0);
+
+      final count = likes
+          .where(
+            (l) =>
+                l.timestamp.isAfter(
+                  targetMonth.subtract(const Duration(days: 1)),
+                ) &&
+                l.timestamp.isBefore(monthEnd.add(const Duration(days: 1))),
+          )
+          .length;
+
+      // Ay ismi
+      final monthNames = [
+        'Oca',
+        'Şub',
+        'Mar',
+        'Nis',
+        'May',
+        'Haz',
+        'Tem',
+        'Ağu',
+        'Eyl',
+        'Eki',
+        'Kas',
+        'Ara',
+      ];
+      final monthName = monthNames[targetMonth.month - 1];
+
+      result.add({'label': monthName, 'value': count});
+    }
+
+    return result;
+  }
+
   /// Engagement rate tahmini (basit hesaplama)
   double get estimatedEngagementRate {
     if (followers.isEmpty) return 0.0;

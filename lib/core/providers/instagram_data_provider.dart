@@ -162,6 +162,10 @@ class InstagramDataProvider extends ChangeNotifier {
   /// Haftalık aktivite
   Map<int, int> get weekdayActivity => _data?.weekdayActivity ?? {};
 
+  /// Aylık beğeni aktivitesi
+  List<Map<String, dynamic>> get monthlyLikeActivity =>
+      _data?.monthlyLikeActivity ?? [];
+
   /// En çok beğenilen hesaplar
   Map<String, int> get topLikedAccounts => _data?.topLikedAccounts ?? {};
 
@@ -180,4 +184,7 @@ class InstagramDataProvider extends ChangeNotifier {
 
   /// Toplam konuşma sayısı
   int get totalConversationCount => _data?.totalConversationCount ?? 0;
+
+  /// İlgi alanları
+  List<InstagramInterest> get interests => _data?.interests ?? [];
 }
