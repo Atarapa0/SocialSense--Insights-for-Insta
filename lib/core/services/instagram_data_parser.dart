@@ -45,6 +45,10 @@ class InstagramDataParser {
     List<InstagramComment> comments = [];
     List<InstagramSavedItem> savedItems = [];
     List<InstagramInterest> interests = [];
+    String? username;
+
+    // Mesajlar için: klasör adı -> mesaj sayısı
+    final Map<String, int> messageCountByFolder = {};
 
     for (final file in archive) {
       if (!file.isFile) continue;
@@ -107,18 +111,100 @@ class InstagramDataParser {
           final content = utf8.decode(file.content as List<int>);
           interests = _parseInterests(content);
         }
+        // Profil bilgisi
+        else if ((baseName.contains('personal_information') ||
+                baseName.contains('profile_info')) &&
+            baseName.endsWith('.json')) {
+          try {
+            final content = utf8.decode(file.content as List<int>);
+            final profileData = json.decode(content);
+
+            // Instagram formati: profile_user veya profile alaninda olabilir
+            if (profileData is Map) {
+              // Yeni format
+              if (profileData.containsKey('profile_user')) {
+                final profile = profileData['profile_user'] as List?;
+                if (profile != null && profile.isNotEmpty) {
+                  final userData = profile[0] as Map<String, dynamic>?;
+                  if (userData != null) {
+                    final stringList =
+                        userData['string_map_data'] as Map<String, dynamic>?;
+                    if (stringList != null &&
+                        stringList.containsKey('Username')) {
+                      username = stringList['Username']['value'] as String?;
+                    }
+                  }
+                }
+              }
+              // Eski format veya basit format
+              if (username == null && profileData.containsKey('username')) {
+                username = profileData['username'] as String?;
+              }
+              if (username == null && profileData.containsKey('name')) {
+                username = profileData['name'] as String?;
+              }
+            }
+
+            if (username != null) {
+              debugPrint('✅ Username bulundu: $username');
+            }
+          } catch (e) {
+            debugPrint('Profil parse hatası: $e');
+          }
+        }
+
+        // Mesajlar - inbox klasöründeki message_X.json dosyalarını say
+        if (fileName.contains('/inbox/') &&
+            baseName.startsWith('message_') &&
+            baseName.endsWith('.json')) {
+          // Klasör adını al: your_instagram_activity/messages/inbox/username_123456/message_1.json
+          final parts = fileName.split('/');
+          if (parts.length >= 2) {
+            final folderName = parts[parts.length - 2]; // username_123456
+
+            // Mesaj dosyasını parse et ve mesaj sayısını al
+            try {
+              final content = utf8.decode(file.content as List<int>);
+              final msgData = json.decode(content);
+              int msgCount = 0;
+
+              if (msgData is Map && msgData.containsKey('messages')) {
+                msgCount = (msgData['messages'] as List).length;
+              }
+
+              messageCountByFolder[folderName] =
+                  (messageCountByFolder[folderName] ?? 0) + msgCount;
+            } catch (_) {
+              messageCountByFolder[folderName] =
+                  (messageCountByFolder[folderName] ?? 0) + 1;
+            }
+          }
+        }
       } catch (e) {
         debugPrint('Dosya parse hatası ($fileName): $e');
       }
     }
 
+    // Mesaj listesi oluştur
+    final List<InstagramMessage> messages =
+        messageCountByFolder.entries
+            .map((e) => InstagramMessage.fromFolder(e.key, e.value, null))
+            .toList()
+          ..sort((a, b) => b.messageCount.compareTo(a.messageCount));
+
+    debugPrint(
+      '✅ Messages bulundu: ${messages.length} konuşma, toplam ${messages.fold(0, (sum, m) => sum + m.messageCount)} mesaj',
+    );
+
     return InstagramData(
+      username: username,
       followers: followers,
       following: following,
       likes: likes,
       comments: comments,
       savedItems: savedItems,
       interests: interests,
+      messages: messages,
       dataExportDate: DateTime.now(),
     );
   }

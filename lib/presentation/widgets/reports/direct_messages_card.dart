@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
+import 'package:socialsense/core/utils/instagram_launcher.dart';
 
 /// Mesaj Analizi Model
 class MessageAnalysis {
@@ -249,57 +250,61 @@ class DirectMessagesCard extends StatelessWidget {
   }
 
   Widget _buildPersonItem(MessageAnalysis account, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          // Avatar
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-              borderRadius: BorderRadius.circular(7),
-            ),
-            child: Center(
-              child: Text(
-                account.username.isNotEmpty
-                    ? account.username[0].toUpperCase()
-                    : '?',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+    return InkWell(
+      onTap: () => InstagramLauncher.openProfile(account.username),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          children: [
+            // Avatar
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(7),
+              ),
+              child: Center(
+                child: Text(
+                  account.username.isNotEmpty
+                      ? account.username.replaceAll('@', '')[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          // Kullanıcı adı
-          Expanded(
-            child: Text(
-              account.username,
-              style: TextStyle(
-                fontSize: 11,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.lightTextPrimary,
+            const SizedBox(width: 8),
+            // Kullanici adi
+            Expanded(
+              child: Text(
+                account.username,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          // Mesaj sayısı
-          Text(
-            '${account.messageCount}',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+            // Mesaj sayisi
+            Text(
+              '${account.messageCount}',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

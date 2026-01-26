@@ -165,6 +165,26 @@ class InstagramMessage {
     required this.messageCount,
     this.lastMessageDate,
   });
+
+  /// Mesaj klasöründen parse et
+  factory InstagramMessage.fromFolder(
+    String folderName,
+    int msgCount,
+    DateTime? lastDate,
+  ) {
+    // Klasör adından kullanıcı adını çıkar: "username_1234567890" -> "username"
+    String username = folderName;
+    final underscoreIndex = folderName.lastIndexOf('_');
+    if (underscoreIndex > 0) {
+      username = folderName.substring(0, underscoreIndex);
+    }
+
+    return InstagramMessage(
+      participant: username,
+      messageCount: msgCount,
+      lastMessageDate: lastDate,
+    );
+  }
 }
 
 /// İlgi alanı modeli
@@ -227,22 +247,26 @@ class InstagramSavedItem {
 /// Ana Instagram veri modeli
 /// Tüm parse edilen verileri içerir
 class InstagramData {
+  final String? username; // Kullanıcı adı
   final List<InstagramUser> followers;
   final List<InstagramUser> following;
   final List<InstagramLike> likes;
   final List<InstagramComment> comments;
   final List<InstagramSavedItem> savedItems;
   final List<InstagramInterest> interests;
+  final List<InstagramMessage> messages;
   final DateTime? dataExportDate;
   final DateTime loadedAt;
 
   InstagramData({
+    this.username,
     required this.followers,
     required this.following,
     required this.likes,
     required this.comments,
     required this.savedItems,
     required this.interests,
+    this.messages = const [],
     this.dataExportDate,
     DateTime? loadedAt,
   }) : loadedAt = loadedAt ?? DateTime.now();
@@ -250,12 +274,14 @@ class InstagramData {
   /// Boş veri
   factory InstagramData.empty() {
     return InstagramData(
+      username: null,
       followers: [],
       following: [],
       likes: [],
       comments: [],
       savedItems: [],
       interests: [],
+      messages: [],
     );
   }
 
@@ -396,4 +422,19 @@ class InstagramData {
       ..sort((a, b) => b.value.compareTo(a.value));
     return Map.fromEntries(sorted.take(10));
   }
+
+  /// En çok mesajlaşılan kişiler (sıralı)
+  List<InstagramMessage> get topMessagedUsers {
+    final sorted = List<InstagramMessage>.from(messages)
+      ..sort((a, b) => b.messageCount.compareTo(a.messageCount));
+    return sorted.take(10).toList();
+  }
+
+  /// Toplam mesaj sayısı
+  int get totalMessageCount {
+    return messages.fold(0, (sum, m) => sum + m.messageCount);
+  }
+
+  /// Toplam konuşma sayısı
+  int get totalConversationCount => messages.length;
 }

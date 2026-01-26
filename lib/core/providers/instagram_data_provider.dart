@@ -120,6 +120,9 @@ class InstagramDataProvider extends ChangeNotifier {
 
   // ==================== HESAPLANMIŞ ÖZELLİKLER ====================
 
+  /// Kullanıcı adı
+  String? get username => _data?.username;
+
   /// Takipçi sayısı
   int get followersCount => _data?.followers.length ?? 0;
 
@@ -168,4 +171,13 @@ class InstagramDataProvider extends ChangeNotifier {
 
   /// En çok kaydedilen hesaplar
   Map<String, int> get topSavedAccounts => _data?.topSavedAccounts ?? {};
+
+  /// En çok mesajlaşılan kişiler
+  List<InstagramMessage> get topMessagedUsers => _data?.topMessagedUsers ?? [];
+
+  /// Toplam mesaj sayısı
+  int get totalMessageCount => _data?.totalMessageCount ?? 0;
+
+  /// Toplam konuşma sayısı
+  int get totalConversationCount => _data?.totalConversationCount ?? 0;
 }

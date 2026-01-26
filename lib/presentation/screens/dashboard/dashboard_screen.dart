@@ -40,14 +40,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   // Placeholder veriler (ZIP'de olmayan veya henüz parse edilmeyen veriler)
-  final List<SharingAnalysis> _receivedFromAccounts = [];
-  final List<SharingAnalysis> _sentToAccounts = [];
-  final int _totalChats = 0;
-  final int _totalMessages = 0;
-  final int _sentMessages = 0;
-  final int _receivedMessages = 0;
-  final List<MessageAnalysis> _mostMessaged = [];
-  final List<MessageAnalysis> _mostMessagedBy = [];
   final List<ActivityDataPoint> _likeActivityData = [];
   final List<InterestCategory> _interestCategories = [];
 
@@ -396,6 +388,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ? '${l10n.get('last_update')}: ${_formatDate(_lastUpdateDate!)}'
         : '${l10n.get('last_update')}: ---';
 
+    // Kullanıcı adını Provider'dan al
+    final dataProvider = Provider.of<InstagramDataProvider>(
+      context,
+      listen: false,
+    );
+    final displayName = dataProvider.username ?? 'Kullanıcı';
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -414,7 +413,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Alex Carter',
+              displayName,
+
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -655,30 +655,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 24),
 
-          // Paylaşım Analizleri (ZIP'de yok - placeholder)
-          SharingAnalysisCard(
-            receivedFromAccounts: _receivedFromAccounts.isEmpty
-                ? [const SharingAnalysis(username: '---', shareCount: 0)]
-                : _receivedFromAccounts,
-            sentToAccounts: _sentToAccounts.isEmpty
-                ? [const SharingAnalysis(username: '---', shareCount: 0)]
-                : _sentToAccounts,
-          ),
-
-          const SizedBox(height: 24),
-
-          // Direkt Mesajlar (ZIP'de yok - placeholder)
+          // Direkt Mesajlar
           DirectMessagesCard(
-            totalChats: _totalChats,
-            totalMessages: _totalMessages,
-            sentMessages: _sentMessages,
-            receivedMessages: _receivedMessages,
-            mostMessaged: _mostMessaged.isEmpty
+            totalChats: dataProvider.totalConversationCount,
+            totalMessages: dataProvider.totalMessageCount,
+            sentMessages: dataProvider.totalMessageCount ~/ 2, // Tahmin
+            receivedMessages: dataProvider.totalMessageCount ~/ 2, // Tahmin
+            mostMessaged: dataProvider.topMessagedUsers.isEmpty
                 ? [const MessageAnalysis(username: '---', messageCount: 0)]
-                : _mostMessaged,
-            mostMessagedBy: _mostMessagedBy.isEmpty
+                : dataProvider.topMessagedUsers
+                      .take(5)
+                      .map(
+                        (m) => MessageAnalysis(
+                          username: '@${m.participant}',
+                          messageCount: m.messageCount,
+                        ),
+                      )
+                      .toList(),
+            mostMessagedBy: dataProvider.topMessagedUsers.isEmpty
                 ? [const MessageAnalysis(username: '---', messageCount: 0)]
-                : _mostMessagedBy,
+                : dataProvider.topMessagedUsers
+                      .take(5)
+                      .map(
+                        (m) => MessageAnalysis(
+                          username: '@${m.participant}',
+                          messageCount: m.messageCount,
+                        ),
+                      )
+                      .toList(),
           ),
 
           const SizedBox(height: 24),
