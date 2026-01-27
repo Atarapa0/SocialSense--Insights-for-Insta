@@ -32,7 +32,8 @@ class StatsRow extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 2.2, // Daha yatay kartlar (Görseldeki gibi)
+        childAspectRatio:
+            1.6, // Yüksekliği artırmak için oranı düşürdük (Overflow fix)
         children: [
           _buildStatCard(
             context,
@@ -80,7 +81,10 @@ class StatsRow extends StatelessWidget {
     bool isDark,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 12,
+      ), // Padding azaltıldı
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : AppColors.lightCard,
         borderRadius: BorderRadius.circular(16),
@@ -97,38 +101,47 @@ class StatsRow extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment:
+            MainAxisAlignment.spaceBetween, // Center yerine SpaceBetween
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.lightTextSecondary,
-                  fontWeight: FontWeight.w500,
+              Expanded(
+                // Text taşmasını önle
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11, // Font küçültüldü
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 2, // 2 satıra izin ver
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
+              const SizedBox(width: 4),
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: Colors.white, size: 16),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 14,
+                ), // İkon küçültüldü
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          // Spacer sildim, spaceBetween halleder
           Text(
             _formatNumber(value),
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 20, // Font küçültüldü
               fontWeight: FontWeight.bold,
               color: isDark
                   ? AppColors.darkTextPrimary

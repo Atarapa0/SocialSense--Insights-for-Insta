@@ -210,4 +210,10 @@ class InstagramDataProvider extends ChangeNotifier {
 
   /// Kayıtlı gönderiler listesi
   List<InstagramSavedItem> get savedItems => _data?.savedItems ?? [];
+
+  /// Reels Gönderilenler
+  Map<String, int> get topReelsSent => _data?.topReelsSent ?? {};
+
+  /// Reels Alınanlar
+  Map<String, int> get topReelsReceived => _data?.topReelsReceived ?? {};
 }

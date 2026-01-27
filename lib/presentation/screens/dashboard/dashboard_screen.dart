@@ -21,6 +21,7 @@ import 'package:socialsense/presentation/widgets/reports/direct_messages_card.da
 
 import 'package:socialsense/presentation/widgets/reports/activity_timeline_card.dart';
 import 'package:socialsense/presentation/widgets/reports/time_distribution_card.dart';
+import 'package:socialsense/presentation/widgets/reports/reels_share_card.dart';
 import 'package:socialsense/presentation/widgets/reports/interests_distribution_card.dart';
 import 'package:socialsense/presentation/widgets/reports/story_likes_card.dart';
 import 'package:socialsense/presentation/widgets/reports/close_friends_card.dart';
@@ -746,6 +747,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mostCommentedAccounts: mostCommentedList.isEmpty
                 ? [const AccountAnalysis(username: '---', count: 0)]
                 : mostCommentedList,
+            onMostLikedTap: () {
+              if (mostLikedList.isEmpty) return;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FollowerListScreen(
+                    title: 'En Çok Beğenenler',
+                    followers: mostLikedList.map((e) => e.username).toList(),
+                  ),
+                ),
+              );
+            },
+            onMostCommentedTap: () {
+              if (mostCommentedList.isEmpty) return;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FollowerListScreen(
+                    title: 'En Çok Yorum Yapanlar',
+                    followers: mostCommentedList
+                        .map((e) => e.username)
+                        .toList(),
+                  ),
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: 24),
@@ -778,7 +805,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       )
                       .toList(),
+            onMostMessagedTap: () {
+              if (dataProvider.topMessagedUsers.isEmpty) return;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FollowerListScreen(
+                    title: 'En Çok Mesajlaşılanlar',
+                    followers: dataProvider.topMessagedUsers
+                        .map((m) => m.participant)
+                        .toList(),
+                  ),
+                ),
+              );
+            },
+            onMostMessagedByTap: () {
+              if (dataProvider.topMessagedUsers.isEmpty) return;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FollowerListScreen(
+                    title: 'Sana En Çok Yazanlar',
+                    followers: dataProvider.topMessagedUsers
+                        .map((m) => m.participant)
+                        .toList(),
+                  ),
+                ),
+              );
+            },
           ),
+
+          const SizedBox(height: 24),
+
+          // Reels Etkileşimleri
+          if (hasData)
+            ReelsShareCard(
+              sentReels: dataProvider.topReelsSent,
+              receivedReels: dataProvider.topReelsReceived,
+            ),
 
           const SizedBox(height: 24),
 

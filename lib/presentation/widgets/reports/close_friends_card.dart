@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
 
-class CloseFriendsCard extends StatelessWidget {
+class CloseFriendsCard extends StatefulWidget {
   final List<String> closeFriends;
 
   const CloseFriendsCard({super.key, required this.closeFriends});
 
   @override
+  State<CloseFriendsCard> createState() => _CloseFriendsCardState();
+}
+
+class _CloseFriendsCardState extends State<CloseFriendsCard> {
+  bool _isExpanded = false;
+  static const int _initialCount = 10;
+
+  @override
   Widget build(BuildContext context) {
+    final itemCount = widget.closeFriends.length;
+    final displayCount = _isExpanded
+        ? itemCount
+        : (itemCount > _initialCount ? _initialCount : itemCount);
+    final displayedFriends = widget.closeFriends.take(displayCount);
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -45,7 +59,7 @@ class CloseFriendsCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${closeFriends.length} kişi ekli',
+                      '${widget.closeFriends.length} kişi ekli',
                       style: Theme.of(
                         context,
                       ).textTheme.bodySmall?.copyWith(color: Colors.grey),
@@ -56,18 +70,18 @@ class CloseFriendsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          if (closeFriends.isEmpty)
+          if (widget.closeFriends.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
               child: Center(
                 child: Text('Yakın arkadaş listeniz boş veya bulunamadı.'),
               ),
             )
-          else
+          else ...[
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: closeFriends.map((friend) {
+              children: displayedFriends.map((friend) {
                 return Chip(
                   avatar: CircleAvatar(
                     backgroundColor: Colors.green,
@@ -90,6 +104,25 @@ class CloseFriendsCard extends StatelessWidget {
                 );
               }).toList(),
             ),
+            if (itemCount > _initialCount)
+              Align(
+                alignment: Alignment.center,
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _isExpanded = !_isExpanded;
+                    });
+                  },
+                  child: Text(
+                    _isExpanded ? 'Daha Az Göster' : 'Tümünü Gör',
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ],
       ),
     );

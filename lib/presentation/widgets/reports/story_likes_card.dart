@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
 
-class StoryLikesCard extends StatelessWidget {
+class StoryLikesCard extends StatefulWidget {
   final Map<String, int> storyLikes;
 
   const StoryLikesCard({super.key, required this.storyLikes});
 
   @override
+  State<StoryLikesCard> createState() => _StoryLikesCardState();
+}
+
+class _StoryLikesCardState extends State<StoryLikesCard> {
+  bool _isExpanded = false;
+  static const int _initialCount = 5;
+
+  @override
   Widget build(BuildContext context) {
+    final entries = widget.storyLikes.entries.toList();
+    final itemCount = entries.length;
+    final displayCount = _isExpanded
+        ? itemCount
+        : (itemCount > _initialCount ? _initialCount : itemCount);
+    final displayedEntries = entries.take(displayCount);
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -62,13 +77,13 @@ class StoryLikesCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          if (storyLikes.isEmpty)
+          if (widget.storyLikes.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
               child: Center(child: Text('Hikaye beğenisi verisi bulunamadı.')),
             )
-          else
-            ...storyLikes.entries.map((entry) {
+          else ...[
+            ...displayedEntries.map((entry) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Row(
@@ -112,6 +127,25 @@ class StoryLikesCard extends StatelessWidget {
                 ),
               );
             }),
+            if (itemCount > _initialCount)
+              Align(
+                alignment: Alignment.center,
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _isExpanded = !_isExpanded;
+                    });
+                  },
+                  child: Text(
+                    _isExpanded ? 'Daha Az Göster' : 'Tümünü Gör',
+                    style: const TextStyle(
+                      color: Color(0xFFE1306C),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ],
       ),
     );

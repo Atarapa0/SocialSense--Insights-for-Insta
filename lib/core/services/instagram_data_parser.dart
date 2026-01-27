@@ -90,6 +90,9 @@ class InstagramDataParser {
     List<String> closeFriends = [];
     List<InstagramLike> storyLikes = [];
     String? username;
+    String? fullName;
+    Map<String, int> topReelsSent = {};
+    Map<String, int> topReelsReceived = {};
 
     // Mesajlar için: klasör adı -> mesaj sayısı
     final Map<String, int> messageCountByFolder = {};
@@ -250,6 +253,21 @@ class InstagramDataParser {
               if (username != null) {
                 debugPrint('✅ Username bulundu ($fileName): $username');
               }
+
+              // Full Name (Display Name) bulma
+              // Genelde string_map_data -> Name -> value
+              if (fullName == null && profileData.containsKey('profile_user')) {
+                try {
+                  final profile = profileData['profile_user'] as List?;
+                  if (profile != null && profile.isNotEmpty) {
+                    final stringList =
+                        profile[0]['string_map_data'] as Map<String, dynamic>?;
+                    if (stringList != null && stringList.containsKey('Name')) {
+                      fullName = stringList['Name']['value'] as String?;
+                    }
+                  }
+                } catch (_) {}
+              }
             }
           } catch (e) {
             // Sessizce geç
@@ -272,12 +290,43 @@ class InstagramDataParser {
               int msgCount = 0;
 
               if (msgData is Map && msgData.containsKey('messages')) {
-                msgCount = (msgData['messages'] as List).length;
+                final msgs = msgData['messages'] as List;
+                msgCount = msgs.length;
+
+                // Reels Analizi
+                final title = utf8.decode(
+                  (msgData['title'] as String? ?? 'Unknown').codeUnits,
+                ); // Karşı tarafın adı (UTF8 fix)
+
+                for (final m in msgs) {
+                  if (m is Map &&
+                      m['share'] != null &&
+                      m['share']['link'] != null) {
+                    final link = m['share']['link'].toString();
+                    if (link.contains('/reel/')) {
+                      var sender = m['sender_name'] as String? ?? 'Unknown';
+                      try {
+                        sender = utf8.decode(sender.codeUnits); // UTF8 fix
+                      } catch (e) {}
+
+                      // Eğer gönderen başlık ile aynıysa -> Received (Karşı taraf gönderdi)
+                      // Not: Başlık genelde Display Name'dir. Sender name de Display Name'dir.
+                      if (sender == title) {
+                        topReelsReceived[sender] =
+                            (topReelsReceived[sender] ?? 0) + 1;
+                      } else {
+                        // Biz gönderdik -> Sent (kime? title'a)
+                        topReelsSent[title] = (topReelsSent[title] ?? 0) + 1;
+                      }
+                    }
+                  }
+                }
               }
 
               messageCountByFolder[folderName] =
                   (messageCountByFolder[folderName] ?? 0) + msgCount;
             } catch (_) {
+              // Hata durumunda sadece dosya sayısını ekle
               messageCountByFolder[folderName] =
                   (messageCountByFolder[folderName] ?? 0) + 1;
             }
@@ -310,6 +359,9 @@ class InstagramDataParser {
       messages: messages,
       closeFriends: closeFriends,
       storyLikes: storyLikes,
+      topReelsSent: topReelsSent,
+      topReelsReceived: topReelsReceived,
+      fullName: fullName,
       dataExportDate: DateTime.now(),
     );
   }
