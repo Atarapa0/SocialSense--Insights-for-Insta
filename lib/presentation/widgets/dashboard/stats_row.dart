@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 
-/// Stats Row (Karşılıklı, Geri Takip Etmiyor, İlgi Alanı, Kayıtlı İçerik)
-/// 2x2 Grid şeklinde istatistik kartları
 class StatsRow extends StatelessWidget {
   final int mutualCount;
   final int notFollowingBackCount;
-  final int interestsCount;
   final int savedCount;
+  final int totalLikes;
+  final int followerCount;
+  final int followingCount;
   final VoidCallback onTap;
 
   const StatsRow({
     super.key,
     required this.mutualCount,
     required this.notFollowingBackCount,
-    required this.interestsCount,
     required this.savedCount,
+    required this.totalLikes,
+    required this.followerCount,
+    required this.followingCount,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
@@ -32,9 +33,9 @@ class StatsRow extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio:
-            1.6, // Yüksekliği artırmak için oranı düşürdük (Overflow fix)
+        childAspectRatio: 1.6, // Yükseklik ayarı
         children: [
+          // 1. Karşılıklı
           _buildStatCard(
             context,
             'Karşılıklı',
@@ -43,6 +44,7 @@ class StatsRow extends StatelessWidget {
             const Color(0xFF00C853), // Yeşil
             isDark,
           ),
+          // 2. Geri Takip Etmeyen
           _buildStatCard(
             context,
             'Geri Takip Etmiyor',
@@ -51,20 +53,40 @@ class StatsRow extends StatelessWidget {
             const Color(0xFFFF9100), // Turuncu
             isDark,
           ),
+          // 3. Toplam Beğeni (İlgi Alanı yerine)
           _buildStatCard(
             context,
-            'İlgi Alanı',
-            interestsCount,
-            Icons.auto_awesome_outlined,
-            const Color(0xFFFFD600), // Sarı
+            'Toplam Beğeni',
+            totalLikes,
+            Icons.favorite_border,
+            const Color(0xFFFF1744), // Kırmızı
             isDark,
           ),
+          // 4. Kayıtlı İçerik
           _buildStatCard(
             context,
             'Kayıtlı İçerik',
             savedCount,
             Icons.bookmark_border,
             const Color(0xFF00B8D4), // Cyan
+            isDark,
+          ),
+          // 5. Takipçi (Yeni)
+          _buildStatCard(
+            context,
+            'Takipçi',
+            followerCount,
+            Icons.group_outlined,
+            const Color(0xFF2962FF), // Mavi
+            isDark,
+          ),
+          // 6. Takip Edilen (Yeni)
+          _buildStatCard(
+            context,
+            'Takip Edilen',
+            followingCount,
+            Icons.person_add_outlined,
+            const Color(0xFF6200EA), // Mor
             isDark,
           ),
         ],
@@ -81,10 +103,7 @@ class StatsRow extends StatelessWidget {
     bool isDark,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 12,
-      ), // Padding azaltıldı
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : AppColors.lightCard,
         borderRadius: BorderRadius.circular(16),
@@ -101,24 +120,22 @@ class StatsRow extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment:
-            MainAxisAlignment.spaceBetween, // Center yerine SpaceBetween
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                // Text taşmasını önle
                 child: Text(
                   label,
                   style: TextStyle(
-                    fontSize: 11, // Font küçültüldü
+                    fontSize: 11,
                     color: isDark
                         ? AppColors.darkTextSecondary
                         : AppColors.lightTextSecondary,
                     fontWeight: FontWeight.w500,
                   ),
-                  maxLines: 2, // 2 satıra izin ver
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -129,19 +146,14 @@ class StatsRow extends StatelessWidget {
                   color: color,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 14,
-                ), // İkon küçültüldü
+                child: Icon(icon, color: Colors.white, size: 14),
               ),
             ],
           ),
-          // Spacer sildim, spaceBetween halleder
           Text(
             _formatNumber(value),
             style: TextStyle(
-              fontSize: 20, // Font küçültüldü
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: isDark
                   ? AppColors.darkTextPrimary

@@ -216,4 +216,7 @@ class InstagramDataProvider extends ChangeNotifier {
 
   /// Reels Alınanlar
   Map<String, int> get topReelsReceived => _data?.topReelsReceived ?? {};
+
+  /// Takip edilenler
+  List<InstagramUser> get following => _data?.following ?? [];
 }

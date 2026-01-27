@@ -376,20 +376,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 16),
 
-          // İstatistikler (Karşılıklı, Geri Takip Etmiyor, vb.)
+          // İstatistikler (6'lı Grid)
           StatsRow(
             mutualCount: hasData ? dataProvider.mutualFollowers.length : 0,
             notFollowingBackCount: hasData
                 ? dataProvider.notFollowingBack.length
                 : 0,
-            // Topic sayısını alıyoruz (her interest objesi topicleri subcategory olarak tutabilir veya tek tek)
-            interestsCount: hasData
-                ? dataProvider.categorizedInterests.values.fold(
-                    0,
-                    (sum, list) => sum + list.length,
-                  )
-                : 0,
             savedCount: hasData ? dataProvider.savedItems.length : 0,
+            totalLikes: hasData ? totalLikes : 0,
+            followerCount: hasData ? followersCount : 0,
+            followingCount: hasData ? dataProvider.following.length : 0,
             onTap: () {
               setState(() => _currentNavIndex = 1);
             },
@@ -939,8 +935,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  /// Uyarılar listesi
-  List<AlertItem> _alerts = [];
+  /// Uyarılar listesi (Dinamik Getter)
+  List<AlertItem> get _alerts {
+    try {
+      final provider = Provider.of<InstagramDataProvider>(context);
+      if (!provider.hasData) return [];
+
+      return [
+        if (provider.notFollowingBack.isNotEmpty)
+          AlertItem(
+            id: 'nf',
+            type: AlertType.followerDrop, // Kırmızı uyarı ikonu
+            title: 'Seni Geri Takip Etmeyenler',
+            description:
+                'Takip ettiğin ${provider.notFollowingBack.length} kişi seni geri takip etmiyor.',
+            timestamp: DateTime.now(),
+            data: {'count': provider.notFollowingBack.length},
+          ),
+        if (provider.ghostFollowersList.isNotEmpty)
+          AlertItem(
+            id: 'gf',
+            type: AlertType.ghostFollower,
+            title: 'Hayalet Takipçiler',
+            description:
+                '${provider.ghostFollowersList.length} takipçi seninle hiç etkileşime girmiyor.',
+            timestamp: DateTime.now(),
+          ),
+      ];
+    } catch (_) {
+      return [];
+    }
+  }
 
   @override
   void initState() {
@@ -949,49 +974,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _initializeAlerts() {
-    _alerts = [
-      AlertItem(
-        id: '1',
-        type: AlertType.followerDrop,
-        title: 'Takipçi Düşüşü',
-        description: 'Son 7 günde 23 takipçi kaybettiniz',
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-        data: {'count': 23},
-      ),
-      AlertItem(
-        id: '2',
-        type: AlertType.ghostFollower,
-        title: 'Hayalet Takipçi Uyarısı',
-        description: 'Hayalet takipçi oranınız %32 oldu',
-        timestamp: DateTime.now().subtract(const Duration(hours: 5)),
-        data: {'rate': 32},
-      ),
-      AlertItem(
-        id: '3',
-        type: AlertType.engagementDrop,
-        title: 'Etkileşim Düşüşü',
-        description: 'Etkileşim oranınız %1.8\'e düştü',
-        timestamp: DateTime.now().subtract(const Duration(days: 1)),
-        data: {'rate': 1.8},
-      ),
-      AlertItem(
-        id: '4',
-        type: AlertType.activeHourChanged,
-        title: 'Aktif Saat Değişti',
-        description: 'Takipçileriniz artık 21:00\'da daha aktif',
-        timestamp: DateTime.now().subtract(const Duration(days: 2)),
-        data: {'hour': 21},
-      ),
-      AlertItem(
-        id: '5',
-        type: AlertType.tip,
-        title: 'İpucu',
-        description:
-            'Akşam saatlerinde paylaşım yaparak etkileşimi artırabilirsiniz',
-        timestamp: DateTime.now().subtract(const Duration(days: 3)),
-        isRead: true,
-      ),
-    ];
+    // Getter kullanıldığı için burası boş
   }
 
   /// Uyarılar ekranı

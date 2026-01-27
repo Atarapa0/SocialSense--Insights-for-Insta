@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:socialsense/core/utils/instagram_launcher.dart'; // Import eklendi
 
 class CloseFriendsCard extends StatefulWidget {
   final List<String> closeFriends;
@@ -82,24 +83,28 @@ class _CloseFriendsCardState extends State<CloseFriendsCard> {
               spacing: 8,
               runSpacing: 8,
               children: displayedFriends.map((friend) {
-                return Chip(
-                  avatar: CircleAvatar(
-                    backgroundColor: Colors.green,
-                    child: Text(
-                      friend.isNotEmpty ? friend[0].toUpperCase() : '?',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                return GestureDetector(
+                  onTap: () =>
+                      InstagramLauncher.openProfile(friend), // Profil açma
+                  child: Chip(
+                    avatar: CircleAvatar(
+                      backgroundColor: Colors.green,
+                      child: Text(
+                        friend.isNotEmpty ? friend[0].toUpperCase() : '?',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  label: Text(friend),
-                  backgroundColor: Colors.green.withOpacity(0.05),
-                  side: BorderSide(color: Colors.green.withOpacity(0.2)),
-                  labelStyle: const TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.w600,
+                    label: Text(friend),
+                    backgroundColor: Colors.green.withOpacity(0.05),
+                    side: BorderSide(color: Colors.green.withOpacity(0.2)),
+                    labelStyle: const TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 );
               }).toList(),

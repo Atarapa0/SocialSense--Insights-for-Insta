@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
+import 'package:socialsense/core/utils/instagram_launcher.dart';
 
 /// Kayıtlı İçerik Hesabı Model
 class SavedContentAccount {
@@ -217,74 +218,81 @@ class _SavedContentDetailCardState extends State<SavedContentDetailCard> {
   }
 
   Widget _buildAccountItem(SavedContentAccount account, bool isDark) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.darkSurface.withValues(alpha: 0.3)
-            : AppColors.lightSurface.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
+    return GestureDetector(
+      onTap: () {
+        // @ işareti varsa temizle
+        final username = account.username.replaceAll('@', '');
+        InstagramLauncher.openProfile(username);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
           color: isDark
-              ? AppColors.darkBorder.withValues(alpha: 0.3)
-              : AppColors.lightBorder.withValues(alpha: 0.5),
+              ? AppColors.darkSurface.withValues(alpha: 0.3)
+              : AppColors.lightSurface.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isDark
+                ? AppColors.darkBorder.withValues(alpha: 0.3)
+                : AppColors.lightBorder.withValues(alpha: 0.5),
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          // Avatar
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: Text(
-                account.username.length > 1
-                    ? account.username[1].toUpperCase()
-                    : '?',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Username
-          Expanded(
-            child: Text(
-              account.username,
-              style: TextStyle(
-                fontSize: 14,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.lightTextPrimary,
-              ),
-            ),
-          ),
-          // Kayıt sayısı (opsiyonel)
-          if (account.savedCount > 0)
+        child: Row(
+          children: [
+            // Avatar
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
-                color: AppColors.darkPrimary.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(
-                '${account.savedCount}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.darkPrimary,
+              child: Center(
+                child: Text(
+                  account.username.length > 1
+                      ? account.username[1].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-        ],
+            const SizedBox(width: 12),
+            // Username
+            Expanded(
+              child: Text(
+                account.username,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
+                ),
+              ),
+            ),
+            // Kayıt sayısı (opsiyonel)
+            if (account.savedCount > 0)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.darkPrimary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${account.savedCount}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkPrimary,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

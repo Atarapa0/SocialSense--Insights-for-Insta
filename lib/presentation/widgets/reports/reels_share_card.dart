@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
+import 'package:socialsense/core/utils/instagram_launcher.dart';
 
 class ReelsShareCard extends StatefulWidget {
   final Map<String, int> sentReels;
@@ -166,49 +167,59 @@ class _ReelsShareCardState extends State<ReelsShareCard> {
     bool isDark,
   ) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: AppColors.darkAccent.withOpacity(0.1),
-            radius: 18,
-            child: Text(
-              entry.key.isNotEmpty ? entry.key[0].toUpperCase() : '?',
-              style: const TextStyle(
-                color: AppColors.darkAccent,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: () => InstagramLauncher.openProfile(entry.key),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: AppColors.darkAccent.withOpacity(0.1),
+                radius: 18,
+                child: Text(
+                  entry.key.isNotEmpty ? entry.key[0].toUpperCase() : '?',
+                  style: const TextStyle(
+                    color: AppColors.darkAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              entry.key, // Username
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.lightTextPrimary,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  entry.key, // Username
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
+                  ),
+                ),
               ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.darkAccent.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '${entry.value} reels',
-              style: const TextStyle(
-                color: AppColors.darkAccent,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.darkAccent.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${entry.value} reels',
+                  style: const TextStyle(
+                    color: AppColors.darkAccent,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
