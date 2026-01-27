@@ -251,6 +251,9 @@ class InstagramData {
   final DateTime loadedAt;
   final Map<String, int> topReelsSent;
   final Map<String, int> topReelsReceived;
+  final Map<String, int> msgSentMap;
+  final Map<String, int> msgReceivedMap;
+  final List<String> pendingRequests;
   final String? fullName;
 
   InstagramData({
@@ -266,6 +269,9 @@ class InstagramData {
     this.storyLikes = const [],
     this.topReelsSent = const {},
     this.topReelsReceived = const {},
+    this.msgSentMap = const {},
+    this.msgReceivedMap = const {},
+    this.pendingRequests = const [],
     this.fullName,
     this.dataExportDate,
     DateTime? loadedAt,
@@ -285,6 +291,9 @@ class InstagramData {
       storyLikes: [],
       topReelsSent: {},
       topReelsReceived: {},
+      msgSentMap: {},
+      msgReceivedMap: {},
+      pendingRequests: [],
       fullName: null,
     );
   }

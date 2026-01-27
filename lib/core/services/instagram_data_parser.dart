@@ -93,6 +93,9 @@ class InstagramDataParser {
     String? fullName;
     Map<String, int> topReelsSent = {};
     Map<String, int> topReelsReceived = {};
+    Map<String, int> msgSentMap = {};
+    Map<String, int> msgReceivedMap = {};
+    List<String> pendingRequests = [];
 
     // Mesajlar için: klasör adı -> mesaj sayısı
     final Map<String, int> messageCountByFolder = {};
@@ -138,7 +141,17 @@ class InstagramDataParser {
             baseName.endsWith('.json')) {
           final content = utf8.decode(file.content as List<int>);
           likes = _parseLikes(content);
+          likes = _parseLikes(content);
           debugPrint('✅ Likes bulundu: ${likes.length} beğeni');
+        }
+        // Bekleyen Takipler
+        else if (baseName.contains('pending_follow_requests') &&
+            baseName.endsWith('.json')) {
+          final content = utf8.decode(file.content as List<int>);
+          pendingRequests = _parsePendingRequests(content);
+          debugPrint(
+            '✅ Pending Requests bulundu: ${pendingRequests.length} kişi',
+          );
         }
         // Yorumlar
         else if (baseName.contains('post_comments') &&
@@ -299,23 +312,28 @@ class InstagramDataParser {
                 ); // Karşı tarafın adı (UTF8 fix)
 
                 for (final m in msgs) {
-                  if (m is Map &&
-                      m['share'] != null &&
-                      m['share']['link'] != null) {
+                  if (m is! Map) continue;
+
+                  var sender = m['sender_name'] as String? ?? 'Unknown';
+                  try {
+                    sender = utf8.decode(sender.codeUnits);
+                  } catch (_) {}
+
+                  // Mesaj Sayımı
+                  if (sender == title) {
+                    msgReceivedMap[sender] = (msgReceivedMap[sender] ?? 0) + 1;
+                  } else {
+                    msgSentMap[title] = (msgSentMap[title] ?? 0) + 1;
+                  }
+
+                  // Reel Analizi
+                  if (m['share'] != null && m['share']['link'] != null) {
                     final link = m['share']['link'].toString();
                     if (link.contains('/reel/')) {
-                      var sender = m['sender_name'] as String? ?? 'Unknown';
-                      try {
-                        sender = utf8.decode(sender.codeUnits); // UTF8 fix
-                      } catch (e) {}
-
-                      // Eğer gönderen başlık ile aynıysa -> Received (Karşı taraf gönderdi)
-                      // Not: Başlık genelde Display Name'dir. Sender name de Display Name'dir.
                       if (sender == title) {
                         topReelsReceived[sender] =
                             (topReelsReceived[sender] ?? 0) + 1;
                       } else {
-                        // Biz gönderdik -> Sent (kime? title'a)
                         topReelsSent[title] = (topReelsSent[title] ?? 0) + 1;
                       }
                     }
@@ -361,6 +379,9 @@ class InstagramDataParser {
       storyLikes: storyLikes,
       topReelsSent: topReelsSent,
       topReelsReceived: topReelsReceived,
+      msgSentMap: msgSentMap,
+      msgReceivedMap: msgReceivedMap,
+      pendingRequests: pendingRequests,
       fullName: fullName,
       dataExportDate: DateTime.now(),
     );
@@ -666,6 +687,27 @@ class InstagramDataParser {
           .toList();
     } catch (e) {
       debugPrint('Story Likes parse hatası: $e');
+      return [];
+    }
+  }
+
+  /// Bekleyen Takip İstekleri parse et
+  static List<String> _parsePendingRequests(String jsonContent) {
+    try {
+      final data = json.decode(jsonContent);
+      List<String> requests = [];
+      if (data is Map &&
+          data.containsKey('relationships_follow_requests_sent')) {
+        final list = data['relationships_follow_requests_sent'] as List? ?? [];
+        for (final item in list) {
+          final stringList = item['string_list_data'] as List?;
+          if (stringList != null && stringList.isNotEmpty) {
+            requests.add(stringList[0]['value'].toString());
+          }
+        }
+      }
+      return requests;
+    } catch (_) {
       return [];
     }
   }

@@ -777,54 +777,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
           DirectMessagesCard(
             totalChats: dataProvider.totalConversationCount,
             totalMessages: dataProvider.totalMessageCount,
-            sentMessages: dataProvider.totalMessageCount ~/ 2, // Tahmin
-            receivedMessages: dataProvider.totalMessageCount ~/ 2, // Tahmin
-            mostMessaged: dataProvider.topMessagedUsers.isEmpty
-                ? [const MessageAnalysis(username: '---', messageCount: 0)]
-                : dataProvider.topMessagedUsers
-                      .take(5)
-                      .map(
-                        (m) => MessageAnalysis(
-                          username: '@${m.participant}',
-                          messageCount: m.messageCount,
-                        ),
-                      )
-                      .toList(),
-            mostMessagedBy: dataProvider.topMessagedUsers.isEmpty
-                ? [const MessageAnalysis(username: '---', messageCount: 0)]
-                : dataProvider.topMessagedUsers
-                      .take(5)
-                      .map(
-                        (m) => MessageAnalysis(
-                          username: '@${m.participant}',
-                          messageCount: m.messageCount,
-                        ),
-                      )
-                      .toList(),
-            onMostMessagedTap: () {
-              if (dataProvider.topMessagedUsers.isEmpty) return;
+            sentMessagesMap: dataProvider.msgSentMap,
+            receivedMessagesMap: dataProvider.msgReceivedMap,
+            onSentTap: () {
+              if (dataProvider.msgSentMap.isEmpty) return;
+              final sorted = dataProvider.msgSentMap.entries.toList()
+                ..sort((a, b) => b.value.compareTo(a.value));
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => FollowerListScreen(
-                    title: 'En Çok Mesajlaşılanlar',
-                    followers: dataProvider.topMessagedUsers
-                        .map((m) => m.participant)
-                        .toList(),
+                    title: 'En Çok Mesaj Attıkların',
+                    followers: sorted.map((e) => e.key).toList(),
                   ),
                 ),
               );
             },
-            onMostMessagedByTap: () {
-              if (dataProvider.topMessagedUsers.isEmpty) return;
+            onReceivedTap: () {
+              if (dataProvider.msgReceivedMap.isEmpty) return;
+              final sorted = dataProvider.msgReceivedMap.entries.toList()
+                ..sort((a, b) => b.value.compareTo(a.value));
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => FollowerListScreen(
-                    title: 'Sana En Çok Yazanlar',
-                    followers: dataProvider.topMessagedUsers
-                        .map((m) => m.participant)
-                        .toList(),
+                    title: 'Sana En Çok Mesaj Atanlar',
+                    followers: sorted.map((e) => e.key).toList(),
                   ),
                 ),
               );
@@ -838,6 +816,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ReelsShareCard(
               sentReels: dataProvider.topReelsSent,
               receivedReels: dataProvider.topReelsReceived,
+              onSentTap: () {
+                if (dataProvider.topReelsSent.isEmpty) return;
+                final sorted = dataProvider.topReelsSent.entries.toList()
+                  ..sort((a, b) => b.value.compareTo(a.value));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FollowerListScreen(
+                      title: 'En Çok Reels Attıkların',
+                      followers: sorted.map((e) => e.key).toList(),
+                    ),
+                  ),
+                );
+              },
+              onReceivedTap: () {
+                if (dataProvider.topReelsReceived.isEmpty) return;
+                final sorted = dataProvider.topReelsReceived.entries.toList()
+                  ..sort((a, b) => b.value.compareTo(a.value));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FollowerListScreen(
+                      title: 'Sana En Çok Reels Atanlar',
+                      followers: sorted.map((e) => e.key).toList(),
+                    ),
+                  ),
+                );
+              },
             ),
 
           const SizedBox(height: 24),
@@ -959,6 +965,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             title: 'Hayalet Takipçiler',
             description:
                 '${provider.ghostFollowersList.length} takipçi seninle hiç etkileşime girmiyor.',
+            timestamp: DateTime.now(),
+          ),
+        if (provider.pendingRequests.isNotEmpty)
+          AlertItem(
+            id: 'pr',
+            type: AlertType.activeHourChanged, // Turuncu/Dikkat çekici
+            title: 'Bekleyen Takip İstekleri',
+            description:
+                '${provider.pendingRequests.length} kişi takip isteğinizi henüz kabul etmedi.',
             timestamp: DateTime.now(),
           ),
       ];

@@ -2,41 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/utils/instagram_launcher.dart';
 
-class ReelsShareCard extends StatefulWidget {
+class ReelsShareCard extends StatelessWidget {
   final Map<String, int> sentReels;
   final Map<String, int> receivedReels;
+  final VoidCallback? onSentTap;
+  final VoidCallback? onReceivedTap;
 
   const ReelsShareCard({
     super.key,
     required this.sentReels,
     required this.receivedReels,
+    this.onSentTap,
+    this.onReceivedTap,
   });
-
-  @override
-  State<ReelsShareCard> createState() => _ReelsShareCardState();
-}
-
-class _ReelsShareCardState extends State<ReelsShareCard> {
-  bool _isSentExpanded = false;
-  bool _isReceivedExpanded = false;
-  static const int _initialCount = 3;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final sortedSent = widget.sentReels.entries.toList()
+    final sortedSent = sentReels.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-
-    final sortedReceived = widget.receivedReels.entries.toList()
+    final sortedReceived = receivedReels.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-
-    final sentCount = sortedSent.length;
-    final receivedCount = sortedReceived.length;
 
     // Veri yoksa gösterme
-    if (sentCount == 0 && receivedCount == 0) {
+    if (sortedSent.isEmpty && sortedReceived.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -44,7 +35,7 @@ class _ReelsShareCardState extends State<ReelsShareCard> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : AppColors.lightCard,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
         ),
@@ -52,18 +43,18 @@ class _ReelsShareCardState extends State<ReelsShareCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
+          // Başlık
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.darkAccent.withOpacity(0.1),
+                  color: Colors.pink.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.movie_filter_outlined,
-                  color: AppColors.darkAccent,
+                  color: Colors.pink,
                   size: 24,
                 ),
               ),
@@ -82,7 +73,7 @@ class _ReelsShareCardState extends State<ReelsShareCard> {
                     ),
                   ),
                   Text(
-                    'En çok kiminle reels paylaşıyorsun?',
+                    'Reels paylaşım istatistikleri',
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark
@@ -97,128 +88,171 @@ class _ReelsShareCardState extends State<ReelsShareCard> {
 
           const SizedBox(height: 24),
 
-          // 1. Bölüm: En Çok Gönderdiklerin
-          if (sentCount > 0) ...[
-            _buildSectionHeader(context, 'Senin Gönderdiklerin', isDark),
-            const SizedBox(height: 12),
-            ...sortedSent
-                .take(_isSentExpanded ? sentCount : _initialCount)
-                .map((e) => _buildUserRow(context, e, isDark)),
-            if (sentCount > _initialCount)
-              Center(
-                child: TextButton(
-                  onPressed: () =>
-                      setState(() => _isSentExpanded = !_isSentExpanded),
-                  child: Text(
-                    _isSentExpanded ? 'Daha Az Göster' : 'Tümünü Gör',
-                    style: const TextStyle(color: AppColors.darkAccent),
+          // İki Sütunlu Yapı
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Sol: Senin Attıkların
+                Expanded(
+                  child: _buildDataColumn(
+                    context,
+                    title: 'Senin Attıkların',
+                    data: sortedSent,
+                    isDark: isDark,
+                    accentColor: Colors.pink,
+                    onSeeAll: onSentTap,
                   ),
                 ),
-              ),
-          ],
 
-          if (sentCount > 0 && receivedCount > 0) ...[
-            const SizedBox(height: 20),
-            Divider(
-              color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                // Dikey Çizgi
+                Container(
+                  width: 1,
+                  color: isDark ? Colors.white12 : Colors.black12,
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+
+                // Sağ: Sana Gelenler
+                Expanded(
+                  child: _buildDataColumn(
+                    context,
+                    title: 'Sana Gelenler',
+                    data: sortedReceived,
+                    isDark: isDark,
+                    accentColor: Colors.purple,
+                    onSeeAll: onReceivedTap,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-          ],
-
-          // 2. Bölüm: Sana Gönderenler
-          if (receivedCount > 0) ...[
-            _buildSectionHeader(context, 'Sana Gönderenler', isDark),
-            const SizedBox(height: 12),
-            ...sortedReceived
-                .take(_isReceivedExpanded ? receivedCount : _initialCount)
-                .map((e) => _buildUserRow(context, e, isDark)),
-            if (receivedCount > _initialCount)
-              Center(
-                child: TextButton(
-                  onPressed: () => setState(
-                    () => _isReceivedExpanded = !_isReceivedExpanded,
-                  ),
-                  child: Text(
-                    _isReceivedExpanded ? 'Daha Az Göster' : 'Tümünü Gör',
-                    style: const TextStyle(color: AppColors.darkAccent),
-                  ),
-                ),
-              ),
-          ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, bool isDark) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-      ),
+  Widget _buildDataColumn(
+    BuildContext context, {
+    required String title,
+    required List<MapEntry<String, int>> data,
+    required bool isDark,
+    required Color accentColor,
+    VoidCallback? onSeeAll,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Kolon Başlığı
+        Row(
+          children: [
+            Icon(Icons.arrow_right_alt, color: accentColor, size: 16),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Liste Elemanları
+        if (data.isEmpty)
+          const Text(
+            'Veri yok',
+            style: TextStyle(color: Colors.grey, fontSize: 12),
+          )
+        else
+          ...data.take(5).map((e) => _buildRowItem(context, e, isDark)),
+
+        // Tümü Butonu
+        if (data.length > 5) ...[
+          const SizedBox(height: 8),
+          Center(
+            child: InkWell(
+              onTap: onSeeAll,
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                child: Text(
+                  'Tümü',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: accentColor,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
-  Widget _buildUserRow(
+  Widget _buildRowItem(
     BuildContext context,
     MapEntry<String, int> entry,
     bool isDark,
   ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: () => InstagramLauncher.openProfile(entry.key),
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: AppColors.darkAccent.withOpacity(0.1),
-                radius: 18,
-                child: Text(
-                  entry.key.isNotEmpty ? entry.key[0].toUpperCase() : '?',
-                  style: const TextStyle(
-                    color: AppColors.darkAccent,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
+    return GestureDetector(
+      onTap: () => InstagramLauncher.openProfile(entry.key),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(
+          children: [
+            // Avatar
+            CircleAvatar(
+              radius: 10,
+              backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+              child: Text(
+                entry.key.isNotEmpty ? entry.key[0].toUpperCase() : '?',
+                style: TextStyle(
+                  fontSize: 9,
+                  color: isDark ? Colors.white : Colors.black,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  entry.key, // Username
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.lightTextPrimary,
-                  ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                entry.key,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark
+                      ? Colors.white.withOpacity(0.9)
+                      : Colors.black87,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                '${entry.value}',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white70 : Colors.black54,
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.darkAccent.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${entry.value} reels',
-                  style: const TextStyle(
-                    color: AppColors.darkAccent,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

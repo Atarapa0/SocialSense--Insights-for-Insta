@@ -219,4 +219,13 @@ class InstagramDataProvider extends ChangeNotifier {
 
   /// Takip edilenler
   List<InstagramUser> get following => _data?.following ?? [];
+
+  /// Mesaj Gönderilenler
+  Map<String, int> get msgSentMap => _data?.msgSentMap ?? {};
+
+  /// Mesaj Alınanlar
+  Map<String, int> get msgReceivedMap => _data?.msgReceivedMap ?? {};
+
+  /// Bekleyen İstekler
+  List<String> get pendingRequests => _data?.pendingRequests ?? [];
 }

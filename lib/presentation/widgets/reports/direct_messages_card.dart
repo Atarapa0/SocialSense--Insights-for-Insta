@@ -1,38 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
-
-class MessageAnalysis {
-  final String username;
-  final int messageCount;
-  const MessageAnalysis({required this.username, required this.messageCount});
-}
+import 'package:socialsense/core/utils/instagram_launcher.dart';
 
 class DirectMessagesCard extends StatelessWidget {
   final int totalChats;
   final int totalMessages;
-  final int sentMessages;
-  final int receivedMessages;
-  final List<MessageAnalysis> mostMessaged;
-  final List<MessageAnalysis> mostMessagedBy;
-  final VoidCallback? onMostMessagedTap;
-  final VoidCallback? onMostMessagedByTap;
+  final Map<String, int> sentMessagesMap;
+  final Map<String, int> receivedMessagesMap;
+  final VoidCallback? onSentTap;
+  final VoidCallback? onReceivedTap;
 
   const DirectMessagesCard({
     super.key,
     required this.totalChats,
     required this.totalMessages,
-    required this.sentMessages,
-    required this.receivedMessages,
-    required this.mostMessaged,
-    required this.mostMessagedBy,
-    this.onMostMessagedTap,
-    this.onMostMessagedByTap,
+    required this.sentMessagesMap,
+    required this.receivedMessagesMap,
+    this.onSentTap,
+    this.onReceivedTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    final sentTotal = sentMessagesMap.values.fold(0, (a, b) => a + b);
+    final receivedTotal = receivedMessagesMap.values.fold(0, (a, b) => a + b);
+
+    final sortedSent = sentMessagesMap.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final sortedReceived = receivedMessagesMap.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -72,7 +71,7 @@ class DirectMessagesCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '$totalChats sohbet, $totalMessages mesaj',
+                    '$totalChats sohbet, toplam $totalMessages mesaj',
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark
@@ -87,14 +86,14 @@ class DirectMessagesCard extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // İstatistikler (Gelen/Giden)
+          // İstatistik Kutucukları
           Row(
             children: [
               Expanded(
                 child: _buildStatBox(
                   context,
-                  'Giden',
-                  sentMessages,
+                  'Toplam Giden',
+                  sentTotal,
                   Colors.blue,
                   isDark,
                 ),
@@ -103,8 +102,8 @@ class DirectMessagesCard extends StatelessWidget {
               Expanded(
                 child: _buildStatBox(
                   context,
-                  'Gelen',
-                  receivedMessages,
+                  'Toplam Gelen',
+                  receivedTotal,
                   Colors.purple,
                   isDark,
                 ),
@@ -114,27 +113,44 @@ class DirectMessagesCard extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Liste
-          const Text(
-            'En Çok Mesajlaşılanlar',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
+          Divider(color: isDark ? Colors.white10 : Colors.black12, height: 1),
+          const SizedBox(height: 20),
 
-          if (mostMessaged.isEmpty)
-            const Center(child: Text('Veri yok'))
-          else
-            ...mostMessaged.map((m) => _buildUserRow(context, m, isDark)),
+          // Listeler (Split View - Clean Design)
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _buildSimpleList(
+                    context,
+                    "Senin Attıkların",
+                    sortedSent,
+                    onSentTap,
+                    isDark,
+                    Colors.blue,
+                  ),
+                ),
 
-          if (mostMessaged.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Center(
-              child: TextButton(
-                onPressed: onMostMessagedTap,
-                child: const Text('Tümünü Gör'),
-              ),
+                Container(
+                  width: 1,
+                  color: isDark ? Colors.white12 : Colors.black12,
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+
+                Expanded(
+                  child: _buildSimpleList(
+                    context,
+                    "Sana Gelenler",
+                    sortedReceived,
+                    onReceivedTap,
+                    isDark,
+                    Colors.purple,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -148,7 +164,7 @@ class DirectMessagesCard extends StatelessWidget {
     bool isDark,
   ) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
@@ -159,17 +175,17 @@ class DirectMessagesCard extends StatelessWidget {
             label,
             style: TextStyle(
               color: color,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
-              fontSize: 12,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            _formatNumber(value),
+            '$value',
             style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
-              fontSize: 18,
+              color: isDark ? Colors.white : Colors.black87,
             ),
           ),
         ],
@@ -177,52 +193,107 @@ class DirectMessagesCard extends StatelessWidget {
     );
   }
 
-  Widget _buildUserRow(
+  Widget _buildSimpleList(
     BuildContext context,
-    MessageAnalysis item,
+    String title,
+    List<MapEntry<String, int>> items,
+    VoidCallback? onSeeAll,
     bool isDark,
+    Color accentColor,
   ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-            child: Text(
-              item.username.isNotEmpty && item.username.startsWith('@')
-                  ? item.username[1].toUpperCase()
-                  : (item.username.isNotEmpty
-                        ? item.username[0].toUpperCase()
-                        : '?'),
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.bold,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.arrow_right_alt, color: accentColor, size: 16),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        if (items.isEmpty)
+          const Text(
+            "Veri yok",
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+
+        ...items
+            .take(5)
+            .map(
+              (e) => GestureDetector(
+                onTap: () => InstagramLauncher.openProfile(e.key),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          e.key,
+                          style: const TextStyle(fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.white10
+                              : Colors.black.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '${e.value}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+        if (items.length > 5) ...[
+          const SizedBox(height: 8),
+          Center(
+            child: InkWell(
+              onTap: onSeeAll,
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                child: Text(
+                  "Tümü",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: accentColor,
+                  ),
+                ),
               ),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              item.username,
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-          ),
-          Text(
-            _formatNumber(item.messageCount),
-            style: TextStyle(
-              color: isDark ? Colors.grey[400] : Colors.grey[600],
-              fontSize: 12,
-            ),
-          ),
         ],
-      ),
-    );
-  }
-
-  String _formatNumber(int number) {
-    return number.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.',
+      ],
     );
   }
 }
