@@ -331,6 +331,7 @@ class InstagramData {
   final Map<String, int> msgSentMap;
   final Map<String, int> msgReceivedMap;
   final List<String> pendingRequests;
+  final List<String> receivedRequests;
   final String? fullName;
 
   InstagramData({
@@ -349,6 +350,7 @@ class InstagramData {
     this.msgSentMap = const {},
     this.msgReceivedMap = const {},
     this.pendingRequests = const [],
+    this.receivedRequests = const [],
     this.fullName,
     this.dataExportDate,
     DateTime? loadedAt,
@@ -371,6 +373,7 @@ class InstagramData {
       msgSentMap: {},
       msgReceivedMap: {},
       pendingRequests: [],
+      receivedRequests: [],
       fullName: null,
     );
   }
@@ -795,6 +798,7 @@ class InstagramData {
     'msgSentMap': msgSentMap,
     'msgReceivedMap': msgReceivedMap,
     'pendingRequests': pendingRequests,
+    'receivedRequests': receivedRequests,
     'fullName': fullName,
   };
 
@@ -834,6 +838,7 @@ class InstagramData {
     msgSentMap: Map<String, int>.from(map['msgSentMap'] ?? {}),
     msgReceivedMap: Map<String, int>.from(map['msgReceivedMap'] ?? {}),
     pendingRequests: List<String>.from(map['pendingRequests'] ?? []),
+    receivedRequests: List<String>.from(map['receivedRequests'] ?? []),
     fullName: map['fullName'],
   );
 }

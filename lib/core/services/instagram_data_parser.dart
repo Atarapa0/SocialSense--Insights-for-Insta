@@ -96,6 +96,7 @@ class InstagramDataParser {
     Map<String, int> msgSentMap = {};
     Map<String, int> msgReceivedMap = {};
     List<String> pendingRequests = [];
+    List<String> receivedRequests = []; // Add
 
     // Mesajlar için: klasör adı -> mesaj sayısı
     final Map<String, int> messageCountByFolder = {};
@@ -151,6 +152,16 @@ class InstagramDataParser {
           pendingRequests = _parsePendingRequests(content);
           debugPrint(
             '✅ Pending Requests bulundu: ${pendingRequests.length} kişi',
+          );
+        }
+        // Gelen Takip İstekleri
+        else if ((baseName.contains('follow_requests_received') ||
+                baseName.contains('recent_follow_requests')) &&
+            baseName.endsWith('.json')) {
+          final content = utf8.decode(file.content as List<int>);
+          receivedRequests = _parseReceivedRequests(content);
+          debugPrint(
+            '✅ Received Requests bulundu: ${receivedRequests.length} kişi',
           );
         }
         // Yorumlar
@@ -382,6 +393,7 @@ class InstagramDataParser {
       msgSentMap: msgSentMap,
       msgReceivedMap: msgReceivedMap,
       pendingRequests: pendingRequests,
+      receivedRequests: receivedRequests,
       fullName: fullName,
       dataExportDate: DateTime.now(),
     );
@@ -703,6 +715,30 @@ class InstagramDataParser {
           final stringList = item['string_list_data'] as List?;
           if (stringList != null && stringList.isNotEmpty) {
             requests.add(stringList[0]['value'].toString());
+          }
+        }
+      }
+      return requests;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Gelen Takip İstekleri parse et
+  static List<String> _parseReceivedRequests(String jsonContent) {
+    try {
+      final data = json.decode(jsonContent);
+      List<String> requests = [];
+      if (data is Map) {
+        for (final key in data.keys) {
+          if (key.toString().contains('follow_requests') && data[key] is List) {
+            final list = data[key] as List;
+            for (final item in list) {
+              final stringList = item['string_list_data'] as List?;
+              if (stringList != null && stringList.isNotEmpty) {
+                requests.add(stringList[0]['value'].toString());
+              }
+            }
           }
         }
       }

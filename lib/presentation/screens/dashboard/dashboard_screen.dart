@@ -26,6 +26,7 @@ import 'package:socialsense/presentation/widgets/reports/reels_share_card.dart';
 import 'package:socialsense/presentation/widgets/reports/interests_distribution_card.dart';
 import 'package:socialsense/presentation/widgets/reports/story_likes_card.dart';
 import 'package:socialsense/presentation/widgets/reports/close_friends_card.dart';
+import 'package:socialsense/presentation/widgets/reports/follow_requests_card.dart';
 import 'package:socialsense/presentation/widgets/reports/saved_content_detail_card.dart';
 import 'package:socialsense/presentation/widgets/alerts/alert_card.dart';
 import 'package:socialsense/presentation/widgets/settings/settings_tile.dart';
@@ -383,10 +384,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             notFollowingBackCount: hasData
                 ? dataProvider.notFollowingBack.length
                 : 0,
+            interestsCount: hasData ? dataProvider.interests.length : 0,
             savedCount: hasData ? dataProvider.savedItems.length : 0,
-            totalLikes: hasData ? totalLikes : 0,
-            followerCount: hasData ? followersCount : 0,
-            followingCount: hasData ? dataProvider.following.length : 0,
             onTap: () {
               setState(() => _currentNavIndex = 1);
             },
@@ -926,6 +925,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 24),
 
+          // Takip İstekleri
+          if (hasData)
+            FollowRequestsCard(
+              sentRequests: dataProvider.pendingRequests,
+              receivedRequests: dataProvider.receivedRequests,
+            ),
+
+          const SizedBox(height: 24),
+
           // Kayıtlı İçerikler (Detaylı)
           SavedContentDetailCard(
             totalSavedContent: savedAccountsList.length,
@@ -991,7 +999,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   /// Uyarılar ekranı
   Widget _buildAlertsContent(AppLocalizations l10n, bool isDark) {
-    if (_alerts.isEmpty) {
+    final alerts = _getAlerts(l10n);
+
+    if (alerts.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1037,7 +1047,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
-    final unreadCount = _alerts.where((a) => !a.isRead).length;
+    final unreadCount = alerts.where((a) => !a.isRead).length;
 
     return Column(
       children: [
@@ -1072,12 +1082,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                 ],
               ),
-              if (_alerts.isNotEmpty)
+              if (alerts.isNotEmpty)
                 TextButton.icon(
                   onPressed: () {
-                    setState(() {
-                      _alerts.clear();
-                    });
+                    // Clear all functionality not supported for dynamic alerts
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(l10n.get('clear_all')),
@@ -1112,22 +1120,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: _alerts.length,
+            itemCount: alerts.length,
             itemBuilder: (context, index) {
-              final alert = _alerts[index];
-              return AlertCard(
-                alert: alert,
-                onTap: () {
-                  setState(() {
-                    _alerts[index] = alert.copyWith(isRead: true);
-                  });
-                },
-                onDismiss: () {
-                  setState(() {
-                    _alerts.removeAt(index);
-                  });
-                },
-              );
+              final alert = alerts[index];
+              return AlertCard(alert: alert, onTap: () {}, onDismiss: () {});
             },
           ),
         ),

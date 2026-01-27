@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 
+/// Stats Row (Karşılıklı, Geri Takip Etmiyor, İlgi Alanı, Kayıtlı İçerik)
+/// 2x2 Grid şeklinde istatistik kartları
 class StatsRow extends StatelessWidget {
   final int mutualCount;
   final int notFollowingBackCount;
+  final int interestsCount;
   final int savedCount;
-  final int totalLikes;
-  final int followerCount;
-  final int followingCount;
   final VoidCallback onTap;
 
   const StatsRow({
     super.key,
     required this.mutualCount,
     required this.notFollowingBackCount,
+    required this.interestsCount,
     required this.savedCount,
-    required this.totalLikes,
-    required this.followerCount,
-    required this.followingCount,
     required this.onTap,
   });
 
@@ -53,13 +51,13 @@ class StatsRow extends StatelessWidget {
             const Color(0xFFFF9100), // Turuncu
             isDark,
           ),
-          // 3. Toplam Beğeni (İlgi Alanı yerine)
+          // 3. İlgi Alanı
           _buildStatCard(
             context,
-            'Toplam Beğeni',
-            totalLikes,
-            Icons.favorite_border,
-            const Color(0xFFFF1744), // Kırmızı
+            'İlgi Alanı',
+            interestsCount,
+            Icons.auto_awesome_outlined,
+            const Color(0xFFFFD600), // Sarı (Amber)
             isDark,
           ),
           // 4. Kayıtlı İçerik
@@ -69,24 +67,6 @@ class StatsRow extends StatelessWidget {
             savedCount,
             Icons.bookmark_border,
             const Color(0xFF00B8D4), // Cyan
-            isDark,
-          ),
-          // 5. Takipçi (Yeni)
-          _buildStatCard(
-            context,
-            'Takipçi',
-            followerCount,
-            Icons.group_outlined,
-            const Color(0xFF2962FF), // Mavi
-            isDark,
-          ),
-          // 6. Takip Edilen (Yeni)
-          _buildStatCard(
-            context,
-            'Takip Edilen',
-            followingCount,
-            Icons.person_add_outlined,
-            const Color(0xFF6200EA), // Mor
             isDark,
           ),
         ],

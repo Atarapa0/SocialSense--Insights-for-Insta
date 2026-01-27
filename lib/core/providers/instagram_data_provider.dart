@@ -280,4 +280,6 @@ class InstagramDataProvider extends ChangeNotifier {
 
   /// Bekleyen İstekler
   List<String> get pendingRequests => _data?.pendingRequests ?? [];
+  List<String> get receivedRequests => _data?.receivedRequests ?? [];
+  String? get fullName => _data?.fullName;
 }
