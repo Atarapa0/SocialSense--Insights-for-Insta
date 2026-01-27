@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/utils/instagram_launcher.dart';
+import 'package:socialsense/core/localization/app_localizations.dart';
 
 class ReelsShareCard extends StatelessWidget {
   final Map<String, int> sentReels;
@@ -20,6 +21,7 @@ class ReelsShareCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
 
     final sortedSent = sentReels.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -63,7 +65,7 @@ class ReelsShareCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Reels Etkileşimleri',
+                    l10n.get('reels_interactions'),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -73,7 +75,7 @@ class ReelsShareCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Reels paylaşım istatistikleri',
+                    l10n.get('reels_stats_subtitle'),
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark
@@ -97,11 +99,12 @@ class ReelsShareCard extends StatelessWidget {
                 Expanded(
                   child: _buildDataColumn(
                     context,
-                    title: 'Senin Attıkların',
+                    title: l10n.get('sent_by_you'),
                     data: sortedSent,
                     isDark: isDark,
                     accentColor: Colors.pink,
                     onSeeAll: onSentTap,
+                    l10n: l10n,
                   ),
                 ),
 
@@ -116,11 +119,12 @@ class ReelsShareCard extends StatelessWidget {
                 Expanded(
                   child: _buildDataColumn(
                     context,
-                    title: 'Sana Gelenler',
+                    title: l10n.get('received_by_you'),
                     data: sortedReceived,
                     isDark: isDark,
                     accentColor: Colors.purple,
                     onSeeAll: onReceivedTap,
+                    l10n: l10n,
                   ),
                 ),
               ],
@@ -138,6 +142,7 @@ class ReelsShareCard extends StatelessWidget {
     required bool isDark,
     required Color accentColor,
     VoidCallback? onSeeAll,
+    required AppLocalizations l10n,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,9 +169,9 @@ class ReelsShareCard extends StatelessWidget {
 
         // Liste Elemanları
         if (data.isEmpty)
-          const Text(
-            'Veri yok',
-            style: TextStyle(color: Colors.grey, fontSize: 12),
+          Text(
+            l10n.get('no_data'),
+            style: const TextStyle(color: Colors.grey, fontSize: 12),
           )
         else
           ...data.take(5).map((e) => _buildRowItem(context, e, isDark)),
@@ -184,7 +189,7 @@ class ReelsShareCard extends StatelessWidget {
                   vertical: 6,
                 ),
                 child: Text(
-                  'Tümü',
+                  l10n.get('see_all'),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,

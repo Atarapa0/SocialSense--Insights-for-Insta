@@ -246,6 +246,22 @@ class AppLocalizations {
     'fri': 'Cum',
     'sat': 'Cmt',
     'sun': 'Paz',
+    'chats': 'sohbet',
+    'direct_messages': 'Direkt Mesajlar',
+    'reels_interactions': 'Reels Etkileşimleri',
+    'sent_by_you': 'Senin Attıkların',
+    'received_by_you': 'Sana Gelenler',
+    'total_sent': 'Toplam Giden',
+    'total_received': 'Toplam Gelen',
+    'no_data': 'Veri yok',
+    'see_all': 'Tümü',
+    'pending_follow_requests_title': 'Bekleyen Takip İstekleri',
+    'pending_follow_requests_desc': 'kişi takip isteğinizi henüz kabul etmedi',
+    'most_messaged_sent': 'En Çok Mesaj Attıkların',
+    'most_messaged_received': 'Sana En Çok Mesaj Atanlar',
+    'most_reels_sent': 'En Çok Reels Gönderdiklerin',
+    'most_reels_received': 'Sana En Çok Reels Gönderenler',
+    'reels_stats_subtitle': 'Reels paylaşım istatistikleri',
   };
 
   // ==========================================
@@ -461,6 +477,23 @@ class AppLocalizations {
     'fri': 'Fri',
     'sat': 'Sat',
     'sun': 'Sun',
+    'chats': 'chats',
+    'direct_messages': 'Direct Messages',
+    'reels_interactions': 'Reels Interactions',
+    'sent_by_you': 'Sent by You',
+    'received_by_you': 'Received by You',
+    'total_sent': 'Total Sent',
+    'total_received': 'Total Received',
+    'no_data': 'No data',
+    'see_all': 'All',
+    'pending_follow_requests_title': 'Pending Follow Requests',
+    'pending_follow_requests_desc':
+        'people haven\'t accepted your follow request yet',
+    'most_messaged_sent': 'Most Messaged (Sent)',
+    'most_messaged_received': 'Most Messaged (Received)',
+    'most_reels_sent': 'Top Reels Sent',
+    'most_reels_received': 'Top Reels Received',
+    'reels_stats_subtitle': 'Reels sharing statistics',
   };
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:socialsense/presentation/screens/welcome/welcome_screen.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
 import 'package:socialsense/core/providers/instagram_data_provider.dart';
@@ -787,7 +788,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => FollowerListScreen(
-                    title: 'En Çok Mesaj Attıkların',
+                    title: l10n.get('most_messaged_sent'),
                     followers: sorted.map((e) => e.key).toList(),
                   ),
                 ),
@@ -801,7 +802,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => FollowerListScreen(
-                    title: 'Sana En Çok Mesaj Atanlar',
+                    title: l10n.get('most_messaged_received'),
                     followers: sorted.map((e) => e.key).toList(),
                   ),
                 ),
@@ -824,7 +825,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (_) => FollowerListScreen(
-                      title: 'En Çok Reels Attıkların',
+                      title: l10n.get('most_reels_sent'),
                       followers: sorted.map((e) => e.key).toList(),
                     ),
                   ),
@@ -838,7 +839,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (_) => FollowerListScreen(
-                      title: 'Sana En Çok Reels Atanlar',
+                      title: l10n.get('most_reels_received'),
                       followers: sorted.map((e) => e.key).toList(),
                     ),
                   ),
@@ -941,8 +942,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  /// Uyarılar listesi (Dinamik Getter)
-  List<AlertItem> get _alerts {
+  /// Uyarılar listesi (Dinamik Metot)
+  List<AlertItem> _getAlerts(AppLocalizations l10n) {
     try {
       final provider = Provider.of<InstagramDataProvider>(context);
       if (!provider.hasData) return [];
@@ -951,10 +952,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (provider.notFollowingBack.isNotEmpty)
           AlertItem(
             id: 'nf',
-            type: AlertType.followerDrop, // Kırmızı uyarı ikonu
-            title: 'Seni Geri Takip Etmeyenler',
-            description:
-                'Takip ettiğin ${provider.notFollowingBack.length} kişi seni geri takip etmiyor.',
+            type: AlertType.followerDrop,
+            title: l10n.get('unfollowers'),
+            description: l10n
+                .get('unfollowers_desc')
+                .replaceFirst('%count', '${provider.notFollowingBack.length}'),
             timestamp: DateTime.now(),
             data: {'count': provider.notFollowingBack.length},
           ),
@@ -962,18 +964,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
           AlertItem(
             id: 'gf',
             type: AlertType.ghostFollower,
-            title: 'Hayalet Takipçiler',
+            title: l10n.get('ghost_followers'),
             description:
-                '${provider.ghostFollowersList.length} takipçi seninle hiç etkileşime girmiyor.',
+                '${provider.ghostFollowersList.length} ${l10n.get('ghost_follower_desc')}',
             timestamp: DateTime.now(),
           ),
         if (provider.pendingRequests.isNotEmpty)
           AlertItem(
             id: 'pr',
-            type: AlertType.activeHourChanged, // Turuncu/Dikkat çekici
-            title: 'Bekleyen Takip İstekleri',
+            type: AlertType.activeHourChanged,
+            title: l10n.get('pending_follow_requests_title'),
             description:
-                '${provider.pendingRequests.length} kişi takip isteğinizi henüz kabul etmedi.',
+                '${provider.pendingRequests.length} ${l10n.get('pending_follow_requests_desc')}',
             timestamp: DateTime.now(),
           ),
       ];
@@ -985,11 +987,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeAlerts();
-  }
-
-  void _initializeAlerts() {
-    // Getter kullanıldığı için burası boş
   }
 
   /// Uyarılar ekranı
@@ -1400,14 +1397,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
 
                 // Uygulamayı paylaş
+                // Uygulamayı paylaş
                 SettingsTile(
                   icon: Icons.share_outlined,
                   title: l10n.get('share_app'),
                   iconColor: const Color(0xFF2ECC71),
-                  showDivider: false,
+                  showDivider: true,
                   onTap: () {
                     // TODO: Paylaşım sheet'i aç
                   },
+                ),
+
+                // Verileri Sil
+                SettingsTile(
+                  icon: Icons.delete_outline,
+                  title: l10n.get('delete_data'),
+                  iconColor: Colors.red,
+                  showDivider: false,
+                  onTap: () => _showDeleteConfirmDialog(l10n, isDark),
                 ),
               ],
             ),
@@ -1531,8 +1538,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
+
+              // Verileri temizle
+              await context.read<InstagramDataProvider>().clearData();
+
+              if (!mounted) return;
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(l10n.get('data_deleted')),
@@ -1540,8 +1553,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   backgroundColor: Colors.red,
                 ),
               );
-              // Welcome ekranına yönlendir
-              Navigator.pushReplacementNamed(context, '/');
+
+              // Welcome ekranına yönlendir ve geçmişi sil
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                (route) => false,
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

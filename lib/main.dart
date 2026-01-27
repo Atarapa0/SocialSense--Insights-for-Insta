@@ -5,7 +5,7 @@ import 'package:socialsense/core/localization/app_localizations.dart';
 import 'package:socialsense/core/theme/app_theme.dart';
 import 'package:socialsense/core/providers/instagram_data_provider.dart';
 import 'package:socialsense/presentation/providers/app_settings_provider.dart';
-import 'package:socialsense/presentation/screens/welcome/welcome_screen.dart';
+import 'package:socialsense/presentation/screens/splash/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +16,7 @@ void main() async {
 
   // Instagram veri provider'ı
   final dataProvider = InstagramDataProvider();
-  await dataProvider.loadLastUpdateDate();
+  // Veriyi Splash Screen'de diskten yükleyeceğiz
 
   runApp(
     MultiProvider(
@@ -59,8 +59,8 @@ class SocialSenseApp extends StatelessWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
 
-          // Ana sayfa
-          home: const WelcomeScreen(),
+          // Başlangıç ekranı (Splash Screen)
+          home: const SplashScreen(),
         );
       },
     );

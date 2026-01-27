@@ -50,6 +50,19 @@ class InstagramUser {
       followDate: followDate,
     );
   }
+  Map<String, dynamic> toMap() => {
+    'username': username,
+    'profile_url': profileUrl,
+    'follow_date': followDate?.millisecondsSinceEpoch,
+  };
+
+  factory InstagramUser.fromMap(Map<String, dynamic> map) => InstagramUser(
+    username: map['username'],
+    profileUrl: map['profile_url'],
+    followDate: map['follow_date'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(map['follow_date'])
+        : null,
+  );
 }
 
 /// Beğeni modeli
@@ -102,6 +115,21 @@ class InstagramLike {
           (json['title'] as String?)?.toLowerCase().contains('story') == true,
     );
   }
+  Map<String, dynamic> toMap() => {
+    'username': username,
+    'media_url': mediaUrl,
+    'timestamp': timestamp.millisecondsSinceEpoch,
+    'is_story': isStory,
+  };
+
+  factory InstagramLike.fromMap(Map<String, dynamic> map) => InstagramLike(
+    username: map['username'],
+    mediaUrl: map['media_url'],
+    timestamp: map['timestamp'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(map['timestamp'])
+        : DateTime.now(),
+    isStory: map['is_story'] ?? false,
+  );
 }
 
 /// Yorum modeli
@@ -148,6 +176,20 @@ class InstagramComment {
       timestamp: timestamp,
     );
   }
+  Map<String, dynamic> toMap() => {
+    'username': username,
+    'comment_text': commentText,
+    'timestamp': timestamp.millisecondsSinceEpoch,
+  };
+
+  factory InstagramComment.fromMap(Map<String, dynamic> map) =>
+      InstagramComment(
+        username: map['username'],
+        commentText: map['comment_text'],
+        timestamp: map['timestamp'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(map['timestamp'])
+            : DateTime.now(),
+      );
 }
 
 /// Mesaj modeli
@@ -179,6 +221,20 @@ class InstagramMessage {
       lastMessageDate: lastDate,
     );
   }
+  Map<String, dynamic> toMap() => {
+    'participant': participant,
+    'message_count': messageCount,
+    'last_message_date': lastMessageDate?.millisecondsSinceEpoch,
+  };
+
+  factory InstagramMessage.fromMap(Map<String, dynamic> map) =>
+      InstagramMessage(
+        participant: map['participant'],
+        messageCount: map['message_count'],
+        lastMessageDate: map['last_message_date'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(map['last_message_date'])
+            : null,
+      );
 }
 
 /// İlgi alanı modeli
@@ -187,6 +243,13 @@ class InstagramInterest {
   final List<String> items;
 
   const InstagramInterest({required this.category, required this.items});
+  Map<String, dynamic> toMap() => {'category': category, 'items': items};
+
+  factory InstagramInterest.fromMap(Map<String, dynamic> map) =>
+      InstagramInterest(
+        category: map['category'],
+        items: List<String>.from(map['items'] ?? []),
+      );
 }
 
 /// Kaydedilen içerik modeli
@@ -233,6 +296,20 @@ class InstagramSavedItem {
       savedDate: savedDate,
     );
   }
+  Map<String, dynamic> toMap() => {
+    'username': username,
+    'media_url': mediaUrl,
+    'saved_date': savedDate?.millisecondsSinceEpoch,
+  };
+
+  factory InstagramSavedItem.fromMap(Map<String, dynamic> map) =>
+      InstagramSavedItem(
+        username: map['username'],
+        mediaUrl: map['media_url'],
+        savedDate: map['saved_date'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(map['saved_date'])
+            : null,
+      );
 }
 
 /// Ana Instagram veri modeli
@@ -699,4 +776,64 @@ class InstagramData {
 
     return Map.fromEntries(categories.entries.where((e) => e.value.isNotEmpty));
   }
+
+  Map<String, dynamic> toMap() => {
+    'username': username,
+    'followers': followers.map((e) => e.toMap()).toList(),
+    'following': following.map((e) => e.toMap()).toList(),
+    'likes': likes.map((e) => e.toMap()).toList(),
+    'comments': comments.map((e) => e.toMap()).toList(),
+    'savedItems': savedItems.map((e) => e.toMap()).toList(),
+    'interests': interests.map((e) => e.toMap()).toList(),
+    'messages': messages.map((e) => e.toMap()).toList(),
+    'closeFriends': closeFriends,
+    'storyLikes': storyLikes.map((e) => e.toMap()).toList(),
+    'dataExportDate': dataExportDate?.millisecondsSinceEpoch,
+    'loadedAt': loadedAt.millisecondsSinceEpoch,
+    'topReelsSent': topReelsSent,
+    'topReelsReceived': topReelsReceived,
+    'msgSentMap': msgSentMap,
+    'msgReceivedMap': msgReceivedMap,
+    'pendingRequests': pendingRequests,
+    'fullName': fullName,
+  };
+
+  factory InstagramData.fromMap(Map<String, dynamic> map) => InstagramData(
+    username: map['username'],
+    followers: (map['followers'] as List)
+        .map((e) => InstagramUser.fromMap(e))
+        .toList(),
+    following: (map['following'] as List)
+        .map((e) => InstagramUser.fromMap(e))
+        .toList(),
+    likes: (map['likes'] as List).map((e) => InstagramLike.fromMap(e)).toList(),
+    comments: (map['comments'] as List)
+        .map((e) => InstagramComment.fromMap(e))
+        .toList(),
+    savedItems: (map['savedItems'] as List)
+        .map((e) => InstagramSavedItem.fromMap(e))
+        .toList(),
+    interests: (map['interests'] as List)
+        .map((e) => InstagramInterest.fromMap(e))
+        .toList(),
+    messages: (map['messages'] as List)
+        .map((e) => InstagramMessage.fromMap(e))
+        .toList(),
+    closeFriends: List<String>.from(map['closeFriends'] ?? []),
+    storyLikes: (map['storyLikes'] as List? ?? [])
+        .map((e) => InstagramLike.fromMap(e))
+        .toList(),
+    dataExportDate: map['dataExportDate'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(map['dataExportDate'])
+        : null,
+    loadedAt: map['loadedAt'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(map['loadedAt'])
+        : null,
+    topReelsSent: Map<String, int>.from(map['topReelsSent'] ?? {}),
+    topReelsReceived: Map<String, int>.from(map['topReelsReceived'] ?? {}),
+    msgSentMap: Map<String, int>.from(map['msgSentMap'] ?? {}),
+    msgReceivedMap: Map<String, int>.from(map['msgReceivedMap'] ?? {}),
+    pendingRequests: List<String>.from(map['pendingRequests'] ?? []),
+    fullName: map['fullName'],
+  );
 }

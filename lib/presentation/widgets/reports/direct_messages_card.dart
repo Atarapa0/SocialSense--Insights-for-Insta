@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/utils/instagram_launcher.dart';
+import 'package:socialsense/core/localization/app_localizations.dart';
 
 class DirectMessagesCard extends StatelessWidget {
   final int totalChats;
@@ -24,6 +25,7 @@ class DirectMessagesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
 
     final sentTotal = sentMessagesMap.values.fold(0, (a, b) => a + b);
     final receivedTotal = receivedMessagesMap.values.fold(0, (a, b) => a + b);
@@ -61,7 +63,7 @@ class DirectMessagesCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Direkt Mesajlar',
+                    l10n.get('direct_messages'),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -71,7 +73,7 @@ class DirectMessagesCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '$totalChats sohbet, toplam $totalMessages mesaj',
+                    '$totalChats ${l10n.get('chats')}, ${l10n.get('total')} $totalMessages ${l10n.get('messages')}',
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark
@@ -92,7 +94,7 @@ class DirectMessagesCard extends StatelessWidget {
               Expanded(
                 child: _buildStatBox(
                   context,
-                  'Toplam Giden',
+                  l10n.get('total_sent'),
                   sentTotal,
                   Colors.blue,
                   isDark,
@@ -102,7 +104,7 @@ class DirectMessagesCard extends StatelessWidget {
               Expanded(
                 child: _buildStatBox(
                   context,
-                  'Toplam Gelen',
+                  l10n.get('total_received'),
                   receivedTotal,
                   Colors.purple,
                   isDark,
@@ -124,11 +126,12 @@ class DirectMessagesCard extends StatelessWidget {
                 Expanded(
                   child: _buildSimpleList(
                     context,
-                    "Senin Attıkların",
+                    l10n.get('sent_by_you'),
                     sortedSent,
                     onSentTap,
                     isDark,
                     Colors.blue,
+                    l10n,
                   ),
                 ),
 
@@ -141,11 +144,12 @@ class DirectMessagesCard extends StatelessWidget {
                 Expanded(
                   child: _buildSimpleList(
                     context,
-                    "Sana Gelenler",
+                    l10n.get('received_by_you'),
                     sortedReceived,
                     onReceivedTap,
                     isDark,
                     Colors.purple,
+                    l10n,
                   ),
                 ),
               ],
@@ -178,6 +182,7 @@ class DirectMessagesCard extends StatelessWidget {
               fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Text(
@@ -200,6 +205,7 @@ class DirectMessagesCard extends StatelessWidget {
     VoidCallback? onSeeAll,
     bool isDark,
     Color accentColor,
+    AppLocalizations l10n,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,9 +230,9 @@ class DirectMessagesCard extends StatelessWidget {
         const SizedBox(height: 12),
 
         if (items.isEmpty)
-          const Text(
-            "Veri yok",
-            style: TextStyle(fontSize: 12, color: Colors.grey),
+          Text(
+            l10n.get('no_data'),
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
 
         ...items
@@ -282,7 +288,7 @@ class DirectMessagesCard extends StatelessWidget {
                   vertical: 6,
                 ),
                 child: Text(
-                  "Tümü",
+                  l10n.get('see_all'),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,

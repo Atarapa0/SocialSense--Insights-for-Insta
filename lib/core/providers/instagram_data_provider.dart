@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/instagram_data.dart';
 import '../services/instagram_data_parser.dart';
@@ -48,6 +50,7 @@ class InstagramDataProvider extends ChangeNotifier {
 
       // Başarılı yükleme tarihini kaydet
       await _saveLastUpdateDate();
+      await saveData();
 
       _isLoading = false;
       notifyListeners();
@@ -72,6 +75,7 @@ class InstagramDataProvider extends ChangeNotifier {
       _lastUpdateDate = DateTime.now();
 
       await _saveLastUpdateDate();
+      await saveData();
 
       _isLoading = false;
       notifyListeners();
@@ -92,9 +96,57 @@ class InstagramDataProvider extends ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('last_update_date');
-    await prefs.remove('cached_data');
+
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/instagram_data.json');
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (_) {}
 
     notifyListeners();
+  }
+
+  Future<void> saveData() async {
+    if (_data == null) return;
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/instagram_data.json');
+      final jsonStr = jsonEncode(_data!.toMap());
+      await file.writeAsString(jsonStr);
+      debugPrint('✅ Veriler diske kaydedildi.');
+    } catch (e) {
+      debugPrint('❌ Kaydetme hatası: $e');
+    }
+  }
+
+  Future<bool> loadFromDisk() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/instagram_data.json');
+      if (await file.exists()) {
+        _isLoading = true;
+        notifyListeners();
+
+        final jsonStr = await file.readAsString();
+        final map = jsonDecode(jsonStr);
+        _data = InstagramData.fromMap(map);
+
+        // Tarihi güncelle
+        await loadLastUpdateDate();
+
+        _isLoading = false;
+        notifyListeners();
+        debugPrint('✅ Veriler diskten yüklendi.');
+        return true;
+      }
+    } catch (e) {
+      debugPrint('❌ Diskten yükleme hatası: $e');
+      _isLoading = false;
+      notifyListeners();
+    }
+    return false;
   }
 
   /// Son güncelleme tarihini kaydet
