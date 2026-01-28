@@ -307,6 +307,17 @@ class InstagramDataParser {
           if (parts.length >= 2) {
             final folderName = parts[parts.length - 2]; // username_123456
 
+            // Folder adından username çıkarma (genelde username_ID formatındadır)
+            String otherUserUsername = folderName;
+            final underscoreIndex = folderName.lastIndexOf('_');
+            if (underscoreIndex > 0) {
+              // Son parçanın sayı olup olmadığına bak
+              final suffix = folderName.substring(underscoreIndex + 1);
+              if (int.tryParse(suffix) != null) {
+                otherUserUsername = folderName.substring(0, underscoreIndex);
+              }
+            }
+
             // Mesaj dosyasını parse et ve mesaj sayısını al
             try {
               final content = utf8.decode(file.content as List<int>);
@@ -317,10 +328,10 @@ class InstagramDataParser {
                 final msgs = msgData['messages'] as List;
                 msgCount = msgs.length;
 
-                // Reels Analizi
+                // Title genelde karşı tarafın Display Name'idir
                 final title = utf8.decode(
                   (msgData['title'] as String? ?? 'Unknown').codeUnits,
-                ); // Karşı tarafın adı (UTF8 fix)
+                );
 
                 for (final m in msgs) {
                   if (m is! Map) continue;
@@ -331,10 +342,14 @@ class InstagramDataParser {
                   } catch (_) {}
 
                   // Mesaj Sayımı
+                  // Eğer gönderen başlık (title) ile aynıysa -> Karşı taraftan gelmiştir
+                  // Değilse -> Biz göndermişizdir
                   if (sender == title) {
-                    msgReceivedMap[sender] = (msgReceivedMap[sender] ?? 0) + 1;
+                    msgReceivedMap[otherUserUsername] =
+                        (msgReceivedMap[otherUserUsername] ?? 0) + 1;
                   } else {
-                    msgSentMap[title] = (msgSentMap[title] ?? 0) + 1;
+                    msgSentMap[otherUserUsername] =
+                        (msgSentMap[otherUserUsername] ?? 0) + 1;
                   }
 
                   // Reel Analizi
@@ -342,16 +357,20 @@ class InstagramDataParser {
                     final link = m['share']['link'].toString();
                     if (link.contains('/reel/')) {
                       if (sender == title) {
-                        topReelsReceived[sender] =
-                            (topReelsReceived[sender] ?? 0) + 1;
+                        topReelsReceived[otherUserUsername] =
+                            (topReelsReceived[otherUserUsername] ?? 0) + 1;
                       } else {
-                        topReelsSent[title] = (topReelsSent[title] ?? 0) + 1;
+                        topReelsSent[otherUserUsername] =
+                            (topReelsSent[otherUserUsername] ?? 0) + 1;
                       }
                     }
                   }
                 }
               }
 
+              // MessageCountByFolder da artık username bazlı tutabiliriz ama folder unique id gibi kalsa daha güvenli.
+              // Ancak kullanıcı listelemede folder name kullanıldığı için burada da pure username eklense iyi olur.
+              // Şimdilik folderName olarak bırakıyoruz, aşağıda düzelteceğiz.
               messageCountByFolder[folderName] =
                   (messageCountByFolder[folderName] ?? 0) + msgCount;
             } catch (_) {

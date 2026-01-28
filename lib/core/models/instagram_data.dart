@@ -212,7 +212,10 @@ class InstagramMessage {
     String username = folderName;
     final underscoreIndex = folderName.lastIndexOf('_');
     if (underscoreIndex > 0) {
-      username = folderName.substring(0, underscoreIndex);
+      final suffix = folderName.substring(underscoreIndex + 1);
+      if (int.tryParse(suffix) != null) {
+        username = folderName.substring(0, underscoreIndex);
+      }
     }
 
     return InstagramMessage(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
-import 'package:socialsense/core/utils/instagram_launcher.dart';
+
 import 'package:socialsense/core/localization/app_localizations.dart';
 
 class ReelsShareCard extends StatelessWidget {
@@ -209,56 +209,51 @@ class ReelsShareCard extends StatelessWidget {
     MapEntry<String, int> entry,
     bool isDark,
   ) {
-    return GestureDetector(
-      onTap: () => InstagramLauncher.openProfile(entry.key),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Row(
-          children: [
-            // Avatar
-            CircleAvatar(
-              radius: 10,
-              backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-              child: Text(
-                entry.key.isNotEmpty ? entry.key[0].toUpperCase() : '?',
-                style: TextStyle(
-                  fontSize: 9,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          // Avatar
+          CircleAvatar(
+            radius: 10,
+            backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+            child: Text(
+              entry.key.isNotEmpty ? entry.key[0].toUpperCase() : '?',
+              style: TextStyle(
+                fontSize: 9,
+                color: isDark ? Colors.white : Colors.black,
               ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                entry.key,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark
-                      ? Colors.white.withOpacity(0.9)
-                      : Colors.black87,
-                ),
-                overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              entry.key,
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.black.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              '${entry.value}',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white70 : Colors.black54,
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                '${entry.value}',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white70 : Colors.black54,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

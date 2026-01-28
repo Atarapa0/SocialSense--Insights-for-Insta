@@ -1,4 +1,4 @@
-package com.example.socialsense
+package com.furkanerdogan.socialsense
 
 import io.flutter.embedding.android.FlutterActivity
 

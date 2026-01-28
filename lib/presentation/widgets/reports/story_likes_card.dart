@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:socialsense/core/utils/instagram_launcher.dart';
 
 class StoryLikesCard extends StatefulWidget {
   final Map<String, int> storyLikes;
@@ -87,54 +86,50 @@ class _StoryLikesCardState extends State<StoryLikesCard> {
             ...displayedEntries.map((entry) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: InkWell(
-                  onTap: () => InstagramLauncher.openProfile(entry.key),
-                  borderRadius: BorderRadius.circular(8),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: const Color(
-                            0xFFE1306C,
-                          ).withOpacity(0.1),
-                          child: Text(
-                            entry.key.isNotEmpty
-                                ? entry.key[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              color: Color(0xFFE1306C),
-                              fontWeight: FontWeight.bold,
-                            ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: const Color(
+                          0xFFE1306C,
+                        ).withOpacity(0.1),
+                        child: Text(
+                          entry.key.isNotEmpty
+                              ? entry.key[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            color: Color(0xFFE1306C),
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            entry.key,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          entry.key,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE1306C).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '${entry.value} ❤️',
+                          style: const TextStyle(
+                            color: Color(0xFFE1306C),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE1306C).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            '${entry.value} ❤️',
-                            style: const TextStyle(
-                              color: Color(0xFFE1306C),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               );

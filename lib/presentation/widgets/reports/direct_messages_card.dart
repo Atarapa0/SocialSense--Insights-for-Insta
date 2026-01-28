@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
-import 'package:socialsense/core/utils/instagram_launcher.dart';
+
 import 'package:socialsense/core/localization/app_localizations.dart';
 
 class DirectMessagesCard extends StatelessWidget {
@@ -238,40 +238,37 @@ class DirectMessagesCard extends StatelessWidget {
         ...items
             .take(5)
             .map(
-              (e) => GestureDetector(
-                onTap: () => InstagramLauncher.openProfile(e.key),
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          e.key,
-                          style: const TextStyle(fontSize: 12),
-                          overflow: TextOverflow.ellipsis,
+              (e) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        e.key,
+                        style: const TextStyle(fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white10
+                            : Colors.black.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '${e.value}',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.white10
-                              : Colors.black.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '${e.value}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),

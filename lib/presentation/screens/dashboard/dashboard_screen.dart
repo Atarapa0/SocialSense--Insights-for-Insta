@@ -10,6 +10,7 @@ import 'package:socialsense/presentation/screens/upload/upload_screen.dart';
 import 'package:socialsense/presentation/screens/analyze/analyze_drop_screen.dart';
 import 'package:socialsense/presentation/screens/analyze/ghost_followers_screen.dart';
 import 'package:socialsense/presentation/screens/analyze/follower_list_screen.dart';
+import 'package:socialsense/presentation/screens/analyze/stats_list_screen.dart';
 import 'package:socialsense/presentation/screens/reports/top_fans_list_screen.dart';
 import 'package:socialsense/presentation/widgets/dashboard/priority_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/activity_hours_card.dart';
@@ -786,9 +787,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => FollowerListScreen(
+                  builder: (_) => StatsListScreen(
                     title: l10n.get('most_messaged_sent'),
-                    followers: sorted.map((e) => e.key).toList(),
+                    items: sorted,
                   ),
                 ),
               );
@@ -800,9 +801,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => FollowerListScreen(
+                  builder: (_) => StatsListScreen(
                     title: l10n.get('most_messaged_received'),
-                    followers: sorted.map((e) => e.key).toList(),
+                    items: sorted,
                   ),
                 ),
               );
@@ -823,9 +824,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => FollowerListScreen(
+                    builder: (_) => StatsListScreen(
                       title: l10n.get('most_reels_sent'),
-                      followers: sorted.map((e) => e.key).toList(),
+                      items: sorted,
                     ),
                   ),
                 );
@@ -837,9 +838,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => FollowerListScreen(
+                    builder: (_) => StatsListScreen(
                       title: l10n.get('most_reels_received'),
-                      followers: sorted.map((e) => e.key).toList(),
+                      items: sorted,
                     ),
                   ),
                 );

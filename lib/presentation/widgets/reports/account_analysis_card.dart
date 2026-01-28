@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
-import 'package:socialsense/core/utils/instagram_launcher.dart';
 
 /// Hesap Analizi Model
 class AccountAnalysis {
@@ -185,68 +184,64 @@ class AccountAnalysisCard extends StatelessWidget {
     IconData iconData,
     Color iconColor,
   ) {
-    return InkWell(
-      onTap: () => InstagramLauncher.openProfile(account.username),
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Row(
-          children: [
-            // Avatar
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: Text(
-                  account.username.length > 1
-                      ? account.username[1].toUpperCase()
-                      : '?',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          // Avatar
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              gradient: AppColors.primaryGradient,
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(width: 10),
-            // Kullanici adi
-            Expanded(
+            child: Center(
               child: Text(
-                account.username,
-                style: TextStyle(
+                account.username.length > 1
+                    ? account.username[1].toUpperCase()
+                    : '?',
+                style: const TextStyle(
                   fontSize: 12,
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.lightTextPrimary,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ),
-            // Sayi
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(iconData, size: 12, color: iconColor),
-                const SizedBox(width: 4),
-                Text(
-                  '${account.count}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
-                  ),
-                ),
-              ],
+          ),
+          const SizedBox(width: 10),
+          // Kullanici adi
+          Expanded(
+            child: Text(
+              account.username,
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
-          ],
-        ),
+          ),
+          // Sayi
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(iconData, size: 12, color: iconColor),
+              const SizedBox(width: 4),
+              Text(
+                '${account.count}',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

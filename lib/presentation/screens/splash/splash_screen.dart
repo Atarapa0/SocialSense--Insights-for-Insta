@@ -47,19 +47,11 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo (Metin olarak veya asset)
-            Icon(
-              Icons.analytics_outlined,
-              size: 80,
-              color: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'SocialSense',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
-              ),
+            // Logo
+            Image.asset(
+              'assets/logo/socialsense_logo.png',
+              width: 150,
+              height: 150,
             ),
             const SizedBox(height: 40),
             const CircularProgressIndicator(),
