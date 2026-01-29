@@ -13,31 +13,11 @@ class FAQScreen extends StatelessWidget {
 
     // SocialSense content
     final faqs = [
-      {
-        'question': 'Verilerim güvende mi?',
-        'answer':
-            'Evet, SocialSense verilerinizi sadece cihazınızda yerel olarak işler. Hiçbir veriniz sunucularımıza yüklenmez veya üçüncü taraflarla paylaşılmaz. Tüm analizler telefonunuzun içinde gerçekleşir.',
-      },
-      {
-        'question': 'Verilerimi nasıl yüklerim?',
-        'answer':
-            'Instagram ayarlarından "Bilgilerini İndir" seçeneği ile verilerinizi JSON formatında indirin. Size gelen e-postadaki ZIP dosyasını SocialSense içindeki "Veri Yükle" alanından seçin.',
-      },
-      {
-        'question': 'Hayalet Takipçi nedir?',
-        'answer':
-            'Sizi takip eden ancak gönderilerinizi beğenmeyen veya yorum yapmayan kullanıcılardır. Bu analiz, son gönderilerinizdeki etkileşimlere dayanarak listelenir.',
-      },
-      {
-        'question': 'Analizler ne kadar doğru?',
-        'answer':
-            'Analizler doğrudan Instagram\'dan indirdiğiniz resmi veriler üzerinden yapılır, bu nedenle %100 doğrudur. Uygulama sadece bu verileri okuyarak size anlamlı grafikler sunar.',
-      },
-      {
-        'question': 'Uygulama ücretli mi?',
-        'answer':
-            'SocialSense şu anda tamamen ücretsizdir ve tüm analizlere erişebilirsiniz.',
-      },
+      {'question': l10n.get('faq_q1'), 'answer': l10n.get('faq_a1')},
+      {'question': l10n.get('faq_q2'), 'answer': l10n.get('faq_a2')},
+      {'question': l10n.get('faq_q3'), 'answer': l10n.get('faq_a3')},
+      {'question': l10n.get('faq_q4'), 'answer': l10n.get('faq_a4')},
+      {'question': l10n.get('faq_q5'), 'answer': l10n.get('faq_a5')},
     ];
 
     return Scaffold(

@@ -11,26 +11,7 @@ class TermsOfUseScreen extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context);
 
-    const content = '''
-**Kullanım Koşulları**
-
-**1. Kabul**
-Bu uygulamayı indirerek ve kullanarak, aşağıdaki koşulları kabul etmiş sayılırsınız.
-
-**2. Instagram ile Bağlantı**
-SocialSense, Instagram veya Meta ile hiçbir şekilde bağlantılı değildir, onlar tarafından desteklenmemekte veya onaylanmamaktadır. Bu uygulama, kullanıcıların kendi verilerini analiz etmelerine yardımcı olan bağımsız bir araçtır.
-
-**3. Sorumluluk Reddi**
-Uygulamanın kullanımından doğabilecek her türlü risk kullanıcıya aittir. Geliştirici, bu uygulamanın kullanımı sonucunda oluşabilecek veri kaybı, hesap kısıtlaması veya diğer olumsuz durumlardan sorumlu tutulamaz.
-
-**4. "Olduğu Gibi" Sunum**
-Bu uygulama "olduğu gibi" sunulmaktadır. Geliştirici, uygulamanın hatasız olacağını veya sürekli çalışacağını garanti etmez.
-
-**5. Kullanım Hakkı**
-Uygulama sadece kişisel kullanım içindir. Uygulamanın kodlarını kopyalamak, değiştirmek veya dağıtmak yasaktır.
-
-**Son Güncelleme:** Ocak 2026
-''';
+    final content = l10n.get('terms_of_use_content');
 
     return Scaffold(
       backgroundColor: isDark

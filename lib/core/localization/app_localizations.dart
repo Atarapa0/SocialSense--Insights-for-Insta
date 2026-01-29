@@ -262,6 +262,70 @@ class AppLocalizations {
     'most_reels_sent': 'En Çok Reels Gönderdiklerin',
     'most_reels_received': 'Sana En Çok Reels Gönderenler',
     'reels_stats_subtitle': 'Reels paylaşım istatistikleri',
+
+    // İletişim & Yardım
+    'get_in_touch': 'İletişime Geçin',
+    'contact_desc':
+        'Sorularınız veya geri bildirimleriniz varsa lütfen bize mesaj gönderin.',
+    'email': 'E-posta',
+    'website': 'Web sitesi',
+    'instagram': 'Instagram',
+
+    // SSS (FAQ)
+    'faq_q1': 'Verilerim güvende mi?',
+    'faq_a1':
+        'Evet, SocialSense verilerinizi sadece cihazınızda yerel olarak işler. Hiçbir veriniz sunucularımıza yüklenmez veya üçüncü taraflarla paylaşılmaz.',
+    'faq_q2': 'Verilerimi nasıl yüklerim?',
+    'faq_a2':
+        'Instagram ayarlarından "Bilgilerini İndir" seçeneği ile verilerinizi JSON formatında indirin, ardından uygulamanın "Veri Yükle" bölümünden ZIP dosyasını seçin.',
+    'faq_q3': 'Hayalet Takipçi nedir?',
+    'faq_a3':
+        'Sizi takip eden ancak gönderilerinizi beğenmeyen veya yorum yapmayan kullanıcılardır.',
+    'faq_q4': 'Analizler ne kadar doğru?',
+    'faq_a4':
+        'Analizler resmi Instagram verilerine dayandığı için %100 doğrudur.',
+    'faq_q5': 'Uygulama ücretli mi?',
+    'faq_a5': 'Şu anda tamamen ücretsizdir.',
+
+    // Yasal
+    'legal_disclaimer_title': 'Sorumluluk Reddi',
+    'privacy_policy_content': '''
+**Gizlilik Politikası**
+
+**1. Veri Toplama ve Kullanım**
+SocialSense, kişisel verilerinizi sunucularında toplamaz, saklamaz veya üçüncü taraflarla paylaşmaz. Uygulamaya yüklediğiniz Instagram verileri (ZIP dosyası), tamamen kendi cihazınızda (yerel olarak) işlenir ve analiz edilir.
+
+**2. Veri Güvenliği**
+Tüm analiz işlemleri çevrimdışı olarak telefonunuzda gerçekleşir. Verileriniz hiçbir şekilde internet üzerinden dışarıya aktarılmaz. Bu nedenle verilerinizin güvenliği ve gizliliği tam kontrolünüz altındadır.
+
+**3. Sorumluluk Reddi**
+Bu uygulamanın geliştiricisi, kullanıcı verilerine erişemez ve bu verilerin güvenliğinden sorumlu tutulamaz. Cihazınızın güvenliği ve verilerinizin korunması tamamen kullanıcının sorumluluğundadır.
+
+**4. Değişiklikler**
+Bu gizlilik politikası zaman zaman güncellenebilir. Değişiklikler bu sayfada yayınlanacaktır.
+
+**Son Güncelleme:** Ocak 2026
+''',
+    'terms_of_use_content': '''
+**Kullanım Koşulları**
+
+**1. Kabul**
+Bu uygulamayı indirerek ve kullanarak, aşağıdaki koşulları kabul etmiş sayılırsınız.
+
+**2. Instagram ile Bağlantı**
+SocialSense, Instagram veya Meta ile hiçbir şekilde bağlantılı değildir, onlar tarafından desteklenmemekte veya onaylanmamaktadır. Bu uygulama, kullanıcıların kendi verilerini analiz etmelerine yardımcı olan bağımsız bir araçtır.
+
+**3. Sorumluluk Reddi**
+Uygulamanın kullanımından doğabilecek her türlü risk kullanıcıya aittir. Geliştirici, bu uygulamanın kullanımı sonucunda oluşabilecek veri kaybı, hesap kısıtlaması veya diğer olumsuz durumlardan sorumlu tutulamaz.
+
+**4. "Olduğu Gibi" Sunum**
+Bu uygulama "olduğu gibi" sunulmaktadır. Geliştirici, uygulamanın hatasız olacağını veya sürekli çalışacağını garanti etmez.
+
+**5. Kullanım Hakkı**
+Uygulama sadece kişisel kullanım içindir. Uygulamanın kodlarını kopyalamak, değiştirmek veya dağıtmak yasaktır.
+
+**Son Güncelleme:** Ocak 2026
+''',
   };
 
   // ==========================================
@@ -494,6 +558,69 @@ class AppLocalizations {
     'most_reels_sent': 'Top Reels Sent',
     'most_reels_received': 'Top Reels Received',
     'reels_stats_subtitle': 'Reels sharing statistics',
+
+    // Contact & Help
+    'get_in_touch': 'Get in Touch',
+    'contact_desc':
+        'If you have any questions or feedback, please send us a message.',
+    'email': 'Email',
+    'website': 'Website',
+    'instagram': 'Instagram',
+
+    // FAQ
+    'faq_q1': 'Is my data safe?',
+    'faq_a1':
+        'Yes, SocialSense processes your data locally on your device only. None of your data is uploaded to our servers or shared with third parties.',
+    'faq_q2': 'How do I upload my data?',
+    'faq_a2':
+        'Download your data in JSON format from Instagram settings ("Download Your Information"), then select the ZIP file in the app\'s "Upload Data" section.',
+    'faq_q3': 'What are Ghost Followers?',
+    'faq_a3': 'Users who follow you but do not like or comment on your posts.',
+    'faq_q4': 'How accurate is the analysis?',
+    'faq_a4':
+        'The analysis is 100% accurate as it is based on official Instagram data.',
+    'faq_q5': 'Is the app free?',
+    'faq_a5': 'It is currently completely free.',
+
+    // Legal
+    'legal_disclaimer_title': 'Disclaimer',
+    'privacy_policy_content': '''
+**Privacy Policy**
+
+**1. Data Collection and Usage**
+SocialSense does not collect, store, or share your personal data on its servers. The Instagram data (ZIP file) you upload to the app is processed and analyzed entirely locally on your device.
+
+**2. Data Security**
+All analysis operations occur offline on your phone. Your data is never transferred externally over the internet. Therefore, the security and privacy of your data are under your full control.
+
+**3. Disclaimer**
+The developer of this application has no access to user data and cannot be held responsible for the security of this data. The security of your device and the protection of your data are entirely the user's responsibility.
+
+**4. Changes**
+This privacy policy may be updated from time to time. Changes will be posted on this page.
+
+**Last Updated:** January 2026
+''',
+    'terms_of_use_content': '''
+**Terms of Use**
+
+**1. Acceptance**
+By downloading and using this application, you agree to the following terms.
+
+**2. Affiliation with Instagram**
+SocialSense is in no way affiliated with, supported by, or endorsed by Instagram or Meta. This application is an independent tool that helps users analyze their own data.
+
+**3. Disclaimer**
+Any risk arising from the use of the application belongs to the user. The developer cannot be held responsible for data loss, account restriction, or other negative situations that may occur as a result of using this application.
+
+**4. "As Is" Presentation**
+This application is provided "as is". The developer does not guarantee that the application will be error-free or operate continuously.
+
+**5. Right of Use**
+The application is for personal use only. Copying, modifying, or distributing the application's codes is prohibited.
+
+**Last Updated:** January 2026
+''',
   };
 }
 

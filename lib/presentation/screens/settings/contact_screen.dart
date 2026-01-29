@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
+
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      debugPrint('Could not launch $url');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +86,7 @@ class ContactScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Get in touch',
+                    l10n.get('get_in_touch'),
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -89,7 +97,7 @@ class ContactScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'We\'d love to hear from you. Please send us a message if you have any questions or feedback.',
+                    l10n.get('contact_desc'),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -103,32 +111,28 @@ class ContactScreen extends StatelessWidget {
                   _buildContactOption(
                     context,
                     icon: Icons.mail_outline,
-                    title: 'Email',
+                    title: l10n.get('email'),
                     subtitle: 'furkaan.er.34@gmail.com',
-                    onTap: () {
-                      // Implement email launch
-                    },
+                    onTap: () => _launchUrl('mailto:furkaan.er.34@gmail.com'),
                   ),
                   const SizedBox(height: 16),
                   _buildContactOption(
                     context,
                     icon: Icons.language,
-                    title: 'Website',
+                    title: l10n.get('website'),
                     subtitle: 'www.socialsense.furkanerdogan.com',
-                    onTap: () {
-                      // Implement website launch
-                    },
+                    onTap: () =>
+                        _launchUrl('https://socialsense.furkanerdogan.com'),
                   ),
                   const SizedBox(height: 16),
                   _buildContactOption(
                     context,
                     icon: Icons
                         .description_outlined, // Generic icon for social/other
-                    title: 'Instagram',
+                    title: l10n.get('instagram'),
                     subtitle: '@socialsense_app',
-                    onTap: () {
-                      // Implement instagram launch
-                    },
+                    onTap: () =>
+                        _launchUrl('https://instagram.com/socialsense_app'),
                   ),
                 ],
               ),
@@ -166,31 +170,35 @@ class ContactScreen extends StatelessWidget {
               color: isDark ? AppColors.darkPrimary : AppColors.lightPrimary,
             ),
             const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
+                    ),
                   ),
-                ),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.lightTextPrimary,
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const Spacer(),
+            const SizedBox(width: 8),
             Icon(
               Icons.arrow_forward_ios,
               size: 14,

@@ -12,23 +12,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     // Privacy Policy Content
-    const content = '''
-**Gizlilik Politikası**
-
-**1. Veri Toplama ve Kullanım**
-SocialSense, kişisel verilerinizi sunucularında toplamaz, saklamaz veya üçüncü taraflarla paylaşmaz. Uygulamaya yüklediğiniz Instagram verileri (ZIP dosyası), tamamen kendi cihazınızda (yerel olarak) işlenir ve analiz edilir.
-
-**2. Veri Güvenliği**
-Tüm analiz işlemleri çevrimdışı olarak telefonunuzda gerçekleşir. Verileriniz hiçbir şekilde internet üzerinden dışarıya aktarılmaz. Bu nedenle verilerinizin güvenliği ve gizliliği tam kontrolünüz altındadır.
-
-**3. Sorumluluk Reddi**
-Bu uygulamanın geliştiricisi, kullanıcı verilerine erişemez ve bu verilerin güvenliğinden sorumlu tutulamaz. Cihazınızın güvenliği ve verilerinizin korunması tamamen kullanıcının sorumluluğundadır.
-
-**4. Değişiklikler**
-Bu gizlilik politikası zaman zaman güncellenebilir. Değişiklikler bu sayfada yayınlanacaktır.
-
-**Son Güncelleme:** Ocak 2026
-''';
+    final content = l10n.get('privacy_policy_content');
 
     return Scaffold(
       backgroundColor: isDark
