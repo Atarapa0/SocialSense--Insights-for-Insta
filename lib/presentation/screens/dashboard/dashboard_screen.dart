@@ -628,39 +628,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             // Sağ: Bildirim + Profil
             Row(
               children: [
-                // Bildirim ikonu (tıklanabilir değil, sadece gösterim)
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? AppColors.darkSurface
-                        : AppColors.lightSurface,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Stack(
-                    children: [
-                      Icon(
-                        Icons.notifications_outlined,
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.lightTextSecondary,
-                      ),
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: AppColors.darkAccent,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
+                // Profil Avatar
 
                 // Profil Avatar
                 Container(

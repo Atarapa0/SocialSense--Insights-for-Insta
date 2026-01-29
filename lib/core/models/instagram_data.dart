@@ -359,6 +359,50 @@ class InstagramData {
     DateTime? loadedAt,
   }) : loadedAt = loadedAt ?? DateTime.now();
 
+  InstagramData copyWith({
+    String? username,
+    List<InstagramUser>? followers,
+    List<InstagramUser>? following,
+    List<InstagramLike>? likes,
+    List<InstagramComment>? comments,
+    List<InstagramSavedItem>? savedItems,
+    List<InstagramInterest>? interests,
+    List<InstagramMessage>? messages,
+    List<String>? closeFriends,
+    List<InstagramLike>? storyLikes,
+    Map<String, int>? topReelsSent,
+    Map<String, int>? topReelsReceived,
+    Map<String, int>? msgSentMap,
+    Map<String, int>? msgReceivedMap,
+    List<String>? pendingRequests,
+    List<String>? receivedRequests,
+    String? fullName,
+    DateTime? dataExportDate,
+    DateTime? loadedAt,
+  }) {
+    return InstagramData(
+      username: username ?? this.username,
+      followers: followers ?? this.followers,
+      following: following ?? this.following,
+      likes: likes ?? this.likes,
+      comments: comments ?? this.comments,
+      savedItems: savedItems ?? this.savedItems,
+      interests: interests ?? this.interests,
+      messages: messages ?? this.messages,
+      closeFriends: closeFriends ?? this.closeFriends,
+      storyLikes: storyLikes ?? this.storyLikes,
+      topReelsSent: topReelsSent ?? this.topReelsSent,
+      topReelsReceived: topReelsReceived ?? this.topReelsReceived,
+      msgSentMap: msgSentMap ?? this.msgSentMap,
+      msgReceivedMap: msgReceivedMap ?? this.msgReceivedMap,
+      pendingRequests: pendingRequests ?? this.pendingRequests,
+      receivedRequests: receivedRequests ?? this.receivedRequests,
+      fullName: fullName ?? this.fullName,
+      dataExportDate: dataExportDate ?? this.dataExportDate,
+      loadedAt: loadedAt ?? this.loadedAt,
+    );
+  }
+
   factory InstagramData.empty() {
     return InstagramData(
       username: null,

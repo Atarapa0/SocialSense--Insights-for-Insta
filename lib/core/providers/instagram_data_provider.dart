@@ -38,6 +38,39 @@ class InstagramDataProvider extends ChangeNotifier {
     try {
       debugPrint('🔄 ZIP dosyası yükleniyor: ${zipFile.path}');
       _data = await InstagramDataParser.parseZipFile(zipFile);
+
+      // Dosya adından kullanıcı adını çıkarmaya çalış
+      try {
+        final filename = zipFile.uri.pathSegments.last;
+        final lowerName = filename.toLowerCase();
+        // instagram_kullaniciadi... veya instagram-kullaniciadi... formatı
+        if (lowerName.startsWith('instagram_') ||
+            lowerName.startsWith('instagram-')) {
+          // 'instagram_' veya 'instagram-' (10 karakter)
+          String rawName = filename.substring(10);
+
+          // Eğer _ tarih vs varsa onlardan öncesini al, yoksa .zip'ten öncesini al
+          if (rawName.contains('_')) {
+            rawName = rawName.split('_').first;
+          } else if (rawName.contains('-')) {
+            // Hyphen case
+            rawName = rawName.split('-').first;
+          } else if (rawName.contains('.')) {
+            rawName = rawName.split('.').first;
+          }
+
+          if (rawName.isNotEmpty && _data != null) {
+            // Eğer parser zaten bulduysa onu ezme (veya boşsa yaz)
+            if (_data!.username == null || _data!.username!.isEmpty) {
+              _data = _data!.copyWith(username: rawName);
+              debugPrint('👤 Kullanıcı adı dosyadan alındı: $rawName');
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('⚠️ Kullanıcı adı çıkarma hatası: $e');
+      }
+
       _lastUpdateDate = DateTime.now();
 
       // Debug log
