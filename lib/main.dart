@@ -5,6 +5,7 @@ import 'package:socialsense/core/localization/app_localizations.dart';
 import 'package:socialsense/core/theme/app_theme.dart';
 import 'package:socialsense/core/providers/instagram_data_provider.dart';
 import 'package:socialsense/presentation/providers/app_settings_provider.dart';
+import 'package:socialsense/presentation/providers/alerts_provider.dart';
 import 'package:socialsense/presentation/screens/splash/splash_screen.dart';
 
 void main() async {
@@ -23,6 +24,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider.value(value: settingsProvider),
         ChangeNotifierProvider.value(value: dataProvider),
+        ChangeNotifierProvider(create: (_) => AlertsProvider()),
       ],
       child: const SocialSenseApp(),
     ),

@@ -15,6 +15,7 @@ import 'package:socialsense/presentation/screens/reports/top_fans_list_screen.da
 import 'package:socialsense/presentation/widgets/dashboard/priority_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/activity_hours_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/stats_row.dart';
+import 'package:socialsense/presentation/providers/alerts_provider.dart';
 import 'package:socialsense/presentation/widgets/dashboard/top_fans_card.dart';
 import 'package:socialsense/presentation/widgets/dashboard/active_hour_card.dart';
 import 'package:socialsense/presentation/widgets/reports/follower_details_card.dart';
@@ -27,6 +28,10 @@ import 'package:socialsense/presentation/widgets/reports/reels_share_card.dart';
 import 'package:socialsense/presentation/widgets/reports/interests_distribution_card.dart';
 import 'package:socialsense/presentation/widgets/reports/story_likes_card.dart';
 import 'package:socialsense/presentation/widgets/reports/close_friends_card.dart';
+import 'package:socialsense/presentation/screens/settings/contact_screen.dart';
+import 'package:socialsense/presentation/screens/settings/faq_screen.dart';
+import 'package:socialsense/presentation/screens/settings/privacy_policy_screen.dart';
+import 'package:socialsense/presentation/screens/settings/terms_of_use_screen.dart';
 import 'package:socialsense/presentation/widgets/reports/follow_requests_card.dart';
 import 'package:socialsense/presentation/widgets/reports/saved_content_detail_card.dart';
 import 'package:socialsense/presentation/widgets/alerts/alert_card.dart';
@@ -56,14 +61,150 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    // Uyarı sayısını hesapla
+    // NOT: _getAlerts metodu performans için optimize edilebilir (Provider'a taşınabilir)
+    final alerts = _getAlerts(l10n);
+    final unreadAlertsCount = alerts.where((a) => !a.isRead).length;
+
     return Scaffold(
       backgroundColor: isDark
           ? AppColors.darkBackground
           : AppColors.lightBackground,
       body: SafeArea(child: _buildBody(context, l10n, isDark)),
-      bottomNavigationBar: _buildBottomNav(context, l10n, isDark),
-      floatingActionButton: _buildFAB(context, l10n, isDark),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(
+                  0,
+                  Icons.dashboard_outlined,
+                  Icons.dashboard,
+                  l10n.get('home'),
+                  isDark,
+                ),
+                _buildNavItem(
+                  1,
+                  Icons.bar_chart_outlined,
+                  Icons.bar_chart,
+                  l10n.get('reports'),
+                  isDark,
+                ),
+                Stack(
+                  children: [
+                    _buildNavItem(
+                      2,
+                      Icons.notifications_none_outlined,
+                      Icons.notifications,
+                      l10n.get('alerts'),
+                      isDark,
+                    ),
+                    if (unreadAlertsCount > 0)
+                      Positioned(
+                        right: 12,
+                        top: 12,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '$unreadAlertsCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                _buildNavItem(
+                  3,
+                  Icons.settings_outlined,
+                  Icons.settings,
+                  l10n.get('settings'),
+                  isDark,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      floatingActionButton: _currentNavIndex == 0
+          ? _buildFAB(context, l10n, isDark)
+          : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget _buildNavItem(
+    int index,
+    IconData icon,
+    IconData activeIcon,
+    String label,
+    bool isDark,
+  ) {
+    final isSelected = _currentNavIndex == index;
+    return InkWell(
+      onTap: () => setState(() => _currentNavIndex = index),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: isSelected
+            ? BoxDecoration(
+                color: (isDark ? AppColors.darkPrimary : AppColors.lightPrimary)
+                    .withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+              )
+            : null,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? activeIcon : icon,
+              color: isSelected
+                  ? (isDark ? AppColors.darkPrimary : AppColors.lightPrimary)
+                  : (isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary),
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected
+                    ? (isDark ? AppColors.darkPrimary : AppColors.lightPrimary)
+                    : (isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -98,8 +239,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final activeHour = dataProvider.mostActiveHour;
     final engagementRate = dataProvider.engagementRate;
     final followersCount = dataProvider.followersCount;
-    final totalLikes = dataProvider.totalLikesCount;
-    final totalComments = dataProvider.totalCommentsCount;
 
     // Top fans hesapla
     final topLiked = dataProvider.topLikedAccounts;
@@ -420,12 +559,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       context,
       listen: false,
     );
-    final displayName = dataProvider.username ?? 'Kullanıcı';
+    final username = dataProvider.username;
 
     return InkWell(
       onTap: () {
-        if (dataProvider.username != null) {
-          InstagramLauncher.openProfile(dataProvider.username!);
+        if (username != null) {
+          InstagramLauncher.openProfile(username);
         }
       },
       borderRadius: BorderRadius.circular(12),
@@ -447,17 +586,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         : AppColors.lightTextSecondary,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  displayName,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.lightTextPrimary,
+                if (username != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    username,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
+                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 4),
                 // Güncelleme tarihi
                 Row(
@@ -540,8 +681,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       child: Center(
                         child: Text(
-                          displayName.isNotEmpty
-                              ? displayName[0].toUpperCase()
+                          (username != null && username.isNotEmpty)
+                              ? username[0].toUpperCase()
                               : '?',
                           style: TextStyle(
                             fontSize: 18,
@@ -849,54 +990,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 24),
 
-          // Aktivite Zaman Çizelgesi Başlığı
-          Text(
-            l10n.get('activity_timeline'),
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: isDark
-                  ? AppColors.darkTextPrimary
-                  : AppColors.lightTextPrimary,
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Beğeni Aktivitesi Grafiği
-          ActivityTimelineCard(
-            title: l10n.get('like_activity'),
-            subtitle: l10n.get('all_time'),
-            dataPoints: dataProvider.monthlyLikeActivity.isEmpty
-                ? const [ActivityDataPoint(label: '---', value: 0)]
-                : dataProvider.monthlyLikeActivity
-                      .map(
-                        (e) => ActivityDataPoint(
-                          label: e['label'] as String,
-                          value: (e['value'] as int).toDouble(),
-                        ),
-                      )
-                      .toList(),
-            lineColor: const Color(0xFFFF6B9D),
-            hasData: hasData && dataProvider.totalLikesCount > 0,
-          ),
-
-          const SizedBox(height: 16),
-
-          // Yorumlar henüz parse edilmiyor, bu kartı kaldırabiliriz veya boş bırakabiliriz
-          if (dataProvider.totalCommentsCount > 0)
-            ActivityTimelineCard(
-              title: l10n.get('comment_activity'),
-              subtitle: l10n.get('all_time'),
-              dataPoints: const [ActivityDataPoint(label: '---', value: 0)],
-              lineColor: const Color(0xFF4ECDC4),
-              hasData: hasData && dataProvider.totalCommentsCount > 0,
-            ),
-
-          const SizedBox(height: 24),
-
-          const SizedBox(height: 24),
-
           // Zaman Dağılımı
           if (hasData)
             TimeDistributionCard(
@@ -945,6 +1038,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
             storyLikesAccounts: const [],
           ),
 
+          const SizedBox(height: 24),
+
+          // Aktivite Zaman Çizelgesi Başlığı
+          Text(
+            l10n.get('activity_timeline'),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.lightTextPrimary,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Beğeni Aktivitesi Grafiği
+          ActivityTimelineCard(
+            title: l10n.get('like_activity'),
+            subtitle: l10n.get('all_time'),
+            dataPoints: dataProvider.monthlyLikeActivity.isEmpty
+                ? const [ActivityDataPoint(label: '---', value: 0)]
+                : dataProvider.monthlyLikeActivity
+                      .map(
+                        (e) => ActivityDataPoint(
+                          label: e['label'] as String,
+                          value: (e['value'] as int).toDouble(),
+                        ),
+                      )
+                      .toList(),
+            lineColor: const Color(0xFFFF6B9D),
+            hasData: hasData && dataProvider.totalLikesCount > 0,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Yorumlar henüz parse edilmiyor, bu kartı kaldırabiliriz veya boş bırakabiliriz
+          if (dataProvider.totalCommentsCount > 0)
+            ActivityTimelineCard(
+              title: l10n.get('comment_activity'),
+              subtitle: l10n.get('all_time'),
+              dataPoints: const [ActivityDataPoint(label: '---', value: 0)],
+              lineColor: const Color(0xFF4ECDC4),
+              hasData: hasData && dataProvider.totalCommentsCount > 0,
+            ),
+
           const SizedBox(height: 100), // Bottom nav için boşluk
         ],
       ),
@@ -955,10 +1094,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<AlertItem> _getAlerts(AppLocalizations l10n) {
     try {
       final provider = Provider.of<InstagramDataProvider>(context);
+      final alertsProvider = Provider.of<AlertsProvider>(context);
+
       if (!provider.hasData) return [];
 
-      return [
-        if (provider.notFollowingBack.isNotEmpty)
+      final alerts = <AlertItem>[];
+
+      if (provider.notFollowingBack.isNotEmpty) {
+        alerts.add(
           AlertItem(
             id: 'nf',
             type: AlertType.followerDrop,
@@ -968,8 +1111,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 .replaceFirst('%count', '${provider.notFollowingBack.length}'),
             timestamp: DateTime.now(),
             data: {'count': provider.notFollowingBack.length},
+            isRead: alertsProvider.readAlertIds.contains('nf'),
           ),
-        if (provider.ghostFollowersList.isNotEmpty)
+        );
+      }
+
+      if (provider.ghostFollowersList.isNotEmpty) {
+        alerts.add(
           AlertItem(
             id: 'gf',
             type: AlertType.ghostFollower,
@@ -977,8 +1125,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             description:
                 '${provider.ghostFollowersList.length} ${l10n.get('ghost_follower_desc')}',
             timestamp: DateTime.now(),
+            isRead: alertsProvider.readAlertIds.contains('gf'),
           ),
-        if (provider.pendingRequests.isNotEmpty)
+        );
+      }
+
+      if (provider.pendingRequests.isNotEmpty) {
+        alerts.add(
           AlertItem(
             id: 'pr',
             type: AlertType.activeHourChanged,
@@ -986,8 +1139,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             description:
                 '${provider.pendingRequests.length} ${l10n.get('pending_follow_requests_desc')}',
             timestamp: DateTime.now(),
+            isRead: alertsProvider.readAlertIds.contains('pr'),
           ),
-      ];
+        );
+      }
+      return alerts;
     } catch (_) {
       return [];
     }
@@ -1000,7 +1156,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   /// Uyarılar ekranı
   Widget _buildAlertsContent(AppLocalizations l10n, bool isDark) {
+    // AlertsProvider'ı dinliyoruz ki badge ve liste güncellensin
     final alerts = _getAlerts(l10n);
+    final alertsProvider = Provider.of<AlertsProvider>(context);
 
     if (alerts.isEmpty) {
       return Center(
@@ -1049,6 +1207,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     final unreadCount = alerts.where((a) => !a.isRead).length;
+    final provider = Provider.of<InstagramDataProvider>(context, listen: false);
 
     return Column(
       children: [
@@ -1083,36 +1242,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                 ],
               ),
-              if (alerts.isNotEmpty)
-                TextButton.icon(
-                  onPressed: () {
-                    // Clear all functionality not supported for dynamic alerts
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.get('clear_all')),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor: isDark
-                            ? AppColors.darkCard
-                            : AppColors.lightTextPrimary,
-                      ),
-                    );
-                  },
-                  icon: Icon(
-                    Icons.clear_all,
-                    size: 18,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
-                  ),
-                  label: Text(
-                    l10n.get('clear_all'),
-                    style: TextStyle(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.lightTextSecondary,
-                    ),
-                  ),
-                ),
+              // Clear All butonu kaldırıldı.
             ],
           ),
         ),
@@ -1124,7 +1254,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
             itemCount: alerts.length,
             itemBuilder: (context, index) {
               final alert = alerts[index];
-              return AlertCard(alert: alert, onTap: () {}, onDismiss: () {});
+              return AlertCard(
+                alert: alert,
+                onTap: () {
+                  // Okundu olarak işaretle
+                  alertsProvider.markAsRead(alert.id);
+
+                  // İlgili sayfaya yönlendir
+                  if (alert.id == 'nf') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => FollowerListScreen(
+                          title: l10n.get('not_following_back'),
+                          followers: provider.notFollowingBack,
+                        ),
+                      ),
+                    );
+                  } else if (alert.id == 'gf') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => GhostFollowersScreen(
+                          ghostCount: provider.ghostFollowersCount,
+                          ghostFollowers: provider.ghostFollowersList,
+                        ),
+                      ),
+                    );
+                  } else if (alert.id == 'pr') {
+                    // Bekleyen İstekler -> Raporlar sayfasına yönlendir
+                    setState(() {
+                      _currentNavIndex = 1; // Raporlar sekmesi
+                    });
+                  }
+                },
+                onDismiss: () {}, // Dismiss işlevi şimdilik pasif
+              );
             },
           ),
         ),
@@ -1266,67 +1431,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
 
-          // ==================== HAKKINDA ====================
-          SettingsSectionHeader(title: l10n.get('about')),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkCard : AppColors.lightCard,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // Uygulama versiyonu
-                SettingsTile(
-                  icon: Icons.info_outline,
-                  title: l10n.get('version'),
-                  subtitle: '1.0.0',
-                  iconColor: const Color(0xFF9B59B6),
-                  onTap: null,
-                  trailing: Text(
-                    'v1.0.0',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: isDark
-                          ? AppColors.darkTextHint
-                          : AppColors.lightTextHint,
-                    ),
-                  ),
-                ),
-
-                // Gizlilik politikası
-                SettingsTile(
-                  icon: Icons.privacy_tip_outlined,
-                  title: l10n.get('privacy_policy'),
-                  iconColor: const Color(0xFF1ABC9C),
-                  onTap: () {
-                    // TODO: Gizlilik politikası sayfasını aç
-                  },
-                ),
-
-                // Kullanım koşulları
-                SettingsTile(
-                  icon: Icons.description_outlined,
-                  title: l10n.get('terms_of_use'),
-                  iconColor: const Color(0xFF34495E),
-                  showDivider: false,
-                  onTap: () {
-                    // TODO: Kullanım koşulları sayfasını aç
-                  },
-                ),
-              ],
-            ),
-          ),
-
           // ==================== YARDIM ====================
-          SettingsSectionHeader(title: l10n.get('help')),
+          SettingsSectionHeader(
+            title: l10n.get('help_and_support') == 'help_and_support'
+                ? 'Help & Support'
+                : l10n.get('help_and_support'),
+          ),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
@@ -1342,32 +1452,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             child: Column(
               children: [
-                // SSS
                 SettingsTile(
                   icon: Icons.help_outline,
-                  title: l10n.get('faq'),
-                  iconColor: const Color(0xFF3498DB),
+                  title: l10n.get('faq') == 'faq' ? 'FAQ' : l10n.get('faq'),
+                  iconColor: const Color(0xFF9B59B6),
                   onTap: () {
-                    // TODO: SSS sayfasını aç
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const FAQScreen()),
+                    );
                   },
                 ),
-
-                // İletişim
                 SettingsTile(
                   icon: Icons.mail_outline,
-                  title: l10n.get('contact'),
+                  title: l10n.get('contact') == 'contact'
+                      ? 'Contact'
+                      : l10n.get('contact'),
                   iconColor: const Color(0xFFE67E22),
                   showDivider: false,
                   onTap: () {
-                    // TODO: İletişim sayfasını aç
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ContactScreen()),
+                    );
                   },
                 ),
               ],
             ),
           ),
 
-          // ==================== UYGULAMA İŞLEMLERİ ====================
-          const SizedBox(height: 16),
+          // ==================== YASAL ====================
+          SettingsSectionHeader(
+            title: l10n.get('legal') == 'legal' ? 'Legal' : l10n.get('legal'),
+          ),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
@@ -1383,35 +1500,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             child: Column(
               children: [
-                // Uygulamayı değerlendir
                 SettingsTile(
-                  icon: Icons.star_outline,
-                  title: l10n.get('rate_app'),
-                  iconColor: const Color(0xFFF1C40F),
+                  icon: Icons.privacy_tip_outlined,
+                  title: l10n.get('privacy_policy') == 'privacy_policy'
+                      ? 'Privacy Policy'
+                      : l10n.get('privacy_policy'),
+                  iconColor: const Color(0xFF27AE60),
                   onTap: () {
-                    // TODO: App Store/Play Store'a yönlendir
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PrivacyPolicyScreen(),
+                      ),
+                    );
                   },
                 ),
-
-                // Uygulamayı paylaş
-                // Uygulamayı paylaş
                 SettingsTile(
-                  icon: Icons.share_outlined,
-                  title: l10n.get('share_app'),
-                  iconColor: const Color(0xFF2ECC71),
-                  showDivider: true,
-                  onTap: () {
-                    // TODO: Paylaşım sheet'i aç
-                  },
-                ),
-
-                // Verileri Sil
-                SettingsTile(
-                  icon: Icons.delete_outline,
-                  title: l10n.get('delete_data'),
-                  iconColor: Colors.red,
+                  icon: Icons.description_outlined,
+                  title: l10n.get('terms_of_use') == 'terms_of_use'
+                      ? 'Terms of Use'
+                      : l10n.get('terms_of_use'),
+                  iconColor: const Color(0xFF7F8C8D),
                   showDivider: false,
-                  onTap: () => _showDeleteConfirmDialog(l10n, isDark),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const TermsOfUseScreen(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -1565,106 +1683,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             child: Text(l10n.get('yes')),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Bottom Navigation Bar
-  Widget _buildBottomNav(
-    BuildContext context,
-    AppLocalizations l10n,
-    bool isDark,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home,
-                label: l10n.get('home'),
-                index: 0,
-                isDark: isDark,
-              ),
-              _buildNavItem(
-                icon: Icons.bar_chart_outlined,
-                activeIcon: Icons.bar_chart,
-                label: l10n.get('reports'),
-                index: 1,
-                isDark: isDark,
-              ),
-              const SizedBox(width: 60),
-              _buildNavItem(
-                icon: Icons.notifications_outlined,
-                activeIcon: Icons.notifications,
-                label: l10n.get('alerts'),
-                index: 2,
-                isDark: isDark,
-              ),
-              _buildNavItem(
-                icon: Icons.settings_outlined,
-                activeIcon: Icons.settings,
-                label: l10n.get('settings'),
-                index: 3,
-                isDark: isDark,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem({
-    required IconData icon,
-    required IconData activeIcon,
-    required String label,
-    required int index,
-    required bool isDark,
-  }) {
-    final isActive = _currentNavIndex == index;
-
-    return GestureDetector(
-      onTap: () => setState(() => _currentNavIndex = index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isActive ? activeIcon : icon,
-            color: isActive
-                ? AppColors.darkPrimary
-                : isDark
-                ? AppColors.darkTextHint
-                : AppColors.lightTextHint,
-            size: 24,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-              color: isActive
-                  ? AppColors.darkPrimary
-                  : isDark
-                  ? AppColors.darkTextHint
-                  : AppColors.lightTextHint,
-            ),
           ),
         ],
       ),
