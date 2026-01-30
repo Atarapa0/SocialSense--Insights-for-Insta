@@ -21,6 +21,7 @@ import 'package:socialsense/presentation/widgets/dashboard/active_hour_card.dart
 import 'package:socialsense/presentation/widgets/reports/follower_details_card.dart';
 import 'package:socialsense/presentation/widgets/reports/account_analysis_card.dart';
 import 'package:socialsense/presentation/widgets/reports/direct_messages_card.dart';
+import 'package:socialsense/presentation/widgets/ads/banner_ad_widget.dart';
 
 import 'package:socialsense/presentation/widgets/reports/activity_timeline_card.dart';
 import 'package:socialsense/presentation/widgets/reports/time_distribution_card.dart';
@@ -508,6 +509,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 16),
 
+          const SizedBox(height: 16),
+
           // Activity Hours Card (haftalık)
           ActivityHoursCard(
             peakTime: hasData ? formatHour(activeHour) : '---',
@@ -530,6 +533,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               setState(() => _currentNavIndex = 1);
             },
           ),
+
+          const SizedBox(height: 16),
+
+          // REKLAM - Banner (En Alt)
+          const BannerAdWidget(),
 
           const SizedBox(height: 100), // Bottom nav için boşluk
         ],
@@ -841,7 +849,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 24),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Hesap Analizleri
           AccountAnalysisCard(
@@ -958,6 +966,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 24),
 
+          const SizedBox(height: 16),
+
+          // REKLAM - Banner
+          const BannerAdWidget(),
+
+          const SizedBox(height: 16),
+
           // Zaman Dağılımı
           if (hasData)
             TimeDistributionCard(
@@ -975,6 +990,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 24),
 
+          // REKLAM - Banner
+          const BannerAdWidget(),
+
+          const SizedBox(height: 16),
+
           // Hikaye Beğenileri
           if (hasData)
             StoryLikesCard(storyLikes: dataProvider.topStoryLikedAccounts),
@@ -986,6 +1006,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             CloseFriendsCard(closeFriends: dataProvider.closeFriends),
 
           const SizedBox(height: 24),
+
+          const SizedBox(height: 16),
 
           // Takip İstekleri
           if (hasData)
@@ -1051,6 +1073,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               lineColor: const Color(0xFF4ECDC4),
               hasData: hasData && dataProvider.totalCommentsCount > 0,
             ),
+
+          const SizedBox(height: 16),
+
+          // REKLAM - Banner (En Alt)
+          const BannerAdWidget(),
 
           const SizedBox(height: 100), // Bottom nav için boşluk
         ],

@@ -48,6 +48,6 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Social Sense, analiz yapabilmek için cihazınızdaki Instagram veri dosyalarını (JSON) seçmenize olanak tanır.</string>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-7473181850268727~2162285283</string>
 </dict>
 </plist>
