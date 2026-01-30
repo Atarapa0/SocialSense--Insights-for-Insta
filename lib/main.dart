@@ -7,9 +7,16 @@ import 'package:socialsense/core/providers/instagram_data_provider.dart';
 import 'package:socialsense/presentation/providers/app_settings_provider.dart';
 import 'package:socialsense/presentation/providers/alerts_provider.dart';
 import 'package:socialsense/presentation/screens/splash/splash_screen.dart';
+import 'package:socialsense/core/services/ad_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Reklam servisini başlat
+  final adService = AdService();
+  await adService.initialize();
+  // App Open reklamını önceden yükle
+  adService.loadAppOpenAd();
 
   // Ayarları yükle
   final settingsProvider = AppSettingsProvider();
@@ -32,8 +39,34 @@ void main() async {
 }
 
 /// Ana uygulama widget'ı
-class SocialSenseApp extends StatelessWidget {
+class SocialSenseApp extends StatefulWidget {
   const SocialSenseApp({super.key});
+
+  @override
+  State<SocialSenseApp> createState() => _SocialSenseAppState();
+}
+
+class _SocialSenseAppState extends State<SocialSenseApp>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Uygulama tekrar açıldığında (resume olduğunda) reklam göster
+      AdService().showAppOpenAdIfAvailable();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

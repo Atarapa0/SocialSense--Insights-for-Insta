@@ -54,28 +54,28 @@ class AppLocalizations {
     'previous_step': 'Önceki Adım',
 
     // Tutorial Adım 1
-    'tutorial_step1_title': 'Instagram Ayarlarını Açın',
+    'tutorial_step1_title': 'Ayarlar > Hesaplar Merkezi',
     'tutorial_step1_desc':
-        'Aktivite ayarlarınıza gidin ve indirme talebinde bulunun. JSON formatını seçtiğinizden emin olun, HTML değil.',
-    'tutorial_step1_highlight': 'JSON formatı seçin',
+        'Instagram Ayarlarına gidin > Hesaplar Merkezi > Bilgilerin ve izinlerin > Bilgilerini dışa aktar sayfasına tıklayın.',
+    'tutorial_step1_highlight': 'Bilgilerini Dışa Aktar',
 
     // Tutorial Adım 2
-    'tutorial_step2_title': 'JSON Formatını Seçin',
+    'tutorial_step2_title': 'Dışa Aktarım Oluşturun',
     'tutorial_step2_desc':
-        'Uygulamamızın verilerinizi doğru işleyebilmesi için dosya formatı olarak JSON seçtiğinizden emin olun.',
-    'tutorial_step2_highlight': 'JSON formatı zorunludur',
+        '"Dışa aktarım oluştur" seçeneğine dokunun ve ardından "Cihaza aktar" seçeneğini seçin.',
+    'tutorial_step2_highlight': 'Cihaza aktar',
 
     // Tutorial Adım 3
-    'tutorial_step3_title': 'Veri Aralığını Belirleyin',
+    'tutorial_step3_title': 'Format ve Aralık Seçimi',
     'tutorial_step3_desc':
-        'İndirmek istediğiniz veri aralığını seçin. Daha kapsamlı analiz için "Tüm Zamanlar" seçeneğini öneririz.',
-    'tutorial_step3_highlight': 'Tüm zamanlar önerilir',
+        'Açılan sayfada:\n• Tüm mevcut bilgiler\n• Tarih aralığı: Her zaman\n• Format: JSON (ÖNEMLİ)',
+    'tutorial_step3_highlight': 'JSON FORMATI ÖNEMLİ',
 
     // Tutorial Adım 4
-    'tutorial_step4_title': 'Dosyanızı İndirin',
+    'tutorial_step4_title': 'İndir ve Yükle',
     'tutorial_step4_desc':
-        'Instagram verilerinizi hazırladığında size bildirim gönderecek. Dosyayı indirin ve bu uygulamaya yükleyin.',
-    'tutorial_step4_highlight': 'E-posta ile bildirim alacaksınız',
+        'Instagram dosyanızı hazırladığında (e-posta ile bildirir), dosyayı indirin ve bu uygulamaya yükleyin.',
+    'tutorial_step4_highlight': 'ZIP dosyasını yükleyin',
 
     // Veri yükleme
     'upload_title': 'Instagram Verilerinizi Yükleyin',
@@ -86,7 +86,7 @@ class AppLocalizations {
     'upload_success': 'Veriler başarıyla yüklendi!',
     'upload_error': 'Veri yüklenirken hata oluştu',
     'secure_upload': 'Güvenli Yükleme',
-    'upload_zip': 'ZIP Yükle',
+    'upload_zip_now': 'ZIP\'i Yükle',
     'drag_drop_or_tap': 'Sürükle bırak veya tıkla',
     'secure_environment': 'GÜVENLİ ORTAM',
     'local_processing_title': 'Sadece Yerel İşleme - Sunucuya Yükleme Yok',
@@ -348,28 +348,28 @@ Uygulama sadece kişisel kullanım içindir. Uygulamanın kodlarını kopyalamak
     'previous_step': 'Previous Step',
 
     // Tutorial Step 1
-    'tutorial_step1_title': 'Open Instagram Settings',
+    'tutorial_step1_title': 'Settings > Accounts Center',
     'tutorial_step1_desc':
-        'Navigate to your activity settings and request a download. Ensure you select the JSON format option, not HTML.',
-    'tutorial_step1_highlight': 'Select JSON format',
+        'Go to Settings > Accounts Center > Your Information and Permissions > Export your information.',
+    'tutorial_step1_highlight': 'Export Your Information',
 
     // Tutorial Step 2
-    'tutorial_step2_title': 'Select JSON Format',
+    'tutorial_step2_title': 'Create & Transfer',
     'tutorial_step2_desc':
-        'Make sure to select JSON as the file format so our app can process your data correctly.',
-    'tutorial_step2_highlight': 'JSON format is required',
+        'Tap "Create export", then select "Export to device".',
+    'tutorial_step2_highlight': 'Export to Device',
 
     // Tutorial Step 3
-    'tutorial_step3_title': 'Select Date Range',
+    'tutorial_step3_title': 'Select Format & Range',
     'tutorial_step3_desc':
-        'Choose the date range for your data. We recommend selecting "All Time" for comprehensive analysis.',
-    'tutorial_step3_highlight': 'All time recommended',
+        'On the next page:\n• All available information\n• Date range: All time\n• Format: JSON (IMPORTANT)',
+    'tutorial_step3_highlight': 'JSON FORMAT IS IMPORTANT',
 
     // Tutorial Step 4
-    'tutorial_step4_title': 'Download Your File',
+    'tutorial_step4_title': 'Download & Upload',
     'tutorial_step4_desc':
-        'Instagram will notify you when your data is ready. Download the file and upload it to this app.',
-    'tutorial_step4_highlight': 'You will receive an email notification',
+        'When Instagram notifies you (via email), download the file and upload it to this app.',
+    'tutorial_step4_highlight': 'Upload ZIP File',
 
     // Data upload
     'upload_title': 'Upload Your Instagram Data',
@@ -380,7 +380,7 @@ Uygulama sadece kişisel kullanım içindir. Uygulamanın kodlarını kopyalamak
     'upload_success': 'Data uploaded successfully!',
     'upload_error': 'Error uploading data',
     'secure_upload': 'Secure Upload',
-    'upload_zip': 'Upload ZIP',
+    'upload_zip_now': 'Upload ZIP',
     'drag_drop_or_tap': 'Drag & drop or tap',
     'secure_environment': 'SECURE ENVIRONMENT',
     'local_processing_title': 'Local Processing Only - No Server Upload',

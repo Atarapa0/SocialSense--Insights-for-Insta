@@ -30,7 +30,7 @@ class TutorialStepCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Resim alanı (placeholder - sonra doldurulacak)
-          _buildImageSection(isDark),
+          _buildImageSection(isDark, l10n.locale.languageCode),
 
           const SizedBox(height: 32),
 
@@ -94,10 +94,9 @@ class TutorialStepCard extends StatelessWidget {
   //    Proje kök dizininde: assets/images/tutorial/ klasörü oluştur
   //
   // 2. ADIM: Resimleri ekle
-  //    - assets/images/tutorial/step1_settings.png  (Instagram ayarları)
-  //    - assets/images/tutorial/step2_json.png      (JSON seçimi)
-  //    - assets/images/tutorial/step3_daterange.png (Tarih aralığı)
-  //    - assets/images/tutorial/step4_download.png  (İndirme)
+  //    - assets/images/tutorial/step1_settings_tr.png
+  //    - assets/images/tutorial/step1_settings_en.png
+  //    vb.
   //
   // 3. ADIM: pubspec.yaml'a ekle
   //    flutter:
@@ -105,35 +104,32 @@ class TutorialStepCard extends StatelessWidget {
   //        - assets/images/tutorial/
   //
   // 4. ADIM: Aşağıdaki _buildImageSection metodundaki placeholder'ı
-  //    Image.asset() ile değiştir. Örnek:
-  //
-  //    Image.asset(
-  //      _getStepImagePath(),
-  //      fit: BoxFit.contain,
-  //    )
+  //    Image.asset() ile değiştir.
   //
   // ============================================================
 
   /// Adıma göre resim yolu döndür
-  /// TODO: Resimler eklendikten sonra bu metodu kullan
-  String _getStepImagePath() {
+  String _getStepImagePath(String languageCode) {
+    // Dil koduna göre suffix ekle (örn: _tr veya _en)
+    final suffix = languageCode == 'tr' ? '_tr' : '_en';
+
     switch (stepNumber) {
       case 1:
-        return 'assets/images/tutorial/step1_settings.png';
+        return 'assets/tutorial/step1_settings$suffix.png';
       case 2:
-        return 'assets/images/tutorial/step2_json.png';
+        return 'assets/tutorial/step2_json$suffix.png';
       case 3:
-        return 'assets/images/tutorial/step3_daterange.png';
+        return 'assets/tutorial/step3_daterange$suffix.png';
       case 4:
-        return 'assets/images/tutorial/step4_download.png';
+        return 'assets/tutorial/step4_download$suffix.png';
       default:
-        return 'assets/images/tutorial/step1_settings.png';
+        return 'assets/tutorial/step1_settings$suffix.png';
     }
   }
 
   /// Resim alanı
   /// TODO: Resimler hazır olduğunda placeholder'ı kaldır ve Image.asset kullan
-  Widget _buildImageSection(bool isDark) {
+  Widget _buildImageSection(bool isDark, String languageCode) {
     return Container(
       width: double.infinity,
       height: 320,
@@ -158,73 +154,35 @@ class TutorialStepCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: Stack(
           children: [
-            // ============================================================
-            // TODO: Resimler hazır olduğunda bu placeholder'ı şununla değiştir:
-            //
-            // Image.asset(
-            //   _getStepImagePath(),
-            //   fit: BoxFit.contain,
-            //   width: double.infinity,
-            //   height: double.infinity,
-            // ),
-            // ============================================================
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    _getStepIcon(),
-                    size: 64,
-                    color: isDark
-                        ? AppColors.darkTextHint
-                        : AppColors.lightTextHint,
+            Image.asset(
+              _getStepImagePath(languageCode),
+              fit: BoxFit.contain,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (context, error, stackTrace) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.grey, size: 40),
+                      SizedBox(height: 8),
+                      Text(
+                        'Image not found\n${_getStepImagePath(languageCode)}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 10, color: Colors.grey),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Step $stepNumber Image',
-                    style: TextStyle(
-                      color: isDark
-                          ? AppColors.darkTextHint
-                          : AppColors.lightTextHint,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _getStepImagePath(),
-                    style: TextStyle(
-                      color: isDark
-                          ? AppColors.darkTextHint.withValues(alpha: 0.5)
-                          : AppColors.lightTextHint.withValues(alpha: 0.5),
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
 
-            // Highlight badge (bazı adımlar için)
-            if (stepNumber <= 2) _buildHighlightBadge(isDark),
+            // Highlight badge (sadece adım 3 için)
+            if (stepNumber == 3) _buildHighlightBadge(isDark),
           ],
         ),
       ),
     );
-  }
-
-  /// Adıma göre ikon döndür
-  IconData _getStepIcon() {
-    switch (stepNumber) {
-      case 1:
-        return Icons.settings;
-      case 2:
-        return Icons.code;
-      case 3:
-        return Icons.date_range;
-      case 4:
-        return Icons.download;
-      default:
-        return Icons.help_outline;
-    }
   }
 
   /// Highlight badge (IMPORTANT, Select JSON gibi)
@@ -251,17 +209,13 @@ class TutorialStepCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: stepNumber == 1
-                    ? Colors.amber.shade100
-                    : AppColors.darkPrimary.withValues(alpha: 0.1),
+                color: Colors.amber.shade100,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Icon(
-                stepNumber == 1 ? Icons.sync : Icons.check_circle,
+                Icons.priority_high,
                 size: 16,
-                color: stepNumber == 1
-                    ? Colors.amber.shade700
-                    : AppColors.darkPrimary,
+                color: Colors.amber.shade700,
               ),
             ),
             const SizedBox(width: 8),
@@ -270,17 +224,15 @@ class TutorialStepCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  stepNumber == 1 ? 'IMPORTANT' : '',
+                  'IMPORTANT',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
-                    color: stepNumber == 1
-                        ? Colors.amber.shade700
-                        : AppColors.darkPrimary,
+                    color: Colors.amber.shade700,
                   ),
                 ),
                 Text(
-                  stepNumber == 1 ? 'Select JSON' : 'Select JSON Format',
+                  'Select JSON Format',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

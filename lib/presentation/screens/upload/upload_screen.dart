@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socialsense/core/constants/app_colors.dart';
 import 'package:socialsense/core/localization/app_localizations.dart';
 import 'package:socialsense/core/providers/instagram_data_provider.dart';
+import 'package:socialsense/core/services/ad_service.dart';
 import 'package:socialsense/presentation/screens/dashboard/dashboard_screen.dart';
 
 /// ZIP Yükleme Ekranı
@@ -265,12 +267,13 @@ class _UploadScreenState extends State<UploadScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        l10n.get('tap_to_upload'),
+                        l10n.get('upload_zip_now'),
                         style: TextStyle(
                           color: isDark
                               ? AppColors.darkTextSecondary
                               : AppColors.lightTextSecondary,
-                          fontSize: 14,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -406,11 +409,26 @@ class _UploadScreenState extends State<UploadScreen> {
       }
 
       if (success) {
-        // Başarılı - Dashboard'a git
+        // ZIP başarıyla yüklendiği için flag'i kaydet (açılışta reklam göstermek için)
+        if (!kIsWeb) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('has_uploaded_zip', true);
+        }
+
         if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const DashboardScreen()),
+          setState(() {
+            _isLoading =
+                false; // Loading'i kapat ki kullanıcı reklamın arkasında kaldığını düşünmesin
+          });
+
+          // Interstitial Reklamı göster, kapattığında Dashboard'a git
+          AdService().showInterstitialAd(
+            onAdClosed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const DashboardScreen()),
+              );
+            },
           );
         }
       } else {
