@@ -43,7 +43,9 @@
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Social Sense, analiz yapabilmek için cihazınızdaki Instagram veri dosyalarını (JSON) seçmenize olanak tanır.</string>
