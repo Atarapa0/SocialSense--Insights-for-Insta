@@ -67,3 +67,9 @@ instagram-*.zip
 secrets.dart
 api_keys.dart
 *zip
+
+# AdMob ve Hassas Bilgiler
+lib/core/constants/ad_ids.dart
+android/app/src/main/AndroidManifest.xml
+ios/Runner/Info.plist
+
